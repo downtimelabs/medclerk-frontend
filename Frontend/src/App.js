@@ -6,7 +6,6 @@ import LandingPage from './components/LandingPage';
 import Auth from './components/Auth';
 import UploadItems from './components/UploadItems';
 import Dashboard from './components/Dashboard';
-import './App.css';
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState(null);

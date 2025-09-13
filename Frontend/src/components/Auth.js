@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
-import './Auth.css';
+import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useI18n } from '../i18n';
 
 const Auth = ({ selectedLanguage, onAuthSuccess }) => {
@@ -111,20 +110,24 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
   };
 
   return (
-    <div className="auth">
-      <div className="main-content">
-        <div className="page-container">
-          <div className="header">
-            <h1>{isSignUp ? t('auth_create_account') : t('auth_welcome_back')}</h1>
-            <p>{isSignUp ? t('auth_signup_sub') : t('auth_signin_sub')}</p>
+    <div className="min-h-screen bg-gradient-main flex flex-col text-dark-300">
+      <div className="flex-1 flex items-center justify-center p-5">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-bold mb-3 text-white">
+              {isSignUp ? t('auth_create_account') : t('auth_welcome_back')}
+            </h1>
+            <p className="text-lg text-dark-400">
+              {isSignUp ? t('auth_signup_sub') : t('auth_signin_sub')}
+            </p>
           </div>
 
           <div className="card">
             <form onSubmit={handleSubmit}>
               {isSignUp && (
-                <div className="form-group">
-                  <label className="form-label">
-                    <FaUser className="input-icon" />
+                <div className="relative mb-5">
+                  <label className="flex items-center gap-2 mb-2 font-semibold text-dark-300">
+                    <FaUser className="text-primary-500 text-sm" />
                     {t('full_name')}
                   </label>
                   <input
@@ -139,9 +142,9 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
                 </div>
               )}
 
-              <div className="form-group">
-                <label className="form-label">
-                  <FaEnvelope className="input-icon" />
+              <div className="relative mb-5">
+                <label className="flex items-center gap-2 mb-2 font-semibold text-dark-300">
+                  <FaEnvelope className="text-primary-500 text-sm" />
                   {t('email_address')}
                 </label>
                 <input
@@ -155,24 +158,24 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">
-                  <FaLock className="input-icon" />
+              <div className="relative mb-5">
+                <label className="flex items-center gap-2 mb-2 font-semibold text-dark-300">
+                  <FaLock className="text-primary-500 text-sm" />
                   {t('password')}
                 </label>
-                <div className="password-input-container">
+                <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="form-input password-input"
+                    className="form-input pr-12"
                     placeholder="Enter your password"
                     disabled={isLoading}
                   />
                   <button
                     type="button"
-                    className="password-toggle"
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-none border-0 text-dark-500 cursor-pointer text-base p-1 transition-colors hover:text-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
                   >
@@ -182,24 +185,24 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
               </div>
 
               {isSignUp && (
-                <div className="form-group">
-                  <label className="form-label">
-                    <FaLock className="input-icon" />
+                <div className="relative mb-5">
+                  <label className="flex items-center gap-2 mb-2 font-semibold text-dark-300">
+                    <FaLock className="text-primary-500 text-sm" />
                     {t('confirm_password')}
                   </label>
-                  <div className="password-input-container">
+                  <div className="relative">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      className="form-input password-input"
+                      className="form-input pr-12"
                       placeholder="Confirm your password"
                       disabled={isLoading}
                     />
                     <button
                       type="button"
-                      className="password-toggle"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-none border-0 text-dark-500 cursor-pointer text-base p-1 transition-colors hover:text-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       disabled={isLoading}
                     >
@@ -214,11 +217,11 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
 
               <button
                 type="submit"
-                className={`btn btn-primary submit-btn ${isLoading ? 'loading' : ''}`}
+                className={`btn btn-primary w-full mt-5 py-4 text-base font-semibold ${isLoading ? 'cursor-not-allowed' : ''}`}
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="loading">
+                  <div className="flex items-center gap-2.5">
                     <div className="spinner"></div>
                     <span>{isSignUp ? t('create_account') : t('sign_in_action')}...</span>
                   </div>
@@ -228,12 +231,12 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
               </button>
             </form>
 
-            <div className="auth-switch">
-              <p>
+            <div className="text-center mt-8 pt-5 border-t border-white/10">
+              <p className="text-dark-500 text-sm">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                 <button
                   type="button"
-                  className="switch-btn"
+                  className="bg-none border-0 text-primary-500 font-semibold cursor-pointer underline ml-1 transition-colors hover:text-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={toggleMode}
                   disabled={isLoading}
                 >
@@ -243,8 +246,10 @@ const Auth = ({ selectedLanguage, onAuthSuccess }) => {
             </div>
           </div>
 
-          <div className="footer-info">
-            <p>Language: {selectedLanguage?.toUpperCase()}</p>
+          <div className="text-center mt-5">
+            <p className="text-dark-500 text-sm bg-white bg-opacity-5 px-4 py-2 rounded-full inline-block">
+              Language: {selectedLanguage?.toUpperCase()}
+            </p>
           </div>
         </div>
       </div>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useI18n } from '../i18n';
 import { FaGlobe, FaArrowRight } from 'react-icons/fa';
-import './LanguageSelection.css';
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -40,58 +39,66 @@ const LanguageSelection = ({ onLanguageSelect }) => {
   };
 
   return (
-    <div className="language-selection">
-      <div className="main-content">
-        <div className="page-container">
-          <div className="header">
-            <div className="icon-container">
-              <FaGlobe className="globe-icon" />
+    <div className="min-h-screen bg-gradient-main flex flex-col text-dark-300">
+      <div className="flex-1 flex items-center justify-center p-5">
+        <div className="max-w-2xl w-full">
+          <div className="text-center mb-10">
+            <div className="flex justify-center mb-5">
+              <FaGlobe className="text-6xl text-primary-500 opacity-90" />
             </div>
-            <h1>{t('select_language_title')}</h1>
-            <p>{t('select_language_sub')}</p>
+            <h1 className="text-4xl font-bold mb-3 text-white">
+              {t('select_language_title')}
+            </h1>
+            <p className="text-lg text-dark-400">
+              {t('select_language_sub')}
+            </p>
           </div>
 
           <div className="card">
-            <div className="language-grid">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
               {languages.map((language) => (
                 <button
                   key={language.code}
-                  className={`language-option ${
-                    selectedLang === language.code ? 'selected' : ''
+                  className={`flex flex-col items-center p-5 border border-white/10 rounded-xl bg-white/5 cursor-pointer transition-all duration-300 text-sm font-medium text-dark-300 hover:border-primary-500 hover:-translate-y-0.5 hover:shadow-lg hover:bg-white/8 ${
+                    selectedLang === language.code 
+                      ? 'border-primary-500 bg-primary-500 text-white -translate-y-0.5 shadow-lg' 
+                      : ''
                   }`}
                   onClick={() => handleLanguageSelect(language.code)}
                 >
-                  <span className="flag">{language.flag}</span>
-                  <span className="name">{language.name}</span>
+                  <span className="text-3xl mb-2">{language.flag}</span>
+                  <span className="font-semibold">{language.name}</span>
                 </button>
               ))}
             </div>
 
-            <div className="continue-section">
+            <div className="text-center">
               <button
-                className={`btn btn-primary continue-btn ${
-                  !selectedLang ? 'disabled' : ''
+                className={`btn btn-primary min-w-48 flex items-center justify-center gap-2.5 text-base py-4 px-8 ${
+                  !selectedLang ? 'opacity-60 cursor-not-allowed' : ''
                 }`}
                 onClick={handleContinue}
                 disabled={!selectedLang || isLoading}
               >
                 {isLoading ? (
-                  <div className="loading">
+                  <div className="flex items-center gap-2.5">
                     <div className="spinner"></div>
                     <span>Setting up...</span>
                   </div>
                 ) : (
                   <>
                     <span>{t('continue')}</span>
-                    <FaArrowRight className="arrow-icon" />
+                    <FaArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          <div className="footer-info">
-            <p>You can change your language preference later in settings</p>
+          <div className="text-center mt-5">
+            <p className="text-dark-500 text-sm">
+              You can change your language preference later in settings
+            </p>
           </div>
         </div>
       </div>
