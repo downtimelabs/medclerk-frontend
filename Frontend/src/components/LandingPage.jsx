@@ -38,13 +38,13 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-main text-dark-300">
       <motion.header 
-        className="flex justify-between items-center px-6 py-4 border-b border-white/6 sticky top-0 backdrop-blur-sm"
+        className="flex justify-between items-center px-6 py-4 border-b border-dark-200 bg-white/90 shadow-sm sticky top-0 backdrop-blur-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         <motion.div 
-          className="font-bold tracking-wide"
+          className="font-bold tracking-wide text-dark-950"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -59,31 +59,31 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
         >
           <div className="relative">
             <select
-              className="appearance-none bg-white bg-opacity-5 text-dark-300 border border-white border-opacity-10 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
+              className="appearance-none bg-white text-dark-700 border border-dark-200 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
               value={selectedLanguage || 'en'}
               onChange={(e) => onLanguageSelect?.(e.target.value)}
             >
-              <option value="en" className="bg-dark-900 text-dark-300">English</option>
-              <option value="es" className="bg-dark-900 text-dark-300">Español</option>
-              <option value="fr" className="bg-dark-900 text-dark-300">Français</option>
-              <option value="de" className="bg-dark-900 text-dark-300">Deutsch</option>
-              <option value="it" className="bg-dark-900 text-dark-300">Italiano</option>
-              <option value="pt" className="bg-dark-900 text-dark-300">pt</option>
-              <option value="ru" className="bg-dark-900 text-dark-300">ru</option>
-              <option value="zh" className="bg-dark-900 text-dark-300">zh</option>
-              <option value="ja" className="bg-dark-900 text-dark-300">ja</option>
-              <option value="ko" className="bg-dark-900 text-dark-300">ko</option>
-              <option value="ar" className="bg-dark-900 text-dark-300">ar</option>
-              <option value="hi" className="bg-dark-900 text-dark-300">Hindi</option>
+              <option value="en" className="bg-white text-dark-700">English</option>
+              <option value="es" className="bg-white text-dark-700">Español</option>
+              <option value="fr" className="bg-white text-dark-700">Français</option>
+              <option value="de" className="bg-white text-dark-700">Deutsch</option>
+              <option value="it" className="bg-white text-dark-700">Italiano</option>
+              <option value="pt" className="bg-white text-dark-700">pt</option>
+              <option value="ru" className="bg-white text-dark-700">ru</option>
+              <option value="zh" className="bg-white text-dark-700">zh</option>
+              <option value="ja" className="bg-white text-dark-700">ja</option>
+              <option value="ko" className="bg-white text-dark-700">ko</option>
+              <option value="ar" className="bg-white text-dark-700">ar</option>
+              <option value="hi" className="bg-white text-dark-700">Hindi</option>
             </select>
           </div>
           <button className="btn btn-link" onClick={() => navigate('/start')}>App</button>
-          <button className="btn btn-secondary" onClick={() => navigate('/start')}>Sign In</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/signin')}>Sign In</button>
           <button className="btn btn-primary" onClick={() => navigate('/start')}>Get Started</button>
         </motion.div>
       </motion.header>
 
-      <main className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 p-14 max-w-6xl mx-auto">
+      <main className="grid grid-cols-1 gap-8 p-14 max-w-4xl mx-auto">
         <motion.div 
           className="space-y-3"
           variants={staggerContainer}
@@ -91,7 +91,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           animate="animate"
         >
           <motion.h1 
-            className="text-4xl lg:text-5xl font-bold leading-tight text-white animate-float"
+            className="text-4xl lg:text-5xl font-bold leading-tight text-dark-900 animate-float"
             variants={fadeInUp}
           >
             {t('landing_title')}
@@ -128,55 +128,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
             variants={fadeInUp}
             style={{ animationDelay: '3s' }}
           >
-            <FaShieldAlt className="inline mr-1" /> HIPAA-style privacy • <FaBolt className="inline mr-1" /> Fast OCR • <FaGlobe className="inline mr-1" /> 12 languages
-          </motion.div>
-        </motion.div>
-        <motion.div 
-          className="flex items-center justify-center"
-          variants={fadeInRight}
-          initial="initial"
-          animate="animate"
-        >
-          <motion.div 
-            className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl overflow-hidden w-full max-w-md"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="bg-black bg-opacity-25 px-3 py-2.5 font-semibold text-white">Upload & Analyze</div>
-            <motion.div 
-              className="p-3 space-y-2"
-              variants={staggerContainer}
-              initial="initial"
-              animate="animate"
-            >
-              <motion.div 
-                className="flex items-center justify-between gap-2.5 px-2.5 py-2 bg-white bg-opacity-5 rounded-lg hover:bg-white hover:bg-opacity-10 hover:translate-x-1 transition-all duration-300"
-                variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
-              >
-                <span className="w-2 h-2 bg-primary-300 rounded-full inline-block mr-2"></span>
-                <span className="flex-1 text-sm">blood_report_may.pdf</span>
-                <span className="text-xs text-dark-300">Queued</span>
-              </motion.div>
-              <motion.div 
-                className="flex items-center justify-between gap-2.5 px-2.5 py-2 bg-white bg-opacity-5 rounded-lg hover:bg-white hover:bg-opacity-10 hover:translate-x-1 transition-all duration-300"
-                variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
-              >
-                <span className="w-2 h-2 bg-primary-300 rounded-full inline-block mr-2"></span>
-                <span className="flex-1 text-sm">prescription_2024.png</span>
-                <span className="text-xs text-success animate-pulse-slow">Analyzed</span>
-              </motion.div>
-              <motion.div 
-                className="flex items-center justify-between gap-2.5 px-2.5 py-2 bg-white bg-opacity-5 rounded-lg hover:bg-white hover:bg-opacity-10 hover:translate-x-1 transition-all duration-300"
-                variants={fadeInUp}
-                whileHover={{ scale: 1.02 }}
-              >
-                <span className="w-2 h-2 bg-primary-300 rounded-full inline-block mr-2"></span>
-                <span className="flex-1 text-sm">cholesterol_result.jpg</span>
-                <span className="text-xs text-dark-300">Processing</span>
-              </motion.div>
-            </motion.div>
+            <FaShieldAlt className="inline mr-1" /> HIPAA-style privacy • <FaBolt className="inline mr-1" /><FaGlobe className="inline mr-1" /> 12 languages
           </motion.div>
         </motion.div>
       </main>
@@ -189,7 +141,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
         viewport={{ once: true }}
       >
         <motion.div 
-          className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+          className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
           variants={scaleIn}
           initial="initial"
           whileInView="animate"
@@ -197,11 +149,11 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           transition={{ duration: 0.3 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-lg font-semibold text-white mb-2">Smart OCR & Summary</h3>
+          <h3 className="text-lg font-semibold text-dark-900 mb-2">Smart Summary</h3>
           <p className="text-dark-400 text-sm">Extract key values and get human-readable summaries of complex reports.</p>
         </motion.div>
         <motion.div 
-          className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+          className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
           variants={scaleIn}
           initial="initial"
           whileInView="animate"
@@ -209,11 +161,11 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           transition={{ duration: 0.3, delay: 0.1 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-lg font-semibold text-white mb-2">Ask Questions</h3>
+          <h3 className="text-lg font-semibold text-dark-900 mb-2">Ask Questions</h3>
           <p className="text-dark-400 text-sm">Chat with your documents: "What changed since last test?"</p>
         </motion.div>
         <motion.div 
-          className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+          className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
           variants={scaleIn}
           initial="initial"
           whileInView="animate"
@@ -221,11 +173,11 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           transition={{ duration: 0.3, delay: 0.2 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-lg font-semibold text-white mb-2">Multilingual</h3>
+          <h3 className="text-lg font-semibold text-dark-900 mb-2">Multilingual</h3>
           <p className="text-dark-400 text-sm">Use the app in your preferred language. Switch anytime.</p>
         </motion.div>
         <motion.div 
-          className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300"
+          className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
           variants={scaleIn}
           initial="initial"
           whileInView="animate"
@@ -233,8 +185,8 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           transition={{ duration: 0.3, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-lg font-semibold text-white mb-2">Private by Design</h3>
-          <p className="text-dark-400 text-sm">Your data stays yours. Export or delete anytime.</p>
+          <h3 className="text-lg font-semibold text-dark-900 mb-2">Your Data Always Secure</h3>
+          <p className="text-dark-400 text-sm">Your data stays yours.You can export or delete anytime.</p>
         </motion.div>
       </motion.section>
 
@@ -246,7 +198,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
         viewport={{ once: true }}
       >
         <motion.h2
-          className="text-2xl font-bold text-white mb-4"
+          className="text-2xl font-bold text-dark-900 mb-4"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -262,13 +214,13 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           viewport={{ once: true }}
         >
           <motion.div 
-            className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300"
+            className="bg-white border border-dark-100 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-sm"
             variants={scaleIn}
             whileHover={{ scale: 1.05, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="font-bold text-white">Starter</div>
-            <div className="text-3xl font-extrabold text-white">Free</div>
+            <div className="font-bold text-dark-900">Starter</div>
+            <div className="text-3xl font-extrabold text-dark-900">Free</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> 10 uploads/month</li>
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Basic OCR</li>
@@ -284,13 +236,13 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
             </motion.button>
           </motion.div>
           <motion.div 
-            className="bg-white bg-opacity-5 border border-primary-500 border-opacity-60 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden"
+            className="bg-white border border-primary-500 border-opacity-60 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden shadow-sm"
             variants={scaleIn}
             whileHover={{ scale: 1.05, y: -10 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            <div className="font-bold text-white">Pro</div>
-            <div className="text-3xl font-extrabold text-white">$9/mo</div>
+            <div className="font-bold text-dark-900">Pro</div>
+            <div className="text-3xl font-extrabold text-dark-900">$9/mo</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Unlimited uploads</li>
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> AI summaries & chat</li>
@@ -306,13 +258,13 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
             </motion.button>
           </motion.div>
           <motion.div 
-            className="bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300"
+            className="bg-white border border-dark-100 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-sm"
             variants={scaleIn}
             whileHover={{ scale: 1.05, y: -10 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            <div className="font-bold text-white">Teams</div>
-            <div className="text-3xl font-extrabold text-white">Custom</div>
+            <div className="font-bold text-dark-900">Teams</div>
+            <div className="text-3xl font-extrabold text-dark-900">Custom</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Shared workspace</li>
               <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Admin controls</li>
@@ -331,7 +283,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
       </motion.section>
 
       <motion.footer 
-        className="px-6 py-4 border-t border-white border-opacity-10 flex justify-between text-dark-500"
+        className="px-6 py-4 border-t border-dark-100 flex justify-between text-dark-500"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
@@ -354,15 +306,15 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           viewport={{ once: true }}
         >
           <motion.button 
-            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-white transition-colors" 
-            onClick={() => navigate('/start')}
+            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-dark-900 transition-colors" 
+            onClick={() => navigate('/signin')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Sign in
           </motion.button>
           <motion.button 
-            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-white transition-colors" 
+            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-dark-900 transition-colors" 
             onClick={() => navigate('/start')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nProvider } from './i18n.jsx';
-import LanguageSelection from './components/LanguageSelection.jsx';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+import RoleSelection from './components/RoleSelection.jsx';
 import LandingPage from './components/LandingPage.jsx';
 import Auth from './components/Auth.jsx';
+import PatientProfile from './components/PatientProfile.jsx';
+import DoctorProfile from './components/DoctorProfile.jsx';
+import DoctorDashboard from './components/DoctorDashboard.jsx';
 import UploadItems from './components/UploadItems.jsx';
 import Dashboard from './components/Dashboard.jsx';
+import DoctorsPage from './components/DoctorsPage.jsx';
 
 function App() {
-  const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
   const [user, setUser] = useState(null);
 
   // Check for existing authentication on app load
@@ -17,6 +24,7 @@ function App() {
     const savedAuth = localStorage.getItem('isAuthenticated');
     const savedUser = localStorage.getItem('user');
     const savedLanguage = localStorage.getItem('selectedLanguage');
+    const savedRole = localStorage.getItem('selectedRole');
     
     if (savedAuth === 'true' && savedUser) {
       setIsAuthenticated(true);
@@ -26,11 +34,19 @@ function App() {
     if (savedLanguage) {
       setSelectedLanguage(savedLanguage);
     }
+    if (savedRole) {
+      setSelectedRole(savedRole);
+    }
   }, []);
 
   const handleLanguageSelect = (language) => {
     setSelectedLanguage(language);
     localStorage.setItem('selectedLanguage', language);
+  };
+
+  const handleRoleSelect = (role) => {
+    setSelectedRole(role);
+    localStorage.setItem('selectedRole', role);
   };
 
   const handleAuthSuccess = (userData) => {
@@ -40,20 +56,29 @@ function App() {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
+  const handleProfileComplete = (updatedUserData) => {
+    setUser(updatedUserData);
+    localStorage.setItem('user', JSON.stringify(updatedUserData));
+  };
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
     setSelectedLanguage(null);
+    setSelectedRole(null);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
     localStorage.removeItem('selectedLanguage');
+    localStorage.removeItem('selectedRole');
   };
 
   return (
-    <Router>
-      <I18nProvider lang={selectedLanguage || 'en'}>
-        <div className="App">
-          <Routes>
+    <ThemeProvider>
+      <Router>
+        <I18nProvider lang={selectedLanguage || 'en'}>
+          <ErrorBoundary>
+            <div className="App">
+            <Routes>
             <Route 
               path="/" 
               element={<LandingPage selectedLanguage={selectedLanguage} onLanguageSelect={handleLanguageSelect} />}
@@ -61,42 +86,64 @@ function App() {
             <Route 
               path="/start" 
               element={
-                !selectedLanguage ? (
-                  <LanguageSelection onLanguageSelect={handleLanguageSelect} />
+                !selectedRole ? (
+                  <RoleSelection 
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onSelect={handleRoleSelect} 
+                  />
                 ) : !isAuthenticated ? (
                   <Auth 
                     selectedLanguage={selectedLanguage}
+                    selectedRole={selectedRole}
+                    onLanguageSelect={handleLanguageSelect}
                     onAuthSuccess={handleAuthSuccess}
                   />
                 ) : (
-                  <Navigate to="/upload" replace />
+                  <Navigate to="/dashboard" replace />
                 )
               } 
             />
             <Route 
               path="/auth" 
               element={
-                !selectedLanguage ? (
-                  <Navigate to="/start" replace />
+                !selectedRole ? (
+                  <RoleSelection 
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onSelect={handleRoleSelect} 
+                  />
                 ) : !isAuthenticated ? (
                   <Auth 
                     selectedLanguage={selectedLanguage}
+                    selectedRole={selectedRole}
+                    onLanguageSelect={handleLanguageSelect}
                     onAuthSuccess={handleAuthSuccess}
                   />
                 ) : (
-                  <Navigate to="/upload" replace />
+                  <Navigate to="/dashboard" replace />
                 )
               } 
             />
             <Route 
-              path="/upload" 
+              path="/signin" 
               element={
-                !isAuthenticated ? (
-                  <Navigate to="/start" replace />
-                ) : (
-                  <UploadItems 
-                    user={user}
+                isAuthenticated ? (
+                  <Navigate to="/dashboard" replace />
+                ) : !selectedRole ? (
+                  <RoleSelection 
                     selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onSelect={handleRoleSelect}
+                    isSignInFlow={true}
+                  />
+                ) : (
+                  <Auth 
+                    selectedLanguage={selectedLanguage}
+                    selectedRole={selectedRole}
+                    onLanguageSelect={handleLanguageSelect}
+                    onAuthSuccess={handleAuthSuccess}
+                    isSignInMode={true}
                   />
                 )
               } 
@@ -106,19 +153,68 @@ function App() {
               element={
                 !isAuthenticated ? (
                   <Navigate to="/start" replace />
+                ) : user?.role === 'doctor' && !user?.doctorProfile ? (
+                  <DoctorProfile 
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onProfileComplete={handleProfileComplete}
+                  />
+                ) : user?.role === 'patient' && !user?.patientProfile ? (
+                  <PatientProfile 
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onProfileComplete={handleProfileComplete}
+                  />
+                ) : user?.role === 'doctor' ? (
+                  <Navigate to="/doctor" replace />
                 ) : (
                   <Dashboard 
                     user={user}
                     selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
               } 
             />
-          </Routes>
-        </div>
-      </I18nProvider>
-    </Router>
+            <Route 
+              path="/doctor" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <DoctorDashboard
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            <Route 
+              path="/doctors" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <DoctorsPage
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            </Routes>
+            </div>
+          </ErrorBoundary>
+        </I18nProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 

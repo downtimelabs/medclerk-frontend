@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply font-sans antialiased bg-dark-950 text-dark-300 leading-relaxed min-h-screen;
+    @apply font-sans antialiased bg-dark-100 text-dark-700 leading-relaxed min-h-screen;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -29,26 +29,26 @@
   }
 
   .btn-secondary {
-    @apply bg-white bg-opacity-5 text-dark-300 border border-white border-opacity-10 hover:bg-white hover:bg-opacity-10;
+    @apply bg-white text-dark-700 border border-dark-200 hover:bg-dark-50;
   }
 
   .btn-link {
-    @apply bg-transparent text-dark-400 px-3 py-2 hover:text-dark-300 hover:bg-white hover:bg-opacity-5;
+    @apply bg-transparent text-dark-500 px-3 py-2 hover:text-dark-700 hover:bg-dark-50;
   }
 
   /* Global card styles */
   .card {
-    @apply bg-white bg-opacity-5 border border-white border-opacity-10 rounded-xl p-6 backdrop-blur-md;
+    @apply bg-white border border-dark-100 rounded-xl p-6 shadow-sm;
   }
 
   /* Global form styles */
   .form-input {
-    @apply w-full px-4 py-3 border border-white border-opacity-10 rounded-lg bg-white bg-opacity-5 text-dark-300 text-sm transition-all duration-200 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-10 placeholder:text-dark-500;
+    @apply w-full px-4 py-3 border border-dark-200 rounded-lg bg-white text-dark-700 text-sm transition-all duration-200 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-10 placeholder:text-dark-400;
   }
 
   /* Global loading spinner */
   .spinner {
-    @apply w-4 h-4 border-2 border-white border-opacity-20 border-t-primary-500 rounded-full animate-spin-slow;
+    @apply w-4 h-4 border-2 border-dark-200 border-t-primary-500 rounded-full animate-spin-slow;
   }
 
   /* Global error/success messages */

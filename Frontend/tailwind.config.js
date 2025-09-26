@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -54,9 +55,10 @@ module.exports = {
         ],
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(80% 80% at 50% 0%, rgba(99,102,241,0.15), transparent 60%)',
-        'gradient-linear': 'linear-gradient(180deg, #0b1020 0%, #0d1226 100%)',
-        'gradient-main': 'radial-gradient(80% 80% at 50% 0%, rgba(99,102,241,0.15), transparent 60%), linear-gradient(180deg, #0b1020 0%, #0d1226 100%)',
+        // Light background gradients with stronger, still subtle contrast
+        'gradient-radial': 'radial-gradient(80% 80% at 50% 0%, rgba(99,102,241,0.16), transparent 60%)',
+        'gradient-linear': 'linear-gradient(180deg, #e9edf5 0%, #f6f8fc 60%, #ffffff 100%)',
+        'gradient-main': 'radial-gradient(80% 80% at 50% 0%, rgba(99,102,241,0.16), transparent 60%), radial-gradient(60% 60% at 100% 100%, rgba(15,23,42,0.08), transparent 60%), linear-gradient(180deg, #e9edf5 0%, #f6f8fc 60%, #ffffff 100%)',
       },
       backdropBlur: {
         xs: '2px',

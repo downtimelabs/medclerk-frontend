@@ -15,7 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n';
 
-const UploadItems = ({ user, selectedLanguage }) => {
+const UploadItems = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -122,18 +122,36 @@ const UploadItems = ({ user, selectedLanguage }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('user');
-    localStorage.removeItem('selectedLanguage');
+    onLogout();
     navigate('/');
   };
 
   return (
-    <div className="min-h-screen bg-gradient-main flex flex-col text-dark-300">
-      <div className="flex justify-between items-center p-5 bg-white bg-opacity-5 backdrop-blur-md border-b border-white border-opacity-10">
-        <div className="text-2xl font-bold text-dark-300">AI Report Organizer</div>
+    <div className="min-h-screen bg-gradient-main flex flex-col text-dark-700">
+      <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
+        <div className="text-2xl font-bold text-dark-950">AI Report Organizer</div>
         <div className="flex gap-4 items-center">
-          <div className="flex items-center gap-2 text-dark-300 font-medium">
+          <div className="relative">
+            <select
+              className="appearance-none bg-white text-dark-700 border border-dark-200 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
+              value={selectedLanguage || 'en'}
+              onChange={(e) => onLanguageSelect?.(e.target.value)}
+            >
+              <option value="en" className="bg-white text-dark-700">English</option>
+              <option value="es" className="bg-white text-dark-700">Español</option>
+              <option value="fr" className="bg-white text-dark-700">Français</option>
+              <option value="de" className="bg-white text-dark-700">Deutsch</option>
+              <option value="it" className="bg-white text-dark-700">Italiano</option>
+              <option value="pt" className="bg-white text-dark-700">pt</option>
+              <option value="ru" className="bg-white text-dark-700">ru</option>
+              <option value="zh" className="bg-white text-dark-700">zh</option>
+              <option value="ja" className="bg-white text-dark-700">ja</option>
+              <option value="ko" className="bg-white text-dark-700">ko</option>
+              <option value="ar" className="bg-white text-dark-700">ar</option>
+              <option value="hi" className="bg-white text-dark-700">Hindi</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2 text-dark-700 font-medium">
             <FaUser className="text-base" />
             <span>{user?.name}</span>
           </div>
@@ -147,10 +165,10 @@ const UploadItems = ({ user, selectedLanguage }) => {
       <div className="flex-1 flex items-center justify-center p-5">
         <div className="max-w-2xl w-full">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-3 text-white">
+            <h1 className="text-4xl font-bold mb-3 text-dark-900">
               {t('upload_title')}
             </h1>
-            <p className="text-lg text-dark-400">
+            <p className="text-lg text-dark-500">
               {t('upload_sub')}
             </p>
           </div>
@@ -158,37 +176,37 @@ const UploadItems = ({ user, selectedLanguage }) => {
           <div className="card">
             <div
               {...getRootProps()}
-              className={`border-2 border-dashed border-white border-opacity-20 rounded-xl p-10 text-center cursor-pointer transition-all duration-300 bg-white bg-opacity-3 mb-8 hover:border-primary-500 hover:bg-primary-500 hover:bg-opacity-5 ${
+              className={`border-2 border-dashed border-dark-200 rounded-xl p-10 text-center cursor-pointer transition-all duration-300 bg-white mb-8 hover:border-primary-500 hover:bg-primary-50 ${
                 isDragActive ? 'border-primary-500 bg-primary-500 bg-opacity-10 scale-105' : ''
               } ${uploadedFiles.length > 0 ? 'border-success bg-success bg-opacity-5' : ''}`}
             >
               <input {...getInputProps()} />
               <div className="space-y-5">
                 <FaCloudUploadAlt className="text-5xl text-primary-500 mx-auto" />
-                <h3 className="text-white text-xl font-semibold">
+                <h3 className="text-dark-900 text-xl font-semibold">
                   {isDragActive
                     ? 'Drop files here...'
                     : 'Drag & drop files here, or click to select'}
                 </h3>
-                <p className="text-dark-400">Supports PDF, Images, and Text documents</p>
+                <p className="text-dark-500">Supports PDF, Images, and Text documents</p>
                 <p className="text-xs text-dark-500">Maximum file size: 10MB per file</p>
               </div>
             </div>
 
             {uploadedFiles.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-white text-lg font-semibold mb-5">
+                <h3 className="text-dark-900 text-lg font-semibold mb-5">
                   Selected Files ({uploadedFiles.length})
                 </h3>
                 <div className="space-y-4">
                   {uploadedFiles.map((file) => (
-                    <div key={file.id} className="flex justify-between items-center p-4 bg-white bg-opacity-5 rounded-lg border border-white border-opacity-10">
+                    <div key={file.id} className="flex justify-between items-center p-4 bg-white rounded-lg border border-dark-100">
                       <div className="flex items-center gap-4 flex-1">
                         <div className="text-3xl">
                           {getFileIcon(file.type)}
                         </div>
                         <div className="flex flex-col">
-                          <span className="font-semibold text-white mb-1">{file.name}</span>
+                          <span className="font-semibold text-dark-900 mb-1">{file.name}</span>
                           <span className="text-xs text-dark-500">{formatFileSize(file.size)}</span>
                         </div>
                       </div>
@@ -258,7 +276,7 @@ const UploadItems = ({ user, selectedLanguage }) => {
           </div>
 
           <div className="text-center mt-5">
-            <p className="text-dark-500 text-sm bg-white bg-opacity-5 px-4 py-2 rounded-full inline-block">
+            <p className="text-dark-500 text-sm bg-dark-50 px-4 py-2 rounded-full inline-block">
               Language: {selectedLanguage?.toUpperCase()} | Files will be processed using OCR and AI analysis
             </p>
           </div>
