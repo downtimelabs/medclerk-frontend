@@ -282,7 +282,8 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
           <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-2xl px-6 py-4 mb-6 shadow-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                <div className="flex items-center gap-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
+                  <img src="/logo.jpg" alt="MedClerk Logo" className="h-6 w-6 object-contain" />
                   {t('app_brand')}
                 </div>
                 <div className="text-sm text-gray-500">

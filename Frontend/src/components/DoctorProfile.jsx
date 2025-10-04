@@ -73,7 +73,10 @@ const DoctorProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComp
     <div className="min-h-screen bg-gradient-main flex flex-col text-dark-700">
       {/* Top bar */}
       <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
-        <div className="text-2xl font-bold text-dark-950">AI Report Organizer</div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
+          <div className="text-2xl font-bold text-dark-950">MedClerk</div>
+        </div>
         <div className="flex gap-4 items-center">
           <div className="relative">
             <select
@@ -103,6 +106,7 @@ const DoctorProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComp
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-dark-900 mb-2">Complete Your Doctor Profile</h1>
             <p className="text-dark-500">Provide your professional details to continue</p>
+            <p className="text-dark-400 text-sm mt-2">You can skip this step and add your profile information later</p>
           </div>
 
           <div className="card">
@@ -178,10 +182,30 @@ const DoctorProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComp
               {error && <div className="error">{error}</div>}
               {success && <div className="success">{success}</div>}
 
-              <div className="text-center mt-8">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+                <button
+                  type="button"
+                  className="btn btn-secondary min-w-48 flex items-center justify-center gap-2.5 text-base py-4 px-8 order-2 sm:order-1"
+                  onClick={() => {
+                    const userWithSkippedProfile = {
+                      ...user,
+                      doctorProfile: {
+                        skipped: true,
+                        licenseNumber: '',
+                        specialization: '',
+                        clinicName: '',
+                        yearsOfExperience: null
+                      }
+                    };
+                    onProfileComplete(userWithSkippedProfile);
+                  }}
+                  disabled={isLoading}
+                >
+                  <span>Skip for Now</span>
+                </button>
                 <button
                   type="submit"
-                  className="btn btn-primary min-w-48 flex items-center justify-center gap-2.5 text-base py-4 px-8"
+                  className="btn btn-primary min-w-48 flex items-center justify-center gap-2.5 text-base py-4 px-8 order-1 sm:order-2"
                   disabled={isLoading}
                 >
                   {isLoading ? (

@@ -44,12 +44,12 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
         transition={{ duration: 0.6 }}
       >
         <motion.div 
-          className="font-bold tracking-wide text-dark-950"
+          className="flex items-center"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {t('app_brand')}
+          <img src="/logo.jpg" alt="MedClerk Logo" className="h-24 w-25 object-contain" />
         </motion.div>
         <motion.div 
           className="flex gap-2"
@@ -296,7 +296,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          © {new Date().getFullYear()} AI Report Organizer
+          © {new Date().getFullYear()} MedClerk
         </motion.div>
         <motion.div 
           className="flex gap-4"

@@ -129,7 +129,10 @@ const UploadItems = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
   return (
     <div className="min-h-screen bg-gradient-main flex flex-col text-dark-700">
       <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
-        <div className="text-2xl font-bold text-dark-950">AI Report Organizer</div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
+          <div className="text-2xl font-bold text-dark-950">MedClerk</div>
+        </div>
         <div className="flex gap-4 items-center">
           <div className="relative">
             <select
