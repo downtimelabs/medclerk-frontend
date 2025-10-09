@@ -218,7 +218,9 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex text-gray-700 dark:text-gray-300">
       {/* Sidebar */}
       <aside className="w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen px-4 pt-4 pb-4 flex flex-col shadow-lg">
-        <div className="text-xl font-extrabold text-gray-800 dark:text-white mb-4">{t('app_brand')}</div>
+        <div className="flex items-center mb-4">
+          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
+        </div>
         {/* Username card */}
         <div className="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400">
@@ -231,11 +233,11 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
         <nav className="space-y-1 flex-1">
           {[
             { id: 'overview', name: 'Overview', icon: FaHome },
-            { id: 'uploads', name: 'Uploads', icon: FaCloudUploadAlt, badge: uploadedFiles.length },
-            { id: 'appointments', name: 'Appointments', icon: FaCalendarAlt, badge: appointments.length },
+            { id: 'uploads', name: 'Uploads', icon: FaCloudUploadAlt, badge: uploadedFiles.length, route: '/uploads' },
+            { id: 'appointments', name: 'Appointments', icon: FaCalendarAlt, badge: appointments.length, route: '/appointments' },
             { id: 'doctors', name: 'Doctors', icon: FaUserMd, isExternalLink: true },
-            { id: 'reports', name: 'Reports', icon: FaFileMedical, badge: uploadedFiles.length },
-            { id: 'settings', name: 'Settings', icon: FaCog }
+            { id: 'reports', name: 'Reports', icon: FaFileMedical, badge: uploadedFiles.length, route: '/reports' },
+            { id: 'settings', name: 'Settings', icon: FaCog, route: '/settings' }
           ].map((item) => {
             const isActive = activeSection === item.id;
             const Icon = item.icon;
@@ -247,7 +249,15 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                     ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg transform scale-105' 
                     : 'hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-sm hover:transform hover:scale-102'
                 }`}
-                onClick={() => item.isExternalLink ? navigate('/doctors') : setActiveSection(item.id)}
+                onClick={() => {
+                  if (item.route) {
+                    navigate(item.route);
+                  } else if (item.isExternalLink) {
+                    navigate('/doctors');
+                  } else {
+                    setActiveSection(item.id);
+                  }
+                }}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl transition-all duration-300 transform hover:scale-110 ${
@@ -276,16 +286,11 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Enhanced navbar with notifications */}
-          <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg border border-gray-200 dark:border-gray-700 rounded-2xl px-6 py-4 mb-6 shadow-xl">
-            <div className="flex items-center justify-between">
+      <div className="flex-1">
+        {/* Enhanced navbar with notifications */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4 shadow-sm">
+          <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-                  <img src="/logo.jpg" alt="MedClerk Logo" className="h-6 w-6 object-contain" />
-                  {t('app_brand')}
-                </div>
                 <div className="text-sm text-gray-500">
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                 </div>
@@ -345,89 +350,77 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 </button>
               </div>
             </div>
-          </div>
+        </div>
+        
+        {/* Content area with padding */}
+        <div className="p-6">
+          <div className="max-w-6xl mx-auto">
           {/* Enhanced welcome section */}
-          <div className="bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 border border-primary-200 dark:border-primary-700 rounded-3xl p-8 mb-8 shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                  Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! 👋
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400 text-lg">Manage your medical reports and health information</p>
-                <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
-                  <span>🏥 Last visit: Dec 15, 2024</span>
-                  <span>📊 Health Score: 85/100</span>
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full -translate-y-32 translate-x-32"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-200/20 to-blue-200/20 rounded-full translate-y-24 -translate-x-24"></div>
+            
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">
+                    Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
+                  </h1>
+                  <span className="text-3xl">👋</span>
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 text-base mb-6">Manage your medical reports and health information</p>
+                
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Last visit:</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Dec 15, 2024</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Health Score:</span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">85/100</span>
+                  </div>
                 </div>
               </div>
-              <div className="hidden md:block">
-                <div className="w-32 h-32 bg-gradient-to-br from-primary-200 to-primary-300 rounded-full flex items-center justify-center">
-                  <FaUser className="text-4xl text-primary-700" />
+              
+              <div className="hidden lg:block">
+                <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
+                  <FaUser className="text-4xl text-white" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Enhanced stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Total Reports', value: '128', icon: FaFileMedical, color: 'from-blue-500 to-blue-600', bgColor: 'bg-blue-50' },
-              { label: 'This Month', value: '12', icon: FaCalendarAlt, color: 'from-green-500 to-green-600', bgColor: 'bg-green-50' },
-              { label: 'AI Answers', value: '86', icon: FaChartLine, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-50' },
-              { label: 'Alerts', value: '2', icon: FaBell, color: 'from-red-500 to-red-600', bgColor: 'bg-red-50' }
+              { label: 'TOTAL REPORTS', value: '4', icon: FaFileMedical, iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-600 dark:text-blue-400', change: '+5 this week', changeColor: 'text-blue-600', arrow: '↗' },
+              { label: 'THIS MONTH', value: '0', icon: FaCalendarAlt, iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-600 dark:text-green-400', change: '+3 from last month', changeColor: 'text-green-600', arrow: '↗' },
+              { label: 'AI ANSWERS', value: '3', icon: FaChartLine, iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-600 dark:text-purple-400', change: '94% accuracy', changeColor: 'text-purple-600', arrow: '↗' },
+              { label: 'ALERTS', value: '1', icon: FaBell, iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-600 dark:text-red-400', change: 'Requires attention', changeColor: 'text-red-600', arrow: '⚠' }
             ].map((stat, idx) => {
               const Icon = stat.icon;
               return (
-                <div key={idx} className={`${stat.bgColor} dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-14 h-14 bg-gradient-to-r ${stat.color} rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg`}>
-                      <Icon className="text-white text-xl group-hover:text-2xl transition-all duration-300" />
+                <div key={idx} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className={`w-10 h-10 ${stat.iconBg} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300`}>
+                      <Icon className={`${stat.iconColor} text-lg`} />
+    
                     </div>
-                    <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 font-medium">{stat.label}</div>
+                    <div className="flex-1">
+                      <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">{stat.label}</div>
+                    </div>
                   </div>
-                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-200">{stat.value}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {idx === 0 && '+5 this week'}
-                    {idx === 1 && '+3 from last month'}
-                    {idx === 2 && '94% accuracy'}
-                    {idx === 3 && 'Requires attention'}
+                  <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">{stat.value}</div>
+                  <div className={`text-xs font-medium ${stat.changeColor} flex items-center gap-1`}>
+                    <span className="text-sm">{stat.arrow}</span>
+                    {stat.change}
                   </div>
-              </div>
+                </div>
               );
             })}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 mb-8 shadow-lg border border-gray-100 dark:border-gray-700">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <FaRobot className="text-white text-sm" />
-              </div>
-              Quick Actions
-            </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.id}
-                    onClick={action.action}
-                    disabled={action.id === 1 && isUploading}
-                    className={`${action.color} shadow-md p-6 rounded-2xl transition-all duration-300 hover:-translate-y-2 hover:scale-105 hover:shadow-xl group disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden`}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-white/20 transform translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
-                    <Icon className="text-3xl mb-3 group-hover:scale-125 group-hover:rotate-12 transition-all duration-300 relative z-10" />
-                    <div className="font-semibold text-sm relative z-10">
-                      {action.id === 1 && isUploading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                          Uploading...
-                        </div>
-                      ) : action.name}
-                    </div>
-                  </button>
-                );
-              })}
-              </div>
           </div>
 
           {/* Add Appointment Modal */}
@@ -469,434 +462,9 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
           {/* Conditional Section Rendering */}
           {activeSection === 'overview' && (
             <>
-          {/* Main Dashboard Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            
-            {/* Center Column - AI Chat Bot & Recent Activity */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              {/* AI Chat Bot */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-6 shadow-lg">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
-                    <FaRobot className="text-white text-xl" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                      AI Health Assistant
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Ask about your reports & health</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Chat Messages */}
-                  <div className="lg:col-span-2">
-                    <div className="h-80 overflow-y-auto mb-4 space-y-3 bg-gray-50 rounded-2xl p-4">
-                      {chatMessages.map((msg) => (
-                        <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-xs p-3 rounded-2xl ${
-                            msg.type === 'user' 
-                              ? 'bg-primary-500 text-white' 
-                              : 'bg-white border border-gray-200 text-gray-800'
-                          }`}>
-                            <div className="text-sm">{msg.message}</div>
-                            <div className={`text-xs mt-1 ${msg.type === 'user' ? 'text-primary-100' : 'text-gray-500'}`}>
-                              {msg.time}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {isTyping && (
-                        <div className="flex justify-start">
-                          <div className="bg-white border border-gray-200 text-gray-800 p-3 rounded-2xl">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Chat Input */}
-                    <form onSubmit={handleSendMessage} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={chatInput}
-                        onChange={(e) => setChatInput(e.target.value)}
-                        placeholder="Ask about your health or reports..."
-                        className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 text-sm"
-                      />
-                      <button
-                        type="submit"
-                        disabled={!chatInput.trim() || isTyping}
-                        className="p-2 bg-primary-500 text-white rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <FaPaperPlane className="text-sm" />
-                      </button>
-                    </form>
-                  </div>
-
-                  {/* Quick Questions */}
-                  <div className="lg:col-span-1">
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-3">Quick Questions</p>
-                      <div className="space-y-2">
-                        {quickQuestions.map((question, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setChatInput(question)}
-                            className="w-full text-left text-xs p-3 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors border border-blue-100"
-                          >
-                            {question}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Recent Activity */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6 flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                    <FaClock className="text-white text-sm" />
-                  </div>
-                  Recent Activity
-                </h3>
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => {
-                    const Icon = activity.icon;
-                    const colors = [
-                      'from-blue-500 to-blue-600',
-                      'from-green-500 to-green-600', 
-                      'from-purple-500 to-purple-600'
-                    ];
-                    return (
-                      <div key={activity.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-102 group">
-                        <div className={`w-12 h-12 bg-gradient-to-br ${colors[activity.id - 1]} rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                          <Icon className="text-white group-hover:scale-110 transition-transform duration-300" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-gray-800 dark:text-gray-200 font-medium">{activity.message}</div>
-                          <div className="text-gray-500 dark:text-gray-400 text-sm">{activity.time}</div>
-                        </div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Uploaded Files Section */}
-              {uploadedFiles.length > 0 && (
-                <div className="bg-white border border-gray-100 rounded-3xl p-6 shadow-lg">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-gray-800">Recent Files</h3>
-                    <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">View All</button>
-                  </div>
-                  <div className="grid gap-4">
-                    {uploadedFiles.slice(-3).map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl hover:shadow-md transition-all group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                            <span className="text-2xl">
-                              {file.type.includes('pdf') ? '📄' : '🖼️'}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-gray-800 font-medium">{file.name}</div>
-                            <div className="text-gray-500 text-sm">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.uploadDate).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                        <button 
-                          className="p-2 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors opacity-0 group-hover:opacity-100"
-                          onClick={() => {
-                            const link = document.createElement('a');
-                            link.href = file.data;
-                            link.download = file.name;
-                            link.click();
-                          }}
-                        >
-                          <FaDownload />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right Sidebar - Calendar & Appointments */}
-            <div className="space-y-6">
-              
-              {/* Enhanced Calendar */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <FaCalendarAlt className="text-white text-sm" />
-                    </div>
-                    Calendar
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      className="p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md"
-                      onClick={goPrevMonth}
-                    >
-                      <FaChevronLeft className="text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors" />
-                    </button>
-                    <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/30 text-primary-700 dark:text-primary-300 font-bold text-sm shadow-sm">
-                      {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
-                    </div>
-                    <button 
-                      className="p-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 hover:scale-110 shadow-sm hover:shadow-md"
-                      onClick={goNextMonth}
-                    >
-                      <FaChevronRight className="text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors" />
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center mb-4">
-                  {['S','M','T','W','T','F','S'].map((d) => (
-                    <div key={d} className="text-xs font-bold text-gray-500 py-2">{d}</div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-7 gap-1 text-center">
-                  {monthDays.map((d) => (
-                    <div 
-                      key={d} 
-                      className={`py-3 rounded-xl text-sm font-medium cursor-pointer transition-all ${
-                        appointmentDays.has(d) 
-                          ? 'bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-lg' 
-                          : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm'
-                      }`}
-                    >
-                      {d}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Enhanced Appointments */}
-              <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl p-6 shadow-lg">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                      <FaUserMd className="text-white text-sm" />
-                    </div>
-                    Appointments
-                  </h3>
-                  <button 
-                    className="bg-gradient-to-r from-primary-500 to-primary-600 text-white p-2 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all duration-300 hover:scale-110 shadow-md hover:shadow-lg"
-                    onClick={() => setIsModalOpen(true)}
-                  >
-                    <FaPlus className="transition-transform duration-300 hover:rotate-90" />
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {appointments.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <FaCalendarAlt className="text-3xl mb-3 mx-auto opacity-50" />
-                      <p>No appointments scheduled</p>
-                    </div>
-                  ) : (
-                    appointments.slice(0, 3).map((a) => (
-                      <div key={a.id} className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl hover:shadow-md transition-all group">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                            a.status==='Confirmed' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}>
-                            {a.status}
-                          </span>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button 
-                              className="p-1 rounded-lg bg-blue-500 text-white hover:bg-blue-600 text-xs"
-                              onClick={() => onEdit(a)}
-                            >
-                              Edit
-                            </button>
-                            <button 
-                              className="p-1 rounded-lg bg-red-500 text-white hover:bg-red-600 text-xs"
-                              onClick={() => onCancel(a.id)}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-gray-800 font-medium">{a.doctor}</div>
-                        <div className="text-gray-600 text-sm">{a.date} at {a.time}</div>
-                        <div className="text-gray-500 text-xs">Room {a.room}</div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
             </>
           )}
 
-
-          {/* Uploads Section */}
-          {activeSection === 'uploads' && (
-            <div className="space-y-6">
-              {/* Section Header */}
-              <div className="bg-gradient-to-br from-orange-50 to-yellow-100 border border-orange-200 rounded-3xl p-8 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-xl flex items-center justify-center">
-                        <FaCloudUploadAlt className="text-white text-xl" />
-                      </div>
-                      Medical Documents
-                    </h2>
-                    <p className="text-gray-600 text-lg">Upload and manage your medical reports and documents</p>
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="w-24 h-24 bg-gradient-to-br from-orange-200 to-yellow-300 rounded-full flex items-center justify-center">
-                      <span className="text-4xl">📄</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Upload Area */}
-              <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">Upload New Documents</h3>
-                  <button 
-                    onClick={handleUploadReport}
-                    disabled={isUploading}
-                    className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-medium flex items-center gap-2 disabled:opacity-50"
-                  >
-                    <FaPlus />
-                    {isUploading ? 'Uploading...' : 'Upload Files'}
-                  </button>
-                </div>
-                
-                <div className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-orange-400 hover:bg-orange-50 transition-all cursor-pointer group"
-                     onClick={handleUploadReport}>
-                  <div className="w-16 h-16 bg-gradient-to-r from-orange-100 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                    <FaCloudUploadAlt className="text-2xl text-orange-600" />
-                  </div>
-                  <h4 className="text-xl font-bold text-gray-800 mb-2">Drop files here or click to upload</h4>
-                  <p className="text-gray-600">Supports PDF, JPG, PNG, DOC files up to 10MB</p>
-                  <div className="flex items-center justify-center gap-4 mt-4 text-sm text-gray-500">
-                    <span>📄 Lab Reports</span>
-                    <span>🖼️ X-rays</span>
-                    <span>📋 Prescriptions</span>
-                    <span>📊 Test Results</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Uploaded Files */}
-              <div className="bg-white rounded-3xl p-6 shadow-lg border border-gray-100">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-800">Your Documents ({uploadedFiles.length})</h3>
-                  <div className="flex items-center gap-2">
-                    <button className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-50">
-                      <FaEye />
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-50">
-                      <FaDownload />
-                    </button>
-                  </div>
-                </div>
-                
-                {uploadedFiles.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <FaFileMedical className="text-2xl text-gray-400" />
-                    </div>
-                    <h4 className="text-lg font-semibold mb-2">No documents uploaded yet</h4>
-                    <p>Start by uploading your medical reports and documents</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-4">
-                    {uploadedFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl hover:shadow-md transition-all group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-                            <span className="text-2xl">
-                              {file.type.includes('pdf') ? '📄' : 
-                               file.type.includes('image') ? '🖼️' : 
-                               file.type.includes('doc') ? '📝' : '📋'}
-                            </span>
-                          </div>
-                          <div>
-                            <div className="text-gray-800 font-semibold">{file.name}</div>
-                            <div className="text-gray-500 text-sm">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.uploadDate).toLocaleDateString()}
-                            </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                                Processed
-                              </span>
-                              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                                AI Analyzed
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors">
-                            <FaEye />
-                          </button>
-                          <button 
-                            className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
-                            onClick={() => {
-                              const link = document.createElement('a');
-                              link.href = file.data;
-                              link.download = file.name;
-                              link.click();
-                            }}
-                          >
-                            <FaDownload />
-                          </button>
-                          <button className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors">
-                            🗑️
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Upload Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Total Files', value: uploadedFiles.length, icon: FaFileMedical, color: 'from-orange-500 to-orange-600' },
-                  { label: 'This Month', value: uploadedFiles.filter(f => new Date(f.uploadDate).getMonth() === new Date().getMonth()).length, icon: FaCalendarAlt, color: 'from-blue-500 to-blue-600' },
-                  { label: 'Storage Used', value: `${(uploadedFiles.reduce((acc, f) => acc + f.size, 0) / 1024 / 1024).toFixed(1)}MB`, icon: FaCloudUploadAlt, color: 'from-green-500 to-green-600' },
-                  { label: 'AI Processed', value: uploadedFiles.length, icon: FaRobot, color: 'from-purple-500 to-purple-600' }
-                ].map((stat, idx) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={idx} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className={`w-10 h-10 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center`}>
-                          <Icon className="text-white text-sm" />
-                        </div>
-                        <div className="text-2xl font-bold text-gray-800">{stat.value}</div>
-                      </div>
-                      <div className="text-sm text-gray-600 font-medium">{stat.label}</div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
 
           {/* Appointments Section */}
           {activeSection === 'appointments' && (
@@ -1449,6 +1017,7 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             <p className="text-gray-500 text-sm bg-gray-50 px-4 py-2 rounded-full inline-block">
               Language: {selectedLanguage?.toUpperCase()} | Last updated: {new Date().toLocaleDateString()}
             </p>
+          </div>
           </div>
         </div>
       </div>

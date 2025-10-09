@@ -133,9 +133,8 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
     <div className="min-h-screen bg-gradient-main flex flex-col text-dark-700">
       {/* Top bar */}
       <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
-        <div className="flex items-center gap-3">
-          <img src="/logo.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
-          <div className="text-2xl font-bold text-dark-950">MedClerk</div>
+        <div className="flex items-center">
+          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
         </div>
         <div className="flex gap-4 items-center">
           <div className="relative">
@@ -308,7 +307,7 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
                       value={formData.emergencyContact.name}
                       onChange={handleEmergencyContactChange}
                       className="form-input"
-                      placeholder="e.g., Jane Doe"
+                      placeholder="e.g: Tanu Kumar "
                       required
                     />
                   </div>
@@ -326,7 +325,7 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
                       value={formData.emergencyContact.phone}
                       onChange={handleEmergencyContactChange}
                       className="form-input"
-                      placeholder="e.g., +1-555-123-4567"
+                      placeholder="e.g., +91-8837852977"
                       required
                     />
                   </div>
@@ -344,7 +343,7 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
                       value={formData.emergencyContact.email}
                       onChange={handleEmergencyContactChange}
                       className="form-input"
-                      placeholder="e.g., jane.doe@example.com"
+                      placeholder="e.g., tanu.kumar@example.com"
                     />
                   </div>
                 </div>
