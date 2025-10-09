@@ -229,9 +229,8 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
               <FaArrowLeft />
               <span className="hidden sm:inline">Back to Dashboard</span>
             </button>
-            <div className="flex items-center gap-3 text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent">
-              <img src="/logo.jpg" alt="MedClerk Logo" className="h-6 w-6 object-contain" />
-              {t('app_brand')}
+            <div className="flex items-center">
+              <img src="/logo1.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
             </div>
           </div>
           <div className="flex items-center gap-4">

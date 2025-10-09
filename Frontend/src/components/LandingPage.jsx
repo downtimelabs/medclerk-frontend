@@ -49,7 +49,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <img src="/logo.jpg" alt="MedClerk Logo" className="h-24 w-25 object-contain" />
+          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-14 w-22 object-contain" />
         </motion.div>
         <motion.div 
           className="flex gap-2"
@@ -283,45 +283,124 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
       </motion.section>
 
       <motion.footer 
-        className="px-6 py-4 border-t border-dark-100 flex justify-between text-dark-500"
+        className="bg-white border-t border-dark-200 mt-16"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
       >
-        <motion.div
-          className="text-sm"
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          © {new Date().getFullYear()} MedClerk
-        </motion.div>
-        <motion.div 
-          className="flex gap-4"
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <motion.button 
-            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-dark-900 transition-colors" 
-            onClick={() => navigate('/signin')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Company Info */}
+            <motion.div
+              className="md:col-span-1 flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center mb-4">
+                <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-22 object-contain" />
+              </div>
+              <p className="text-dark-600 text-sm leading-relaxed">
+                Organize and understand your medical reports with AI.
+              </p>
+            </motion.div>
+
+            {/* Quick Links */}
+            <motion.div
+              className="flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-sm font-semibold text-dark-900 mb-4">Quick Links</h3>
+              <ul className="space-y-3">
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    onClick={() => navigate('/start')}
+                    whileHover={{ x: 5 }}
+                  >
+                    How it Works
+                  </motion.button>
+                </li>
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    onClick={() => navigate('/signin')}
+                    whileHover={{ x: 5 }}
+                  >
+                    Sign In
+                  </motion.button>
+                </li>
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    onClick={() => navigate('/start')}
+                    whileHover={{ x: 5 }}
+                  >
+                    Get Started
+                  </motion.button>
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* Support */}
+            <motion.div
+              className="flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <h3 className="text-sm font-semibold text-dark-900 mb-4">Support</h3>
+              <ul className="space-y-3">
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    whileHover={{ x: 5 }}
+                  >
+                    Help Center
+                  </motion.button>
+                </li>
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    whileHover={{ x: 5 }}
+                  >
+                    Privacy Policy
+                  </motion.button>
+                </li>
+                <li>
+                  <motion.button 
+                    className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
+                    whileHover={{ x: 5 }}
+                  >
+                    Contact Us
+                  </motion.button>
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* Bottom Bar */}
+          <motion.div 
+            className="border-t border-dark-200 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            viewport={{ once: true }}
           >
-            Sign in
-          </motion.button>
-          <motion.button 
-            className="bg-transparent border-0 text-dark-300 cursor-pointer hover:text-dark-900 transition-colors" 
-            onClick={() => navigate('/start')}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Get started
-          </motion.button>
-        </motion.div>
+            <div className="text-dark-500 text-sm mb-2 md:mb-0">
+              © {new Date().getFullYear()} MedClerk. All rights reserved.
+            </div>
+            <div className="text-dark-500 text-sm">
+              Made with ❤️ for better healthcare
+            </div>
+          </motion.div>
+        </div>
       </motion.footer>
     </div>
   );

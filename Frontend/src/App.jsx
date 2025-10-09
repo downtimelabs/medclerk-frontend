@@ -12,6 +12,10 @@ import DoctorDashboard from './components/DoctorDashboard.jsx';
 import UploadItems from './components/UploadItems.jsx';
 import Dashboard from './components/Dashboard.jsx';
 import DoctorsPage from './components/DoctorsPage.jsx';
+import UploadPage from './components/UploadPage.jsx';
+import AppointmentsPage from './components/AppointmentsPage.jsx';
+import ReportsPage from './components/ReportsPage.jsx';
+import SettingsPage from './components/SettingsPage.jsx';
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
@@ -201,6 +205,66 @@ function App() {
                   <Navigate to="/start" replace />
                 ) : (
                   <DoctorsPage
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            <Route 
+              path="/uploads" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <UploadPage
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            <Route 
+              path="/appointments" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <AppointmentsPage
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            <Route 
+              path="/reports" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <ReportsPage
+                    user={user}
+                    selectedLanguage={selectedLanguage}
+                    onLanguageSelect={handleLanguageSelect}
+                    onLogout={handleLogout}
+                  />
+                )
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                !isAuthenticated ? (
+                  <Navigate to="/start" replace />
+                ) : (
+                  <SettingsPage
                     user={user}
                     selectedLanguage={selectedLanguage}
                     onLanguageSelect={handleLanguageSelect}
