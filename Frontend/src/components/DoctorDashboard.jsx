@@ -466,7 +466,16 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-dark-100 min-h-screen p-4 flex flex-col">
         <div className="flex items-center gap-2 px-2 py-2 mb-2">
-          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-14 w-22 object-contain" />
+          <img 
+            src="/logo1.jpg" 
+            alt="MedClerk Logo" 
+            className="h-14 w-22 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => {
+              const dashboardRoute = user?.role === 'doctor' ? '/doctor' : '/dashboard';
+              window.location.href = dashboardRoute;
+            }}
+            title="Go to Dashboard"
+          />
         </div>
         <div className="relative mb-3">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400"><FaSearch /></div>

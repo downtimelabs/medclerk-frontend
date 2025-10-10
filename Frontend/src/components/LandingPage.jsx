@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useI18n } from '../i18n';
 
-const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
+const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
 
@@ -77,9 +77,29 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
               <option value="hi" className="bg-white text-dark-700">Hindi</option>
             </select>
           </div>
-          <button className="btn btn-link" onClick={() => navigate('/start')}>App</button>
-          <button className="btn btn-secondary" onClick={() => navigate('/signin')}>Sign In</button>
-          <button className="btn btn-primary" onClick={() => navigate('/start')}>Get Started</button>
+          
+          {isAuthenticated ? (
+            <>
+              <button className="btn btn-link" onClick={() => navigate('/dashboard')}>
+                Dashboard
+              </button>
+              <button className="btn btn-secondary" onClick={() => {
+                localStorage.removeItem('isAuthenticated');
+                localStorage.removeItem('user');
+                localStorage.removeItem('selectedLanguage');
+                localStorage.removeItem('selectedRole');
+                window.location.reload();
+              }}>
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn btn-link" onClick={() => navigate('/start')}>App</button>
+              <button className="btn btn-secondary" onClick={() => navigate('/signin')}>Sign In</button>
+              <button className="btn btn-primary" onClick={() => navigate('/start')}>Get Started</button>
+            </>
+          )}
         </motion.div>
       </motion.header>
 
@@ -102,27 +122,29 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
           >
             {t('landing_sub')}
           </motion.p>
-          <motion.div 
-            className="flex gap-3 mb-3"
-            variants={fadeInUp}
-          >
-            <motion.button 
-              className="btn btn-primary" 
-              onClick={() => navigate('/start')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+          {!isAuthenticated && (
+            <motion.div 
+              className="flex gap-3 mb-3"
+              variants={fadeInUp}
             >
-              {t('start_free')} <FaArrowRight />
-            </motion.button>
-            <motion.button 
-              className="btn btn-secondary" 
-              onClick={() => navigate('/start')}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t('live_demo')}
-            </motion.button>
-          </motion.div>
+              <motion.button 
+                className="btn btn-primary" 
+                onClick={() => navigate('/start')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t('start_free')} <FaArrowRight />
+              </motion.button>
+              <motion.button 
+                className="btn btn-secondary" 
+                onClick={() => navigate('/start')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {t('live_demo')}
+              </motion.button>
+            </motion.div>
+          )}
           <motion.div 
             className="text-dark-500 text-sm animate-float"
             variants={fadeInUp}
@@ -396,9 +418,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect }) => {
             <div className="text-dark-500 text-sm mb-2 md:mb-0">
               © {new Date().getFullYear()} MedClerk. All rights reserved.
             </div>
-            <div className="text-dark-500 text-sm">
-              Made with ❤️ for better healthcare
-            </div>
+           
           </motion.div>
         </div>
       </motion.footer>

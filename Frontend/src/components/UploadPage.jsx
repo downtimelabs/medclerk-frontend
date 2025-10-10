@@ -8,6 +8,7 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('uploads');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const notifications = [
     { id: 1, message: 'Your appointment reminder for tomorrow', type: 'reminder', time: '1 hour ago' },
@@ -18,6 +19,11 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const handleLogout = () => {
     onLogout();
     navigate('/');
+  };
+
+  const toggleProfile = () => {
+    setShowProfile(!showProfile);
+    setShowNotifications(false); // Close notifications if open
   };
 
   // Load uploaded files from localStorage
@@ -86,15 +92,41 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
         <div className="flex items-center mb-4">
           <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
         </div>
-        {/* Username card */}
-        <div className="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400">
-            <FaUser />
+
+        {/* Enhanced Patient Profile Card */}
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-700 border-2 border-blue-300 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400 shadow-md">
+              <FaUser className="text-xl" />
+            </div>
+            <div>
+              <div className="font-semibold text-gray-800 dark:text-gray-200">{user?.name || 'User'}</div>
+              <div className="text-xs text-gray-500">{user?.email}</div>
+            </div>
           </div>
-          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title={user?.name || 'User'}>
-            {user?.name || 'User'}
-          </div>
+
+          {user?.role === 'PATIENT' && user?.patientProfile && (
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-blue-200/50 dark:border-blue-700/50">
+              <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Blood Group</div>
+                <div className="font-semibold text-blue-600">{user.patientProfile.bloodGroup || 'N/A'}</div>
+              </div>
+              <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Height</div>
+                <div className="font-semibold text-blue-600">{user.patientProfile.heightCm || 'N/A'} cm</div>
+              </div>
+              <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Weight</div>
+                <div className="font-semibold text-blue-600">{user.patientProfile.weightKg || 'N/A'} kg</div>
+              </div>
+              <div className="text-center p-2 bg-white/50 dark:bg-gray-800/50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Age</div>
+                <div className="font-semibold text-blue-600">{user.patientProfile.age || 'N/A'} yrs</div>
+              </div>
+            </div>
+          )}
         </div>
+
         <nav className="space-y-1 flex-1">
           {[
             { id: 'overview', name: 'Overview', icon: FaHome, route: '/dashboard' },
@@ -183,6 +215,61 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 )}
               </div>
               
+              {/* Profile Button & Dropdown */}
+              <div className="relative">
+                <button 
+                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={toggleProfile}
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary-100 grid place-items-center">
+                    <FaUser className="text-primary-600" />
+                  </div>
+                  <span className="text-sm font-medium">{user?.name}</span>
+                </button>
+
+                {showProfile && (
+                  <div className="absolute right-0 top-12 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                    <div className="p-4 border-b border-gray-100">
+                      <h3 className="font-semibold text-gray-800">Profile Information</h3>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-500">Full Name</label>
+                        <p className="text-sm font-medium">{user?.name}</p>
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Email</label>
+                        <p className="text-sm font-medium">{user?.email}</p>
+                      </div>
+                      {user?.role === 'PATIENT' && user?.patientProfile && (
+                        <>
+                          <div>
+                            <label className="text-xs text-gray-500">Blood Group</label>
+                            <p className="text-sm font-medium">{user.patientProfile.bloodGroup || 'Not specified'}</p>
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500">Height</label>
+                            <p className="text-sm font-medium">{user.patientProfile.heightCm || 'Not specified'} cm</p>
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-500">Weight</label>
+                            <p className="text-sm font-medium">{user.patientProfile.weightKg || 'Not specified'} kg</p>
+                          </div>
+                        </>
+                      )}
+                      <div className="pt-2 border-t border-gray-100">
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full text-left text-sm text-red-600 hover:text-red-700 font-medium"
+                        >
+                          <FaSignOutAlt className="inline mr-2" /> Logout
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <select
                 className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
                 value={selectedLanguage || 'en'}
@@ -193,10 +280,6 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 <option value="fr">Français</option>
                 <option value="hi">हिंदी</option>
               </select>
-              
-              <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
-                <FaSignOutAlt className="mr-2" /> Logout
-              </button>
             </div>
           </div>
         </div>

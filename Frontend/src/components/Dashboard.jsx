@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FaUser, FaSignOutAlt, FaCloudUploadAlt, FaCalendarAlt, FaChevronLeft, FaChevronRight, FaHome, FaUserMd, FaFileMedical, FaCog, FaChartLine, FaBell, FaDownload, FaEye, FaPlus, FaRobot, FaPaperPlane, FaMicrophone, FaStar, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaStethoscope } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt, FaCloudUploadAlt, FaCalendarAlt, FaChevronLeft, FaChevronRight, FaHome, FaUserMd, FaFileMedical, FaCog, FaChartLine, FaBell, FaDownload, FaEye, FaPlus, FaRobot, FaPaperPlane, FaMicrophone, FaStar, FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaStethoscope, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,6 +14,19 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    dob: '',
+    bloodGroup: '',
+    heightCm: '',
+    weightKg: '',
+    gender: ''
+  });
   const [chatMessages, setChatMessages] = useState([
     { id: 1, type: 'bot', message: 'Hello! I\'m your AI health assistant. I can help you understand your medical reports and answer health-related questions. How can I help you today?', time: new Date().toLocaleTimeString() }
   ]);
@@ -145,6 +158,64 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     input.click();
   };
 
+  const handleEditProfile = () => {
+    setIsEditingProfile(true);
+    setEditFormData({
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      dob: user?.dob || '',
+      bloodGroup: user?.patientProfile?.bloodGroup || '',
+      heightCm: user?.patientProfile?.heightCm || '',
+      weightKg: user?.patientProfile?.weightKg || '',
+      gender: user?.patientProfile?.gender || ''
+    });
+  };
+
+  const handleSaveProfile = () => {
+    // Update user data
+    const updatedUser = {
+      ...user,
+      name: editFormData.name,
+      email: editFormData.email,
+      phone: editFormData.phone,
+      dob: editFormData.dob,
+      patientProfile: {
+        ...user?.patientProfile,
+        bloodGroup: editFormData.bloodGroup,
+        heightCm: editFormData.heightCm,
+        weightKg: editFormData.weightKg,
+        gender: editFormData.gender
+      }
+    };
+    
+    // Update localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update parent component (if needed)
+    if (onProfileComplete) {
+      onProfileComplete(updatedUser);
+    }
+    
+    setIsEditingProfile(false);
+    setShowProfileModal(false);
+    alert('Profile updated successfully!');
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingProfile(false);
+    setEditFormData({
+      name: '',
+      email: '',
+      phone: '',
+      dob: '',
+      bloodGroup: '',
+      heightCm: '',
+      weightKg: '',
+      gender: ''
+    });
+  };
+
   const handleLogout = () => {
     onLogout();
     navigate('/');
@@ -218,18 +289,20 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex text-gray-700 dark:text-gray-300">
       {/* Sidebar */}
       <aside className="w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen px-4 pt-4 pb-4 flex flex-col shadow-lg">
-        <div className="flex items-center mb-4">
-          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
+        <div className="flex items-center mb-8">
+          <img 
+            src="/logo1.jpg" 
+            alt="MedClerk Logo" 
+            className="h-16 w-26 object-contain cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => {
+              const dashboardRoute = user?.role === 'doctor' ? '/doctor' : '/dashboard';
+              window.location.href = dashboardRoute;
+            }}
+            title="Go to Dashboard"
+          />
         </div>
-        {/* Username card */}
-        <div className="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400">
-              <FaUser />
-            </div>
-          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title={user?.name || 'User'}>
-            {user?.name || 'User'}
-          </div>
-        </div>
+        
+        {/* Navigation - Remove settings from here */}
         <nav className="space-y-1 flex-1">
           {[
             { id: 'overview', name: 'Overview', icon: FaHome },
@@ -237,23 +310,21 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             { id: 'appointments', name: 'Appointments', icon: FaCalendarAlt, badge: appointments.length, route: '/appointments' },
             { id: 'doctors', name: 'Doctors', icon: FaUserMd, isExternalLink: true },
             { id: 'reports', name: 'Reports', icon: FaFileMedical, badge: uploadedFiles.length, route: '/reports' },
-            { id: 'settings', name: 'Settings', icon: FaCog, route: '/settings' }
+            { id: 'settings', name: 'Settings', icon: FaCog }
           ].map((item) => {
             const isActive = activeSection === item.id;
             const Icon = item.icon;
             return (
               <div 
                 key={item.id}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${
                   isActive 
-                    ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg transform scale-105' 
-                    : 'hover:bg-blue-50 dark:hover:bg-gray-700 hover:shadow-sm hover:transform hover:scale-102'
+                    ? 'bg-primary-500 text-white' 
+                    : 'hover:bg-blue-50 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => {
                   if (item.route) {
                     navigate(item.route);
-                  } else if (item.isExternalLink) {
-                    navigate('/doctors');
                   } else {
                     setActiveSection(item.id);
                   }
@@ -263,7 +334,7 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                   <div className={`w-10 h-10 rounded-xl transition-all duration-300 transform hover:scale-110 ${
                     isActive 
                       ? 'bg-white/20 text-white shadow-lg' 
-                      : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-600 dark:to-gray-700 text-blue-600 dark:text-blue-400 shadow-sm hover:shadow-md'
+                      : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-600 dark:to-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                   } flex items-center justify-center`}>
                     <Icon className={`transition-all duration-300 ${isActive ? 'text-lg' : 'text-base hover:text-lg'}`} />
                   </div>
@@ -287,7 +358,7 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
 
       {/* Main content */}
       <div className="flex-1">
-        {/* Enhanced navbar with notifications */}
+        {/* Navbar */}
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4 shadow-sm">
           <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -296,7 +367,55 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                {/* Notifications */}
+                {/* Profile Button & Dropdown */}
+                <div className="relative">
+                  <button 
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={() => setShowProfile(!showProfile)}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                      <FaUser className="text-white text-lg" />
+                    </div>
+                    <span className="text-sm font-medium hidden md:block">{user?.name}</span>
+                  </button>
+
+                  {showProfile && (
+                    <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                            <FaUser className="text-white text-xl" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-gray-800">{user?.name}</div>
+                            <div className="text-sm text-gray-500">{user?.email}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <button 
+                          onClick={() => {
+                            setShowProfile(false);
+                            setShowProfileModal(true);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                        >
+                          <FaUser className="text-gray-500" />
+                          View Profile
+                        </button>
+                        <button 
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 rounded-lg flex items-center gap-2"
+                        >
+                          <FaSignOutAlt className="text-red-500" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Notifications Button */}
                 <div className="relative">
                   <button 
                     className="p-2 rounded-lg hover:bg-gray-50 transition-colors relative"
@@ -326,36 +445,15 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                   )}
                 </div>
                 
-                <select
-                  className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
-                  value={selectedLanguage || 'en'}
-                  onChange={(e) => onLanguageSelect?.(e.target.value)}
-                >
-                  <option value="en">English</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
-                  <option value="it">Italiano</option>
-                  <option value="pt">Português</option>
-                  <option value="ru">Русский</option>
-                  <option value="zh">中文</option>
-                  <option value="ja">日本語</option>
-                  <option value="ko">한국어</option>
-                  <option value="ar">العربية</option>
-                  <option value="hi">हिंदी</option>
-                </select>
-                
-                <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
-                  <FaSignOutAlt className="mr-2" /> Logout
-                </button>
+               
               </div>
             </div>
         </div>
         
-        {/* Content area with padding */}
+        {/* Content area */}
         <div className="p-6">
           <div className="max-w-6xl mx-auto">
-          {/* Enhanced welcome section */}
+          {/* Welcome section */}
           <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full -translate-y-32 translate-x-32"></div>
@@ -465,6 +563,148 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             </>
           )}
 
+          {/* Uploads Section */}
+          {activeSection === 'uploads' && (
+            <div className="space-y-6">
+              {/* Section Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200">Upload Reports</h2>
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">Upload and manage your medical reports</p>
+                </div>
+                <button
+                  onClick={handleUploadReport}
+                  disabled={isUploading}
+                  className="btn btn-primary flex items-center gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <div className="spinner"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <FaCloudUploadAlt />
+                      Upload New Report
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* Upload Area */}
+              <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-700">
+                <div className="text-center">
+                  <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FaCloudUploadAlt className="text-4xl text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Upload Your Medical Reports</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-2xl mx-auto">
+                    Drag and drop your medical files here, or click the button above to browse and select files. 
+                    Supported formats: PDF, JPG, PNG, DOC, DOCX
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Secure & Private
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      AI Analysis
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      Easy Organization
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Files List */}
+              {uploadedFiles.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6">Uploaded Reports ({uploadedFiles.length})</h3>
+                  <div className="space-y-4">
+                    {uploadedFiles.map((file) => (
+                      <div key={file.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                            <FaFileMedical className="text-blue-600 dark:text-blue-400 text-xl" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200">{file.name}</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.uploadDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              // Create download link
+                              const link = document.createElement('a');
+                              link.href = file.data;
+                              link.download = file.name;
+                              link.click();
+                            }}
+                            className="p-2 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            title="Download"
+                          >
+                            <FaDownload />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Open file in new tab
+                              const newWindow = window.open();
+                              newWindow.document.write(`
+                                <html>
+                                  <head><title>${file.name}</title></head>
+                                  <body style="margin:0; padding:20px;">
+                                    <iframe src="${file.data}" width="100%" height="100%" style="border:none;"></iframe>
+                                  </body>
+                                </html>
+                              `);
+                            }}
+                            className="p-2 text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                            title="View"
+                          >
+                            <FaEye />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setUploadedFiles(prev => prev.filter(f => f.id !== file.id));
+                              localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles.filter(f => f.id !== file.id)));
+                            }}
+                            className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            title="Delete"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {uploadedFiles.length === 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-lg border border-gray-100 dark:border-gray-700 text-center">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FaFileMedical className="text-2xl text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No Reports Uploaded Yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-6">Upload your first medical report to get started with AI analysis</p>
+                  <button
+                    onClick={handleUploadReport}
+                    className="btn btn-primary"
+                  >
+                    <FaCloudUploadAlt />
+                    Upload Your First Report
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Appointments Section */}
           {activeSection === 'appointments' && (
@@ -605,9 +845,12 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                         <FaPlus />
                         New Appointment
                       </button>
-                      <button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center gap-2">
-                        <FaPhone />
-                        Call Clinic
+                      <button 
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all flex items-center justify-center gap-2"
+                        onClick={handleUploadReport}
+                      >
+                        <FaCloudUploadAlt />
+                        Upload Report
                       </button>
                       <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white p-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all flex items-center justify-center gap-2">
                         <FaBell />
@@ -1012,7 +1255,273 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             </div>
           )}
 
-          {/* Footer - shown for all sections */}
+          {/* Profile Modal */}
+          {showProfileModal && (
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm grid place-items-center p-4 z-50">
+              <div className="bg-white border border-gray-100 rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col">
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                  <h3 className="text-2xl font-bold text-gray-800">Profile Details</h3>
+                  <div className="flex items-center gap-3">
+                    {!isEditingProfile && (
+                      <button 
+                        onClick={handleEditProfile}
+                        className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Edit Profile
+                      </button>
+                    )}
+                    <button 
+                      className="text-gray-400 hover:text-gray-600 p-2"
+                      onClick={() => {
+                        setShowProfileModal(false);
+                        setIsEditingProfile(false);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="p-6 overflow-y-auto flex-grow">
+                  <div className="space-y-8">
+                  {/* Basic Information */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-700 mb-4">Basic Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Full Name</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="text"
+                            value={editFormData.name}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.name || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Email</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="email"
+                            value={editFormData.email}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.email || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Phone</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="tel"
+                            value={editFormData.phone}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.phone || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Date of Birth</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="date"
+                            value={editFormData.dob}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, dob: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.dob || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Medical Information */}
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-700 mb-4">Medical Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Blood Group</label>
+                        {isEditingProfile ? (
+                          <select
+                            value={editFormData.bloodGroup}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, bloodGroup: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          >
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                          </select>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.patientProfile?.bloodGroup || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Height (cm)</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="number"
+                            value={editFormData.heightCm}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, heightCm: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            placeholder="Enter height in cm"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.patientProfile?.heightCm ? `${user.patientProfile.heightCm} cm` : 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Weight (kg)</label>
+                        {isEditingProfile ? (
+                          <input
+                            type="number"
+                            value={editFormData.weightKg}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, weightKg: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            placeholder="Enter weight in kg"
+                          />
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.patientProfile?.weightKg ? `${user.patientProfile.weightKg} kg` : 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-500 mb-2">Gender</label>
+                        {isEditingProfile ? (
+                          <select
+                            value={editFormData.gender}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, gender: e.target.value }))}
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                          >
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="font-medium text-gray-900">{user?.patientProfile?.gender || 'Not set'}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Additional Medical Information */}
+                    {(() => {
+                      const allergies = user?.patientProfile?.allergies;
+                      const chronicConditions = user?.patientProfile?.chronicConditions;
+                      
+                      // Handle both array and string formats
+                      const allergiesList = Array.isArray(allergies) ? allergies : 
+                                         (typeof allergies === 'string' && allergies.trim()) ? [allergies] : [];
+                      const conditionsList = Array.isArray(chronicConditions) ? chronicConditions : 
+                                           (typeof chronicConditions === 'string' && chronicConditions.trim()) ? [chronicConditions] : [];
+                      
+                      return (allergiesList.length > 0 || conditionsList.length > 0) && (
+                        <div className="mt-6 space-y-4">
+                          {allergiesList.length > 0 && (
+                            <div>
+                              <h5 className="text-md font-semibold text-gray-700 mb-2">Allergies</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {allergiesList.map((allergy, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                                    {allergy}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {conditionsList.length > 0 && (
+                            <div>
+                              <h5 className="text-md font-semibold text-gray-700 mb-2">Chronic Conditions</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {conditionsList.map((condition, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm">
+                                    {condition}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    
+                    {/* Emergency Contact */}
+                    {user?.patientProfile?.emergencyContact && (
+                      <div className="mt-6">
+                        <h5 className="text-md font-semibold text-gray-700 mb-2">Emergency Contact</h5>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">Name</div>
+                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.name || 'Not set'}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Phone</div>
+                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.phone || 'Not set'}</div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Relationship</div>
+                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.relationship || 'Not set'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  </div>
+                  
+                  {/* Edit Mode Buttons */}
+                  {isEditingProfile && (
+                    <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                      <button
+                        onClick={handleCancelEdit}
+                        className="px-6 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveProfile}
+                        className="px-6 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer - single instance */}
           <div className="text-center mt-6">
             <p className="text-gray-500 text-sm bg-gray-50 px-4 py-2 rounded-full inline-block">
               Language: {selectedLanguage?.toUpperCase()} | Last updated: {new Date().toLocaleDateString()}

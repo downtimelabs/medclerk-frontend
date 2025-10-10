@@ -85,7 +85,7 @@ function App() {
             <Routes>
             <Route 
               path="/" 
-              element={<LandingPage selectedLanguage={selectedLanguage} onLanguageSelect={handleLanguageSelect} />}
+              element={<LandingPage selectedLanguage={selectedLanguage} onLanguageSelect={handleLanguageSelect} isAuthenticated={isAuthenticated} user={user} />}
             />
             <Route 
               path="/start" 
@@ -102,6 +102,7 @@ function App() {
                     selectedRole={selectedRole}
                     onLanguageSelect={handleLanguageSelect}
                     onAuthSuccess={handleAuthSuccess}
+                    isSignUpMode={true}
                   />
                 ) : (
                   <Navigate to="/dashboard" replace />
@@ -123,6 +124,7 @@ function App() {
                     selectedRole={selectedRole}
                     onLanguageSelect={handleLanguageSelect}
                     onAuthSuccess={handleAuthSuccess}
+                    isSignUpMode={true}
                   />
                 ) : (
                   <Navigate to="/dashboard" replace />
@@ -157,30 +159,48 @@ function App() {
               element={
                 !isAuthenticated ? (
                   <Navigate to="/start" replace />
-                ) : user?.role === 'doctor' && !user?.doctorProfile ? (
-                  <DoctorProfile 
-                    user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
-                    onProfileComplete={handleProfileComplete}
-                  />
-                ) : user?.role === 'patient' && !user?.patientProfile ? (
-                  <PatientProfile 
-                    user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
-                    onProfileComplete={handleProfileComplete}
-                  />
-                ) : user?.role === 'doctor' ? (
-                  <Navigate to="/doctor" replace />
-                ) : (
-                  <Dashboard 
-                    user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
-                    onLogout={handleLogout}
-                  />
-                )
+                ) : (() => {
+                  // Debug: Log user data for routing decisions
+                  console.log('Dashboard routing - User data:', user);
+                  console.log('User role:', user?.role);
+                  console.log('Doctor profile exists:', !!user?.doctorProfile);
+                  console.log('Patient profile exists:', !!user?.patientProfile);
+                  
+                  if (user?.role === 'doctor' && !user?.doctorProfile) {
+                    console.log('Routing to DoctorProfile - no doctor profile');
+                    return (
+                      <DoctorProfile 
+                        user={user}
+                        selectedLanguage={selectedLanguage}
+                        onLanguageSelect={handleLanguageSelect}
+                        onProfileComplete={handleProfileComplete}
+                      />
+                    );
+                  } else if (user?.role === 'patient' && !user?.patientProfile) {
+                    console.log('Routing to PatientProfile - no patient profile');
+                    return (
+                      <PatientProfile 
+                        user={user}
+                        selectedLanguage={selectedLanguage}
+                        onLanguageSelect={handleLanguageSelect}
+                        onProfileComplete={handleProfileComplete}
+                      />
+                    );
+                  } else if (user?.role === 'doctor') {
+                    console.log('Routing to Doctor Dashboard - profile exists');
+                    return <Navigate to="/doctor" replace />;
+                  } else {
+                    console.log('Routing to Patient Dashboard - profile exists');
+                    return (
+                      <Dashboard 
+                        user={user}
+                        selectedLanguage={selectedLanguage}
+                        onLanguageSelect={handleLanguageSelect}
+                        onLogout={handleLogout}
+                      />
+                    );
+                  }
+                })()
               } 
             />
             <Route 
