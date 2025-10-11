@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { FaCloudUploadAlt, FaFileMedical, FaCalendarAlt, FaRobot, FaDownload, FaEye, FaPlus, FaTrash, FaUser, FaSignOutAlt, FaHome, FaUserMd, FaCog, FaChartLine, FaBell } from 'react-icons/fa';
+import { FaCloudUploadAlt, FaFileMedical, FaCalendarAlt, FaRobot, FaDownload, FaEye, FaPlus, FaTrash, FaUser, FaSignOutAlt, FaHome, FaUserMd, FaCog, FaChartLine, FaBell, FaCheckCircle, FaSpinner } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { uploadFile, getUserDocuments, getFileUrl, DocumentType, validateFile } from '../services/uploadService';
 
 const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const navigate = useNavigate();
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
   const [activeSection, setActiveSection] = useState('uploads');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMetadata, setUploadMetadata] = useState({
+    title: '',
+    type: DocumentType.OTHER
+  });
+  const [error, setError] = useState('');
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
 
   const notifications = [
     { id: 1, message: 'Your appointment reminder for tomorrow', type: 'reminder', time: '1 hour ago' },
@@ -26,62 +36,117 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     setShowNotifications(false); // Close notifications if open
   };
 
-  // Load uploaded files from localStorage
+  // Load uploaded files from backend
   useEffect(() => {
-    const storedFiles = localStorage.getItem('uploadedFiles');
-    if (storedFiles) {
-      setUploadedFiles(JSON.parse(storedFiles));
-    }
+    loadDocuments();
   }, []);
 
-  // Save uploaded files to localStorage
-  useEffect(() => {
-    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
-  }, [uploadedFiles]);
+  const loadDocuments = async () => {
+    try {
+      setIsLoadingDocuments(true);
+      const documents = await getUserDocuments();
+      setUploadedFiles(documents);
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+      setError('Failed to load documents. Please try again.');
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  };
 
   const handleUploadReport = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
-    input.multiple = true;
-    input.onchange = async (e) => {
-      const files = Array.from(e.target.files || []);
-      if (files.length > 0) {
-        setIsUploading(true);
-        
-        try {
-          for (const file of files) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const fileData = {
-                id: Date.now() + Math.random(),
-                name: file.name,
-                size: file.size,
-                type: file.type,
-                uploadDate: new Date().toISOString(),
-                data: reader.result
-              };
-              
-              setUploadedFiles(prev => [...prev, fileData]);
-            };
-            reader.readAsDataURL(file);
-          }
-          
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          alert(`Successfully uploaded ${files.length} file(s)!`);
-        } catch (error) {
-          alert('Upload failed. Please try again.');
-        } finally {
-          setIsUploading(false);
+    input.accept = 'image/*,application/pdf,.doc,.docx,text/plain';
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        // Validate file
+        const validation = validateFile(file);
+        if (!validation.valid) {
+          setError(validation.errors.join(', '));
+          return;
         }
+
+        setSelectedFile(file);
+        setUploadMetadata({
+          title: file.name,
+          type: DocumentType.OTHER
+        });
+        setShowUploadModal(true);
+        setError('');
       }
     };
     input.click();
   };
 
-  const handleDeleteFile = (fileId) => {
+  const handleConfirmUpload = async () => {
+    if (!selectedFile || !uploadMetadata.title) {
+      setError('Please provide a title for the document');
+      return;
+    }
+
+    setIsUploading(true);
+    setError('');
+
+    try {
+      const document = await uploadFile(selectedFile, uploadMetadata, (progress) => {
+        setUploadProgress(progress);
+      });
+
+      // Add to uploaded files list
+      setUploadedFiles(prev => [document, ...prev]);
+      
+      // Reset state
+      setShowUploadModal(false);
+      setSelectedFile(null);
+      setUploadMetadata({ title: '', type: DocumentType.OTHER });
+      setUploadProgress(null);
+      
+      alert('File uploaded successfully!');
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setError(error.message || 'Upload failed. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleCancelUpload = () => {
+    setShowUploadModal(false);
+    setSelectedFile(null);
+    setUploadMetadata({ title: '', type: DocumentType.OTHER });
+    setUploadProgress(null);
+    setError('');
+  };
+
+  const handleDeleteFile = async (fileId) => {
     if (window.confirm('Are you sure you want to delete this file?')) {
+      // Note: Implement delete API call when backend provides delete endpoint
       setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+    }
+  };
+
+  const handleViewFile = async (file) => {
+    try {
+      const url = await getFileUrl(file.objectKey);
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Failed to get file URL:', error);
+      alert('Failed to open file. Please try again.');
+    }
+  };
+
+  const handleDownloadFile = async (file) => {
+    try {
+      const url = await getFileUrl(file.objectKey);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = file.title;
+      link.click();
+    } catch (error) {
+      console.error('Failed to download file:', error);
+      alert('Failed to download file. Please try again.');
     }
   };
 
@@ -345,16 +410,22 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Your Documents ({uploadedFiles.length})</h3>
           <div className="flex items-center gap-2">
-            <button className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-              <FaEye />
-            </button>
-            <button className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-              <FaDownload />
+            <button 
+              onClick={loadDocuments}
+              disabled={isLoadingDocuments}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+            >
+              {isLoadingDocuments ? <FaSpinner className="animate-spin" /> : '🔄'}
             </button>
           </div>
         </div>
         
-        {uploadedFiles.length === 0 ? (
+        {isLoadingDocuments ? (
+          <div className="text-center py-12">
+            <FaSpinner className="animate-spin text-4xl text-primary-500 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">Loading your documents...</p>
+          </div>
+        ) : uploadedFiles.length === 0 ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <FaFileMedical className="text-2xl text-gray-400" />
@@ -369,38 +440,38 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 flex items-center justify-center">
                     <span className="text-2xl">
-                      {file.type.includes('pdf') ? '📄' : 
-                       file.type.includes('image') ? '🖼️' : 
-                       file.type.includes('doc') ? '📝' : '📋'}
+                      {file.mimeType?.includes('pdf') ? '📄' : 
+                       file.mimeType?.includes('image') ? '🖼️' : 
+                       file.mimeType?.includes('doc') ? '📝' : '📋'}
                     </span>
                   </div>
                   <div>
-                    <div className="text-gray-800 dark:text-gray-200 font-semibold">{file.name}</div>
+                    <div className="text-gray-800 dark:text-gray-200 font-semibold">{file.title}</div>
                     <div className="text-gray-500 dark:text-gray-400 text-sm">
-                      {(file.size / 1024 / 1024).toFixed(2)} MB • {new Date(file.uploadDate).toLocaleDateString()}
+                      {(file.fileSize / 1024 / 1024).toFixed(2)} MB • {new Date(file.createdAt).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
-                        Processed
+                        {file.type}
                       </span>
-                      <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
-                        AI Analyzed
-                      </span>
+                      {file.ocrProcessing && (
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
+                          OCR Processing
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg">
+                  <button 
+                    onClick={() => handleViewFile(file)}
+                    className="p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg"
+                  >
                     <FaEye />
                   </button>
                   <button 
+                    onClick={() => handleDownloadFile(file)}
                     className="p-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors shadow-md hover:shadow-lg"
-                    onClick={() => {
-                      const link = document.createElement('a');
-                      link.href = file.data;
-                      link.download = file.name;
-                      link.click();
-                    }}
                   >
                     <FaDownload />
                   </button>
@@ -416,6 +487,119 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
           </div>
         )}
       </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Upload Document</h3>
+            
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            {selectedFile && (
+              <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">
+                    {selectedFile.type.includes('pdf') ? '📄' : 
+                     selectedFile.type.includes('image') ? '🖼️' : '📋'}
+                  </span>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-800 dark:text-gray-200">{selectedFile.name}</div>
+                    <div className="text-sm text-gray-500">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Document Title
+                </label>
+                <input
+                  type="text"
+                  value={uploadMetadata.title}
+                  onChange={(e) => setUploadMetadata(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  placeholder="Enter document title"
+                  disabled={isUploading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Document Type
+                </label>
+                <select
+                  value={uploadMetadata.type}
+                  onChange={(e) => setUploadMetadata(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                  disabled={isUploading}
+                >
+                  <option value={DocumentType.LAB_REPORT}>Lab Report</option>
+                  <option value={DocumentType.PRESCRIPTION}>Prescription</option>
+                  <option value={DocumentType.DISCHARGE_SUMMARY}>Discharge Summary</option>
+                  <option value={DocumentType.SCAN_IMAGE}>Scan/Image</option>
+                  <option value={DocumentType.OTHER}>Other</option>
+                </select>
+              </div>
+
+              {uploadProgress && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {uploadProgress.stage === 'presigned' && 'Getting upload URL...'}
+                      {uploadProgress.stage === 'uploading' && 'Uploading to cloud...'}
+                      {uploadProgress.stage === 'confirming' && 'Finalizing...'}
+                      {uploadProgress.stage === 'complete' && 'Complete!'}
+                    </span>
+                    <span className="font-semibold text-primary-600">{Math.round(uploadProgress.percent)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-primary-500 to-primary-600 h-full transition-all duration-300"
+                      style={{ width: `${uploadProgress.percent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCancelUpload}
+                disabled={isUploading}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmUpload}
+                disabled={isUploading || !uploadMetadata.title}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg hover:from-primary-600 hover:to-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isUploading ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <FaCloudUploadAlt />
+                    Upload
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
             </div>
           </div>
         </div>

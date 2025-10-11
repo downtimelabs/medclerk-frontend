@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash, FaCheckCircle, FaPhone, FaUserMd, FaHospital, FaGraduationCap, FaIdCard, FaHeart, FaWeight, FaRuler, FaExclamationTriangle, FaUserFriends } from 'react-icons/fa';
 import { useI18n } from '../i18n';
+import { API_ENDPOINTS, STORAGE_KEYS } from '../config/api';
 
 const Auth = ({ selectedLanguage, selectedRole, onLanguageSelect, onAuthSuccess, isSignInMode = false, isSignUpMode = false }) => {
   const [isSignUp, setIsSignUp] = useState(isSignUpMode || !isSignInMode);
@@ -197,7 +198,7 @@ const Auth = ({ selectedLanguage, selectedRole, onLanguageSelect, onAuthSuccess,
       }
 
       // Make API call to your backend
-      const endpoint = isSignUp ? 'https://medclerk-backend.vercel.app/api/v1/auth/register' : 'https://medclerk-backend.vercel.app/api/v1/auth/login';
+      const endpoint = isSignUp ? API_ENDPOINTS.AUTH.REGISTER : API_ENDPOINTS.AUTH.LOGIN;
       
       // Debug: Log the data being sent
       const requestData = isSignUp ? apiData : { email: formData.email, password: formData.password };
@@ -236,7 +237,18 @@ const Auth = ({ selectedLanguage, selectedRole, onLanguageSelect, onAuthSuccess,
         }
 
         const result = await response.json();
-        console.log('Registration success:', result);
+        console.log('Registration/Login success:', result);
+        
+        // Store access token from backend response
+        if (result.data?.accessToken) {
+          localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, result.data.accessToken);
+          console.log('Access token stored');
+        }
+
+        // Store refresh token if provided
+        if (result.data?.refreshToken) {
+          localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, result.data.refreshToken);
+        }
         
       } catch (fetchError) {
         console.error('Fetch error:', fetchError);
