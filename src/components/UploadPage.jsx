@@ -8,7 +8,10 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [activeSection, setActiveSection] = useState('uploads');
   const [showNotifications, setShowNotifications] = useState(false);
+<<<<<<< HEAD:src/components/UploadPage.jsx
   const [showProfile, setShowProfile] = useState(false);
+=======
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/UploadPage.jsx
 
   const notifications = [
     { id: 1, message: 'Your appointment reminder for tomorrow', type: 'reminder', time: '1 hour ago' },
@@ -21,11 +24,14 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     navigate('/');
   };
 
+<<<<<<< HEAD:src/components/UploadPage.jsx
   const toggleProfile = () => {
     setShowProfile(!showProfile);
     setShowNotifications(false); // Close notifications if open
   };
 
+=======
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/UploadPage.jsx
   // Load uploaded files from localStorage
   useEffect(() => {
     const storedFiles = localStorage.getItem('uploadedFiles');
@@ -92,6 +98,7 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
         <div className="flex items-center mb-4">
           <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
         </div>
+<<<<<<< HEAD:src/components/UploadPage.jsx
 
         {/* Enhanced Patient Profile Card */}
         <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-700 rounded-xl p-4 space-y-3">
@@ -127,6 +134,17 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
           )}
         </div>
 
+=======
+        {/* Username card */}
+        <div className="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400">
+            <FaUser />
+          </div>
+          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title={user?.name || 'User'}>
+            {user?.name || 'User'}
+          </div>
+        </div>
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/UploadPage.jsx
         <nav className="space-y-1 flex-1">
           {[
             { id: 'overview', name: 'Overview', icon: FaHome, route: '/dashboard' },
@@ -215,6 +233,7 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 )}
               </div>
               
+<<<<<<< HEAD:src/components/UploadPage.jsx
               {/* Profile Button & Dropdown */}
               <div className="relative">
                 <button 
@@ -270,6 +289,8 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 )}
               </div>
 
+=======
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/UploadPage.jsx
               <select
                 className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
                 value={selectedLanguage || 'en'}
@@ -280,6 +301,13 @@ const UploadPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 <option value="fr">Français</option>
                 <option value="hi">हिंदी</option>
               </select>
+<<<<<<< HEAD:src/components/UploadPage.jsx
+=======
+              
+              <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
+                <FaSignOutAlt className="mr-2" /> Logout
+              </button>
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/UploadPage.jsx
             </div>
           </div>
         </div>

@@ -230,7 +230,11 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
               <span className="hidden sm:inline">Back to Dashboard</span>
             </button>
             <div className="flex items-center">
+<<<<<<< HEAD:src/components/DoctorsPage.jsx
               <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26   object-contain" />
+=======
+              <img src="/logo1.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
+>>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/DoctorsPage.jsx
             </div>
           </div>
           <div className="flex items-center gap-4">
