@@ -418,13 +418,9 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
             <div className="text-dark-500 text-sm mb-2 md:mb-0">
               © {new Date().getFullYear()} MedClerk. All rights reserved.
             </div>
-<<<<<<< HEAD:src/components/LandingPage.jsx
-           
-=======
             <div className="text-dark-500 text-sm">
               Made with ❤️ for better healthcare
             </div>
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/LandingPage.jsx
           </motion.div>
         </div>
       </motion.footer>

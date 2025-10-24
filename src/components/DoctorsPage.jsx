@@ -25,6 +25,7 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
   const { t } = useI18n();
   const { isDarkMode } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [form, setForm] = useState({ date: '', time: '', doctor: '', room: '' });
 
@@ -184,9 +185,15 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
     return [...recommended, ...remaining];
   };
 
+  const handleViewDetails = (doctor) => {
+    setSelectedDoctor(doctor);
+    setIsDetailModalOpen(true);
+  };
+
   const handleBookAppointment = (doctor) => {
     setSelectedDoctor(doctor);
     setForm({ ...form, doctor: doctor.name });
+    setIsDetailModalOpen(false);
     setIsModalOpen(true);
   };
 
@@ -230,11 +237,7 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
               <span className="hidden sm:inline">Back to Dashboard</span>
             </button>
             <div className="flex items-center">
-<<<<<<< HEAD:src/components/DoctorsPage.jsx
-              <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26   object-contain" />
-=======
-              <img src="/logo1.jpg" alt="MedClerk Logo" className="h-8 w-8 object-contain" />
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/DoctorsPage.jsx
+              <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -324,35 +327,38 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
         <div className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-800">Recommended for You</h2>
-            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-4 py-2 rounded-full">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span>Smart Match</span>
-            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div className="space-y-4">
             {getRecommendedDoctors().map((doctor) => {
               const Icon = doctor.icon;
               return (
                 <div 
                   key={doctor.id} 
-                  className={`${doctor.bgColor} border border-gray-100 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group relative overflow-hidden`}
+                  className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer group relative flex items-center gap-6"
+                  onClick={() => handleViewDetails(doctor)}
                 >
-                  {doctor.isRecommended && (
-                    <div className="absolute top-4 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium">
-                      Recommended
-                    </div>
-                  )}
+                  {/* Doctor Avatar */}
+                  <div className={`w-20 h-20 bg-gradient-to-r ${doctor.color} rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                    <span>{doctor.avatar}</span>
+                  </div>
                   
-                  {/* Doctor Header */}
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className={`w-20 h-20 bg-gradient-to-r ${doctor.color} rounded-3xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform`}>
-                      <span>{doctor.avatar}</span>
+                  {/* Doctor Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-1">{doctor.name}</h3>
+                        <p className="text-gray-600 font-medium">{doctor.specialty}</p>
+                      </div>
+                      {doctor.isRecommended && (
+                        <div className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium flex-shrink-0">
+                          Recommended
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">{doctor.name}</h3>
-                      <p className="text-gray-600 font-medium">{doctor.specialty}</p>
-                      <div className="flex items-center gap-2 mt-2">
+                    
+                    <div className="flex items-center gap-6 text-sm text-gray-600 mb-3">
+                      <div className="flex items-center gap-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
                             <FaStar 
@@ -361,66 +367,32 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
                             />
                           ))}
                         </div>
-                        <span className="text-sm text-gray-600">{doctor.rating} ({doctor.experience})</span>
+                        <span className="font-medium">{doctor.rating}</span>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Icon className="text-gray-400" />
+                        <span>{doctor.experience}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FaMapMarkerAlt className="text-gray-400" />
+                        <span>{doctor.location}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {doctor.specializes.slice(0, 3).map((spec, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                          {spec}
+                        </span>
+                      ))}
                     </div>
                   </div>
-
-                  {/* Doctor Info */}
-                  <div className="space-y-4 mb-6">
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <FaMapMarkerAlt className="text-gray-400" />
-                      <span>{doctor.location}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <Icon className="text-gray-400" />
-                      <span>{doctor.specializes.join(', ')}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <FaClock className="text-gray-400" />
-                      <span>{doctor.availability}</span>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    {doctor.description}
-                  </p>
-
-                  <div className="bg-white/50 rounded-2xl p-4 mb-6">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Education:</span>
-                        <p className="font-medium text-gray-800">{doctor.education}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Languages:</span>
-                        <p className="font-medium text-gray-800">{doctor.languages.join(', ')}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Consultation:</span>
-                        <p className="font-medium text-gray-800">{doctor.consultationFee}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Experience:</span>
-                        <p className="font-medium text-gray-800">{doctor.experience}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    <button 
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium flex items-center justify-center gap-2"
-                      onClick={() => handleBookAppointment(doctor)}
-                    >
-                      <FaCalendarAlt />
-                      Book Appointment
-                    </button>
-                    <button className="p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                      <FaPhone className="text-gray-600" />
-                    </button>
-                    <button className="p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                      <FaEnvelope className="text-gray-600" />
+                  
+                  {/* Action Button */}
+                  <div className="flex-shrink-0">
+                    <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium flex items-center gap-2">
+                      View Details
+                      <span>→</span>
                     </button>
                   </div>
                 </div>
@@ -429,6 +401,137 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
           </div>
         </div>
       </div>
+
+      {/* Doctor Detail Modal */}
+      {isDetailModalOpen && selectedDoctor && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm grid place-items-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white border border-gray-100 rounded-3xl w-full max-w-3xl shadow-2xl my-8">
+            {/* Modal Header */}
+            <div className={`bg-gradient-to-r ${selectedDoctor.color} rounded-t-3xl p-8 text-white relative`}>
+              <button 
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+                onClick={() => setIsDetailModalOpen(false)}
+              >
+                ✕
+              </button>
+              <div className="flex items-center gap-6">
+                <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-3xl flex items-center justify-center text-5xl">
+                  <span>{selectedDoctor.avatar}</span>
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-3xl font-bold mb-2">{selectedDoctor.name}</h2>
+                  <p className="text-white/90 text-lg font-medium mb-2">{selectedDoctor.specialty}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar 
+                          key={i} 
+                          className={`text-sm ${i < Math.floor(selectedDoctor.rating) ? 'text-yellow-300' : 'text-white/40'}`} 
+                        />
+                      ))}
+                    </div>
+                    <span className="text-white/90">{selectedDoctor.rating} Rating</span>
+                    <span className="text-white/90">•</span>
+                    <span className="text-white/90">{selectedDoctor.experience}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              {/* Quick Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="bg-blue-50 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaMapMarkerAlt className="text-blue-600" />
+                    <span className="text-sm font-medium text-gray-600">Location</span>
+                  </div>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.location}</p>
+                </div>
+                <div className="bg-green-50 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaClock className="text-green-600" />
+                    <span className="text-sm font-medium text-gray-600">Availability</span>
+                  </div>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.availability}</p>
+                </div>
+                <div className="bg-purple-50 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaPhone className="text-purple-600" />
+                    <span className="text-sm font-medium text-gray-600">Phone</span>
+                  </div>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.phone}</p>
+                </div>
+                <div className="bg-orange-50 rounded-2xl p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <FaEnvelope className="text-orange-600" />
+                    <span className="text-sm font-medium text-gray-600">Email</span>
+                  </div>
+                  <p className="text-gray-800 font-medium text-sm">{selectedDoctor.email}</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">About</h3>
+                <p className="text-gray-600 leading-relaxed">{selectedDoctor.description}</p>
+              </div>
+
+              {/* Specializations */}
+              <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-800 mb-3">Specializations</h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDoctor.specializes.map((spec, idx) => (
+                    <span key={idx} className={`px-4 py-2 ${selectedDoctor.bgColor} text-gray-700 rounded-full text-sm font-medium border border-gray-200`}>
+                      {spec}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Additional Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Education</h4>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.education}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Languages</h4>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.languages.join(', ')}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Consultation Fee</h4>
+                  <p className="text-gray-800 font-medium text-lg">{selectedDoctor.consultationFee}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Experience</h4>
+                  <p className="text-gray-800 font-medium">{selectedDoctor.experience}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button 
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-medium flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  onClick={() => handleBookAppointment(selectedDoctor)}
+                >
+                  <FaCalendarAlt />
+                  Book Appointment
+                </button>
+                <button className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium flex items-center justify-center gap-2">
+                  <FaPhone />
+                  Call Doctor
+                </button>
+                <button className="px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium flex items-center justify-center gap-2">
+                  <FaEnvelope />
+                  Send Message
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Appointment Modal */}
       {isModalOpen && (

@@ -289,7 +289,6 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 flex text-gray-700 dark:text-gray-300">
       {/* Sidebar */}
       <aside className="w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 min-h-screen px-4 pt-4 pb-4 flex flex-col shadow-lg">
-<<<<<<< HEAD:src/components/Dashboard.jsx
         <div className="flex items-center mb-8">
           <img 
             src="/logo1.jpg" 
@@ -301,19 +300,6 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             }}
             title="Go to Dashboard"
           />
-=======
-        <div className="flex items-center mb-4">
-          <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
-        </div>
-        {/* Username card */}
-        <div className="mb-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-2 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border border-blue-200 dark:border-blue-600 grid place-items-center text-blue-600 dark:text-blue-400">
-              <FaUser />
-            </div>
-          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate" title={user?.name || 'User'}>
-            {user?.name || 'User'}
-          </div>
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
         </div>
         
         {/* Navigation - Remove settings from here */}
@@ -324,11 +310,7 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             { id: 'appointments', name: 'Appointments', icon: FaCalendarAlt, badge: appointments.length, route: '/appointments' },
             { id: 'doctors', name: 'Doctors', icon: FaUserMd, isExternalLink: true },
             { id: 'reports', name: 'Reports', icon: FaFileMedical, badge: uploadedFiles.length, route: '/reports' },
-<<<<<<< HEAD:src/components/Dashboard.jsx
             { id: 'settings', name: 'Settings', icon: FaCog }
-=======
-            { id: 'settings', name: 'Settings', icon: FaCog, route: '/settings' }
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
           ].map((item) => {
             const isActive = activeSection === item.id;
             const Icon = item.icon;
@@ -343,11 +325,6 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
                 onClick={() => {
                   if (item.route) {
                     navigate(item.route);
-<<<<<<< HEAD:src/components/Dashboard.jsx
-=======
-                  } else if (item.isExternalLink) {
-                    navigate('/doctors');
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
                   } else {
                     setActiveSection(item.id);
                   }
@@ -381,11 +358,7 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
 
       {/* Main content */}
       <div className="flex-1">
-<<<<<<< HEAD:src/components/Dashboard.jsx
         {/* Navbar */}
-=======
-        {/* Enhanced navbar with notifications */}
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
         <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-8 py-4 shadow-sm">
           <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -477,17 +450,10 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             </div>
         </div>
         
-<<<<<<< HEAD:src/components/Dashboard.jsx
         {/* Content area */}
         <div className="p-6">
           <div className="max-w-6xl mx-auto">
           {/* Welcome section */}
-=======
-        {/* Content area with padding */}
-        <div className="p-6">
-          <div className="max-w-6xl mx-auto">
-          {/* Enhanced welcome section */}
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
           <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full -translate-y-32 translate-x-32"></div>
@@ -597,7 +563,6 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
             </>
           )}
 
-<<<<<<< HEAD:src/components/Dashboard.jsx
           {/* Uploads Section */}
           {activeSection === 'uploads' && (
             <div className="space-y-6">
@@ -740,8 +705,6 @@ const Dashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
               )}
             </div>
           )}
-=======
->>>>>>> a829cb605530d43de74cb6dc976d1d49486c13ee:Frontend/src/components/Dashboard.jsx
 
           {/* Appointments Section */}
           {activeSection === 'appointments' && (
