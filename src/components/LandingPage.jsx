@@ -172,7 +172,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
           viewport={{ once: true }}
         >
           <h3 className="text-lg font-semibold text-dark-900 mb-2">Smart Summary</h3>
-          <p className="text-dark-400 text-sm">Extract key values and get human-readable summaries of complex reports.</p>
+          <p className="text-dark-500 text-sm font-medium">Extract key values and get human-readable summaries of complex reports.</p>
         </motion.div>
         <motion.div 
           className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
@@ -184,7 +184,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
           viewport={{ once: true }}
         >
           <h3 className="text-lg font-semibold text-dark-900 mb-2">Ask Questions</h3>
-          <p className="text-dark-400 text-sm">Chat with your documents: "What changed since last test?"</p>
+          <p className="text-dark-500 text-sm font-medium">Chat with your documents: "What changed since last test?"</p>
         </motion.div>
         <motion.div 
           className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
@@ -196,7 +196,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
           viewport={{ once: true }}
         >
           <h3 className="text-lg font-semibold text-dark-900 mb-2">Multilingual</h3>
-          <p className="text-dark-400 text-sm">Use the app in your preferred language. Switch anytime.</p>
+          <p className="text-dark-500 text-sm font-medium">Use the app in your preferred language. Switch anytime.</p>
         </motion.div>
         <motion.div 
           className="bg-white border border-dark-100 rounded-xl p-4 text-left hover:scale-105 hover:-translate-y-1 transition-all duration-300 shadow-sm"
@@ -208,7 +208,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
           viewport={{ once: true }}
         >
           <h3 className="text-lg font-semibold text-dark-900 mb-2">Your Data Always Secure</h3>
-          <p className="text-dark-400 text-sm">Your data stays yours.You can export or delete anytime.</p>
+          <p className="text-dark-500 text-sm font-medium">Your data stays yours. You can export or delete anytime.</p>
         </motion.div>
       </motion.section>
 
@@ -236,17 +236,17 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
           viewport={{ once: true }}
         >
           <motion.div 
-            className="bg-white border border-dark-100 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-sm"
+            className="group bg-white border-2 border-primary-500/80 rounded-xl p-4 text-left flex flex-col gap-2 transform transition-all duration-200 ease-out hover:scale-[1.04] hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden"
             variants={scaleIn}
-            whileHover={{ scale: 1.05, y: -10 }}
-            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.04, y: -8 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="font-bold text-dark-900">Starter</div>
             <div className="text-3xl font-extrabold text-dark-900">Free</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> 10 uploads/month</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Basic OCR</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Community support</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> 10 uploads/month</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Basic OCR</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Community support</li>
             </ul>
             <motion.button 
               className="btn btn-secondary mt-auto" 
@@ -258,17 +258,17 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
             </motion.button>
           </motion.div>
           <motion.div 
-            className="bg-white border border-primary-500 border-opacity-60 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 relative overflow-hidden shadow-sm"
+            className="group bg-white border-2 border-transparent rounded-xl p-4 text-left flex flex-col gap-2 transform transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-xl hover:border-primary-100 relative"
             variants={scaleIn}
-            whileHover={{ scale: 1.05, y: -10 }}
+            whileHover={{ scale: 1.03, y: -6 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
             <div className="font-bold text-dark-900">Pro</div>
             <div className="text-3xl font-extrabold text-dark-900">$9/mo</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Unlimited uploads</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> AI summaries & chat</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Priority support</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Unlimited uploads</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> AI summaries & chat</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Priority support</li>
             </ul>
             <motion.button 
               className="btn btn-primary mt-auto" 
@@ -280,17 +280,17 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
             </motion.button>
           </motion.div>
           <motion.div 
-            className="bg-white border border-dark-100 rounded-xl p-4 text-left flex flex-col gap-2 hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-sm"
+            className="group bg-white border-2 border-primary-500/80 rounded-xl p-4 text-left flex flex-col gap-2 transform transition-all duration-200 ease-out hover:scale-[1.04] hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden"
             variants={scaleIn}
-            whileHover={{ scale: 1.05, y: -10 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
+            whileHover={{ scale: 1.04, y: -8 }}
+            transition={{ duration: 0.2, delay: 0.2 }}
           >
             <div className="font-bold text-dark-900">Teams</div>
             <div className="text-3xl font-extrabold text-dark-900">Custom</div>
             <ul className="list-none p-0 m-2 space-y-1.5">
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Shared workspace</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> Admin controls</li>
-              <li className="flex items-center gap-2 text-dark-300"><FaCheckCircle className="text-primary-500" /> SLA</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Shared workspace</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> Admin controls</li>
+              <li className="flex items-center gap-2 text-dark-500 font-medium"><FaCheckCircle className="text-primary-500" /> SLA</li>
             </ul>
             <motion.button 
               className="btn btn-secondary mt-auto" 
@@ -419,7 +419,7 @@ const LandingPage = ({ selectedLanguage, onLanguageSelect, isAuthenticated, user
               © {new Date().getFullYear()} MedClerk. All rights reserved.
             </div>
             <div className="text-dark-500 text-sm">
-              Made with ❤️ for better healthcare
+              Made with MedClerk for better healthcare
             </div>
           </motion.div>
         </div>

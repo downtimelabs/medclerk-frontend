@@ -1,5 +1,6 @@
-import React from 'react';
-import { FaUserMd, FaCalendarAlt, FaFileMedical, FaUsers, FaBell, FaComments, FaStethoscope, FaSearch } from 'react-icons/fa';
+import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaUserMd, FaCalendarAlt, FaFileMedical, FaUsers, FaBell, FaComments, FaStethoscope, FaSearch, FaUserCircle, FaUser, FaCog, FaSignOutAlt, FaChevronDown, FaFilter, FaClock, FaTimes } from 'react-icons/fa';
 import { useI18n } from '../i18n';
 
 const Sparkline = ({ data, stroke = '#6366f1' }) => {
@@ -364,8 +365,11 @@ const StatCard = ({ title, value, delta, positive, icon, chart }) => (
   </div>
 );
 
-const SidebarItem = ({ active, icon, label, badge }) => (
-  <div className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${active ? 'bg-primary-500 text-white shadow-sm' : 'text-dark-700 hover:bg-dark-50'}`}>
+const SidebarItem = ({ active, icon, label, badge, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 ${active ? 'bg-primary-500 text-white shadow-sm' : 'text-dark-700 hover:bg-dark-50'}`}
+  >
     <div className="flex items-center gap-3">
       <span className={`w-8 h-8 grid place-items-center rounded-md ${active ? 'bg-primary-600 text-white' : 'bg-dark-50 text-dark-700'}`}>{icon}</span>
       <span className="text-sm font-medium">{label}</span>
@@ -376,6 +380,36 @@ const SidebarItem = ({ active, icon, label, badge }) => (
 
 const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
   const { t } = useI18n();
+  const navigate = useNavigate();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [activeSection, setActiveSection] = useState('overview');
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Appointment filters state
+  const [filterDate, setFilterDate] = useState('');
+  const [filterTime, setFilterTime] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [profileData, setProfileData] = useState(() => {
+    // Try to load from localStorage first
+    const savedProfile = localStorage.getItem('doctorProfile');
+    if (savedProfile) {
+      return JSON.parse(savedProfile);
+    }
+    // Otherwise use default values
+    return {
+      name: user?.name || 'Dr. John Doe',
+      email: user?.email || 'doctor@hospital.com',
+      phone: user?.phone || '+1 (555) 123-4567',
+      specialty: user?.specialty || 'General Practitioner',
+      license: user?.license || 'MD-123456',
+      experience: user?.experience || '10 years',
+      hospital: user?.hospital || 'City General Hospital',
+      education: user?.education || 'MD from Harvard Medical School',
+      bio: user?.bio || 'Experienced physician dedicated to providing quality healthcare.'
+    };
+  });
 
   // Add CSS animations for charts
   React.useEffect(() => {
@@ -419,6 +453,21 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
           transform-origin: bottom;
         }
       }
+      
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      .animate-slideIn {
+        animation: slideIn 0.4s ease-out forwards;
+      }
     `;
     document.head.appendChild(style);
     
@@ -441,11 +490,16 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
       }
     },
     appointments: [
-      { id: 'A-1001', date: '2025-09-12', name: 'Jane Cooper', doctor: user?.name || 'You', room: '302B', status: 'Pending' },
-      { id: 'A-1002', date: '2025-09-12', name: 'Cody Fisher', doctor: user?.name || 'You', room: '210A', status: 'Checked' },
-      { id: 'A-1003', date: '2025-09-11', name: 'Leslie Alexander', doctor: user?.name || 'You', room: '415', status: 'In Progress' },
-      { id: 'A-1004', date: '2025-09-11', name: 'Guy Hawkins', doctor: user?.name || 'You', room: '118', status: 'Pending' },
-      { id: 'A-1005', date: '2025-09-10', name: 'Kristin Watson', doctor: user?.name || 'You', room: '506', status: 'Checked' }
+      { id: 'A-1001', date: '2025-10-25', time: '09:00', name: 'Jane Cooper', age: 32, doctor: profileData?.name || 'You', room: '302B', status: 'Pending', type: 'Checkup' },
+      { id: 'A-1002', date: '2025-10-25', time: '10:30', name: 'Cody Fisher', age: 45, doctor: profileData?.name || 'You', room: '210A', status: 'Checked', type: 'Follow-up' },
+      { id: 'A-1003', date: '2025-10-25', time: '11:00', name: 'Leslie Alexander', age: 28, doctor: profileData?.name || 'You', room: '415', status: 'In Progress', type: 'Consultation' },
+      { id: 'A-1004', date: '2025-10-25', time: '14:00', name: 'Guy Hawkins', age: 52, doctor: profileData?.name || 'You', room: '118', status: 'Pending', type: 'Checkup' },
+      { id: 'A-1005', date: '2025-10-24', time: '15:30', name: 'Kristin Watson', age: 38, doctor: profileData?.name || 'You', room: '506', status: 'Checked', type: 'Follow-up' },
+      { id: 'A-1006', date: '2025-10-24', time: '16:00', name: 'Robert Fox', age: 61, doctor: profileData?.name || 'You', room: '203', status: 'Completed', type: 'Checkup' },
+      { id: 'A-1007', date: '2025-10-26', time: '09:30', name: 'Brooklyn Simmons', age: 29, doctor: profileData?.name || 'You', room: '108', status: 'Pending', type: 'Consultation' },
+      { id: 'A-1008', date: '2025-10-26', time: '11:30', name: 'Jacob Jones', age: 41, doctor: profileData?.name || 'You', room: '315', status: 'Pending', type: 'Follow-up' },
+      { id: 'A-1009', date: '2025-10-23', time: '10:00', name: 'Eleanor Pena', age: 35, doctor: profileData?.name || 'You', room: '402', status: 'Completed', type: 'Checkup' },
+      { id: 'A-1010', date: '2025-10-23', time: '13:00', name: 'Jenny Wilson', age: 47, doctor: profileData?.name || 'You', room: '210', status: 'Completed', type: 'Consultation' }
     ],
     kidneyDamageAdmitted: 3672,
     // 24-hour patient activity data (similar to your reference)
@@ -461,23 +515,90 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
     kidneyTrend: [6,8,10,9,12,14,13,16,15,18,17,20]
   };
 
+  // Filter appointments based on selected filters
+  const filteredAppointments = useMemo(() => {
+    return mock.appointments.filter(appointment => {
+      const matchesDate = !filterDate || appointment.date === filterDate;
+      const matchesTime = !filterTime || appointment.time.startsWith(filterTime);
+      const matchesStatus = !filterStatus || appointment.status === filterStatus;
+      return matchesDate && matchesTime && matchesStatus;
+    });
+  }, [filterDate, filterTime, filterStatus]);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterDate('');
+    setFilterTime('');
+    setFilterStatus('');
+  };
+
+  const hasActiveFilters = filterDate || filterTime || filterStatus;
+
   return (
     <div className="min-h-screen bg-gradient-main flex text-dark-700">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-dark-100 min-h-screen p-4 flex flex-col">
-        <div className="flex items-center gap-2 px-2 py-2 mb-2">
-          <span className="text-xl text-dark-950 font-extrabold">{t('app_brand')}</span>
+        <div className="px-2 py-3 mb-4">
+          <a 
+            href="/"
+            onClick={async (e) => {
+              e.preventDefault();
+              // First clear local storage and authentication
+              localStorage.removeItem('isAuthenticated');
+              localStorage.removeItem('user');
+              localStorage.removeItem('selectedLanguage');
+              localStorage.removeItem('selectedRole');
+              // Then call the logout handler
+              if (onLogout) onLogout();
+              // Force a full page reload with a small delay to ensure state is cleared
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 100);
+            }}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            <img 
+              src="/logo1.jpg" 
+              alt="MedClerk Logo" 
+              className="h-14 w-auto object-contain"
+            />
+          </a>
         </div>
         <div className="relative mb-3">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-400"><FaSearch /></div>
           <input className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-dark-200 text-dark-700 placeholder:text-dark-400 focus:outline-none focus:border-primary-500" placeholder="Search here..." />
         </div>
         <nav className="space-y-1 flex-1">
-          <SidebarItem active icon={<FaStethoscope />} label="Overview" />
-          <SidebarItem icon={<FaCalendarAlt />} label="Appointments" />
-          <SidebarItem icon={<FaUsers />} label="Patients" />
-          <SidebarItem icon={<FaFileMedical />} label="Reports" />
-          <SidebarItem icon={<FaBell />} label="Prescriptions" />
+          <SidebarItem 
+            active={activeSection === 'overview'} 
+            icon={<FaStethoscope />} 
+            label="Overview" 
+            onClick={() => setActiveSection('overview')}
+          />
+          <SidebarItem 
+            active={activeSection === 'appointments'} 
+            icon={<FaCalendarAlt />} 
+            label="Appointments" 
+            onClick={() => setActiveSection('appointments')}
+          />
+          <SidebarItem 
+            active={activeSection === 'patients'} 
+            icon={<FaUsers />} 
+            label="Patients" 
+            onClick={() => setActiveSection('patients')}
+          />
+          <SidebarItem 
+            active={activeSection === 'reports'} 
+            icon={<FaFileMedical />} 
+            label="Reports" 
+            onClick={() => setActiveSection('reports')}
+          />
+          <SidebarItem 
+            active={activeSection === 'prescriptions'} 
+            icon={<FaBell />} 
+            label="Prescriptions" 
+            onClick={() => setActiveSection('prescriptions')}
+          />
         </nav>
         <div className="mt-auto">
           <button className="w-full btn btn-secondary" onClick={onLogout}>Logout</button>
@@ -485,37 +606,115 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
       </aside>
 
       {/* Main */}
-      <main className="flex-1 p-6">
+      <main className="flex-1">
         {/* Top bar */}
-        <div className="flex justify-between items-center mb-5">
-          <div>
-            <h1 className="text-2xl font-extrabold text-dark-950">Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}</h1>
-            <p className="text-sm text-dark-500">Track, manage and forecast your patient reports and data.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <select
-              className="appearance-none bg-white text-dark-700 border border-dark-200 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
-              value={selectedLanguage || 'en'}
-              onChange={(e) => onLanguageSelect?.(e.target.value)}
-            >
-              <option value="en" className="bg-white text-dark-700">English</option>
-              <option value="es" className="bg-white text-dark-700">Español</option>
-              <option value="fr" className="bg-white text-dark-700">Français</option>
-              <option value="de" className="bg-white text-dark-700">Deutsch</option>
-              <option value="it" className="bg-white text-dark-700">Italiano</option>
-              <option value="pt" className="bg-white text-dark-700">pt</option>
-              <option value="ru" className="bg-white text-dark-700">ru</option>
-              <option value="zh" className="bg-white text-dark-700">zh</option>
-              <option value="ja" className="bg-white text-dark-700">ja</option>
-              <option value="ko" className="bg-white text-dark-700">ko</option>
-              <option value="ar" className="bg-white text-dark-700">ar</option>
-              <option value="hi" className="bg-white text-dark-700">Hindi</option>
-            </select>
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-b border-r border-blue-100 px-6 py-5 shadow-sm">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Welcome back{profileData?.name ? `, ${profileData.name.split(' ')[0]}` : ''}
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">Track, manage and forecast your patient reports and data.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <select
+                className="appearance-none bg-white/80 backdrop-blur text-gray-700 border border-blue-200 rounded-xl px-4 py-2.5 pr-8 text-sm cursor-pointer focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 shadow-sm hover:shadow transition-all"
+                value={selectedLanguage || 'en'}
+                onChange={(e) => onLanguageSelect?.(e.target.value)}
+              >
+                <option value="en" className="bg-white text-gray-700">English</option>
+                <option value="es" className="bg-white text-gray-700">Español</option>
+                <option value="fr" className="bg-white text-gray-700">Français</option>
+                <option value="de" className="bg-white text-gray-700">Deutsch</option>
+                <option value="it" className="bg-white text-gray-700">Italiano</option>
+                <option value="pt" className="bg-white text-gray-700">pt</option>
+                <option value="ru" className="bg-white text-gray-700">ru</option>
+                <option value="zh" className="bg-white text-gray-700">zh</option>
+                <option value="ja" className="bg-white text-gray-700">ja</option>
+                <option value="ko" className="bg-white text-gray-700">ko</option>
+                <option value="ar" className="bg-white text-gray-700">ar</option>
+                <option value="hi" className="bg-white text-gray-700">Hindi</option>
+              </select>
+              
+              {/* Profile Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 bg-white/80 backdrop-blur border border-blue-200 rounded-xl px-4 py-2.5 hover:bg-white hover:shadow-md transition-all"
+                >
+                  <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white shadow-sm">
+                    <FaUserCircle className="text-lg" />
+                  </div>
+                  <div className="text-left hidden md:block">
+                    <div className="text-sm font-semibold text-gray-800">{profileData?.name || 'Doctor'}</div>
+                    <div className="text-xs text-gray-500">{profileData?.email || 'doctor@hospital.com'}</div>
+                  </div>
+                  <FaChevronDown className={`text-xs text-gray-500 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
+                </button>
+              
+              {/* Dropdown Menu */}
+              {showProfileMenu && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-dark-200 rounded-xl shadow-xl z-50">
+                  <div className="p-4 border-b border-dark-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white">
+                        <FaUserCircle className="text-2xl" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-dark-900 truncate">{profileData?.name || 'Dr. John Doe'}</div>
+                        <div className="text-xs text-dark-500 truncate">{profileData?.email || 'doctor@hospital.com'}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-2">
+                    <button 
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        setShowProfileModal(true);
+                        setIsEditMode(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-dark-50 transition-colors text-left"
+                    >
+                      <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                        <FaUser className="text-sm" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-dark-900">View Profile</div>
+                        <div className="text-xs text-dark-500">See and edit your details</div>
+                      </div>
+                    </button>
+                  </div>
+                  
+                  <div className="p-2 border-t border-dark-100">
+                    <button 
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        onLogout();
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors text-left group"
+                    >
+                      <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center text-red-600 group-hover:bg-red-100">
+                        <FaSignOutAlt className="text-sm" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-red-600">Sign Out</div>
+                        <div className="text-xs text-red-500">Logout from your account</div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+        </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Conditional Content Based on Active Section */}
+        {activeSection === 'overview' && (
+          <>
+            {/* Stats grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-6 pt-6">
           <StatCard title="Total Patients" value={mock.stats.totalPatients.toLocaleString()} delta={47} positive icon={<FaUsers />} chart={<MiniBars data={mock.stats.trends.patients} />} />
           <StatCard title="New Appointments" value={mock.stats.newAppointments} delta={-10} positive={false} icon={<FaCalendarAlt />} chart={<Sparkline data={mock.stats.trends.appointments} />} />
           <StatCard title="Pending Reports" value={mock.stats.pendingReports} delta={25} positive icon={<FaFileMedical />} chart={<MiniBars data={mock.stats.trends.reports} color="#ef4444" />} />
@@ -523,7 +722,7 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
         </div>
 
         {/* Content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 px-6 pb-6">
           <div className="lg:col-span-2 space-y-5">
             <div className="bg-white border border-dark-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
               <div className="flex items-center justify-between mb-4">
@@ -542,30 +741,54 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
               </div>
             </div>
 
-            <div className="bg-white border border-dark-100 rounded-xl p-4 shadow-sm">
-              <div className="font-semibold text-dark-900 mb-3">Recent Patient Appointment</div>
+            <div className="bg-white border border-dark-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="font-bold text-dark-900 text-lg">Recent Appointments</h2>
+                  <p className="text-sm text-dark-500 mt-1">Today's schedule overview</p>
+                </div>
+                <button
+                  onClick={() => setActiveSection('appointments')}
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                >
+                  View All
+                  <FaCalendarAlt />
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-dark-500">
-                      <th className="py-2">Serial</th>
-                      <th className="py-2">Date</th>
-                      <th className="py-2">Patient</th>
-                      <th className="py-2">Assign To</th>
-                      <th className="py-2">Room</th>
-                      <th className="py-2">Status</th>
+                    <tr className="text-left text-dark-500 border-b-2 border-dark-200">
+                      <th className="py-3 px-2">ID</th>
+                      <th className="py-3 px-2">Date</th>
+                      <th className="py-3 px-2">Time</th>
+                      <th className="py-3 px-2">Patient</th>
+                      <th className="py-3 px-2">Room</th>
+                      <th className="py-3 px-2">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-dark-100">
-                    {mock.appointments.map((row) => (
-                      <tr key={row.id} className="hover:bg-dark-50">
-                        <td className="py-2">{row.id}</td>
-                        <td className="py-2">{row.date}</td>
-                        <td className="py-2">{row.name}</td>
-                        <td className="py-2">{row.doctor}</td>
-                        <td className="py-2">{row.room}</td>
-                        <td className="py-2">
-                          <span className={`px-2 py-1 rounded-full text-xs ${row.status === 'Pending' ? 'bg-warning/20 text-warning' : row.status === 'Checked' ? 'bg-success/20 text-success' : 'bg-primary-50 text-primary-700'}`}>{row.status}</span>
+                    {mock.appointments.slice(0, 5).map((row) => (
+                      <tr key={row.id} className="hover:bg-dark-50 transition-colors">
+                        <td className="py-3 px-2 font-medium text-blue-600">{row.id}</td>
+                        <td className="py-3 px-2">{row.date}</td>
+                        <td className="py-3 px-2">
+                          <div className="flex items-center gap-1">
+                            <FaClock className="text-blue-500 text-xs" />
+                            {row.time}
+                          </div>
+                        </td>
+                        <td className="py-3 px-2 font-medium">{row.name}</td>
+                        <td className="py-3 px-2">{row.room}</td>
+                        <td className="py-3 px-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+                            row.status === 'Checked' ? 'bg-green-100 text-green-700' : 
+                            row.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {row.status}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -623,10 +846,406 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
             </div>
           </div>
         </div>
+          </>
+        )}
+
+        {/* Appointments Section */}
+        {activeSection === 'appointments' && (
+          <div className="px-6 py-6">
+            <div className="bg-white border border-dark-100 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="font-bold text-dark-900 text-xl flex items-center gap-2">
+                    <FaCalendarAlt className="text-primary-500" />
+                    Patient Appointments
+                  </h2>
+                  <p className="text-sm text-dark-500 mt-1">
+                    Showing {filteredAppointments.length} of {mock.appointments.length} appointments
+                  </p>
+                </div>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-2 px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                  >
+                    <FaTimes />
+                    Clear Filters
+                  </button>
+                )}
+              </div>
+
+              {/* Filters Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-5 border border-blue-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <FaFilter className="text-blue-600" />
+                  <span className="font-semibold text-dark-900">Filter Appointments</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Date Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 mb-2">
+                      <FaCalendarAlt className="inline mr-2 text-blue-600" />
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+                  </div>
+
+                  {/* Time Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 mb-2">
+                      <FaClock className="inline mr-2 text-blue-600" />
+                      Time
+                    </label>
+                    <select
+                      value={filterTime}
+                      onChange={(e) => setFilterTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    >
+                      <option value="">All Times</option>
+                      <option value="09">Morning (9:00 AM)</option>
+                      <option value="10">Morning (10:00 AM)</option>
+                      <option value="11">Morning (11:00 AM)</option>
+                      <option value="13">Afternoon (1:00 PM)</option>
+                      <option value="14">Afternoon (2:00 PM)</option>
+                      <option value="15">Afternoon (3:00 PM)</option>
+                      <option value="16">Afternoon (4:00 PM)</option>
+                    </select>
+                  </div>
+
+                  {/* Status Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-dark-700 mb-2">
+                      <FaStethoscope className="inline mr-2 text-blue-600" />
+                      Status
+                    </label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    >
+                      <option value="">All Status</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Checked">Checked</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Appointments List */}
+              <div className="overflow-x-auto">
+                {filteredAppointments.length > 0 ? (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-dark-500 border-b-2 border-dark-200">
+                        <th className="py-3 px-2 font-semibold">ID</th>
+                        <th className="py-3 px-2 font-semibold">Date</th>
+                        <th className="py-3 px-2 font-semibold">Time</th>
+                        <th className="py-3 px-2 font-semibold">Patient</th>
+                        <th className="py-3 px-2 font-semibold">Age</th>
+                        <th className="py-3 px-2 font-semibold">Type</th>
+                        <th className="py-3 px-2 font-semibold">Room</th>
+                        <th className="py-3 px-2 font-semibold">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-dark-100">
+                      {filteredAppointments.map((row) => (
+                        <tr key={row.id} className="hover:bg-blue-50 transition-colors cursor-pointer">
+                          <td className="py-3 px-2 font-medium text-blue-600">{row.id}</td>
+                          <td className="py-3 px-2">{row.date}</td>
+                          <td className="py-3 px-2">
+                            <div className="flex items-center gap-1">
+                              <FaClock className="text-blue-500 text-xs" />
+                              {row.time}
+                            </div>
+                          </td>
+                          <td className="py-3 px-2 font-medium">{row.name}</td>
+                          <td className="py-3 px-2">{row.age}</td>
+                          <td className="py-3 px-2">
+                            <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
+                              {row.type}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2">{row.room}</td>
+                          <td className="py-3 px-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              row.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : 
+                              row.status === 'Checked' ? 'bg-green-100 text-green-700' : 
+                              row.status === 'In Progress' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {row.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-12">
+                    <FaCalendarAlt className="text-5xl text-gray-300 mx-auto mb-4" />
+                    <p className="text-dark-500 text-lg font-medium">No appointments found</p>
+                    <p className="text-dark-400 text-sm mt-1">Try adjusting your filters</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Placeholder for other sections */}
+        {activeSection === 'patients' && (
+          <div className="px-6 py-6">
+            <div className="bg-white border border-dark-100 rounded-xl p-12 shadow-sm text-center">
+              <FaUsers className="text-6xl text-gray-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-dark-900 mb-2">Patients Section</h2>
+              <p className="text-dark-500">This section is under development</p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'reports' && (
+          <div className="px-6 py-6">
+            <div className="bg-white border border-dark-100 rounded-xl p-12 shadow-sm text-center">
+              <FaFileMedical className="text-6xl text-gray-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-dark-900 mb-2">Reports Section</h2>
+              <p className="text-dark-500">This section is under development</p>
+            </div>
+          </div>
+        )}
+
+        {activeSection === 'prescriptions' && (
+          <div className="px-6 py-6">
+            <div className="bg-white border border-dark-100 rounded-xl p-12 shadow-sm text-center">
+              <FaBell className="text-6xl text-gray-300 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-dark-900 mb-2">Prescriptions Section</h2>
+              <p className="text-dark-500">This section is under development</p>
+            </div>
+          </div>
+        )}
       </main>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm grid place-items-center p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl my-8">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-3xl p-6 text-white relative">
+              <button 
+                className="absolute top-4 right-4 text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+                onClick={() => {
+                  setShowProfileModal(false);
+                  setIsEditMode(false);
+                }}
+              >
+                ✕
+              </button>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center text-4xl">
+                  <FaUserCircle />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-1">{isEditMode ? 'Edit Profile' : 'My Profile'}</h2>
+                  <p className="text-white/90">{isEditMode ? 'Update your information' : 'View your profile details'}</p>
+                </div>
+                {!isEditMode && (
+                  <button
+                    onClick={() => setIsEditMode(true)}
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl transition-colors flex items-center gap-2"
+                  >
+                    <FaCog />
+                    <span>Edit</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-8">
+              {!isEditMode ? (
+                // View Mode
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Full Name</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.name}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Email Address</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.email}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Phone Number</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.phone}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Specialty</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.specialty}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">License Number</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.license}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Experience</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.experience}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Hospital</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.hospital}</div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500 mb-1 block">Education</label>
+                      <div className="text-lg font-semibold text-gray-800">{profileData.education}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500 mb-1 block">Bio</label>
+                    <div className="text-gray-800 leading-relaxed">{profileData.bio}</div>
+                  </div>
+                </div>
+              ) : (
+                // Edit Mode
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  // Save to localStorage
+                  localStorage.setItem('doctorProfile', JSON.stringify(profileData));
+                  setIsEditMode(false);
+                  // Show success message
+                  setShowSuccessMessage(true);
+                  setTimeout(() => setShowSuccessMessage(false), 3000);
+                }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Full Name</label>
+                      <input
+                        type="text"
+                        value={profileData.name}
+                        onChange={(e) => setProfileData({...profileData, name: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Email Address</label>
+                      <input
+                        type="email"
+                        value={profileData.email}
+                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Specialty</label>
+                      <input
+                        type="text"
+                        value={profileData.specialty}
+                        onChange={(e) => setProfileData({...profileData, specialty: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">License Number</label>
+                      <input
+                        type="text"
+                        value={profileData.license}
+                        onChange={(e) => setProfileData({...profileData, license: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Experience</label>
+                      <input
+                        type="text"
+                        value={profileData.experience}
+                        onChange={(e) => setProfileData({...profileData, experience: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Hospital</label>
+                      <input
+                        type="text"
+                        value={profileData.hospital}
+                        onChange={(e) => setProfileData({...profileData, hospital: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Education</label>
+                      <input
+                        type="text"
+                        value={profileData.education}
+                        onChange={(e) => setProfileData({...profileData, education: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Bio</label>
+                    <textarea
+                      value={profileData.bio}
+                      onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
+                      rows="4"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-4 pt-4">
+                    <button
+                      type="submit"
+                      className="flex-1 bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-3 rounded-xl hover:from-primary-600 hover:to-primary-700 transition-all font-medium"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditMode(false)}
+                      className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Notification Toast */}
+      {showSuccessMessage && (
+        <div className="fixed top-20 right-6 z-50 animate-slideIn">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-bold text-lg">Success!</p>
+              <p className="text-sm opacity-90">Profile updated successfully</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default DoctorDashboard;
 

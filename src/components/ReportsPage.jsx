@@ -7,6 +7,7 @@ const ReportsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [activeSection, setActiveSection] = useState('reports');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [trendPeriod, setTrendPeriod] = useState('week');
 
   const notifications = [
     { id: 1, message: 'Your appointment reminder for tomorrow', type: 'reminder', time: '1 hour ago' },
@@ -186,35 +187,250 @@ const ReportsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                   <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-2xl p-6 border border-green-200 dark:border-green-700">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold">✓</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                          <span className="text-white font-bold">✓</span>
+                        </div>
+                        <h4 className="font-bold text-gray-800 dark:text-gray-200">Normal</h4>
                       </div>
-                      <h4 className="font-bold text-gray-800 dark:text-gray-200">Normal Values</h4>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Most recent blood work shows normal glucose and cholesterol levels.</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Glucose</span>
+                        <span className="font-semibold text-green-600">95 mg/dL</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Cholesterol</span>
+                        <span className="font-semibold text-green-600">180 mg/dL</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Heart Rate</span>
+                        <span className="font-semibold text-green-600">72 bpm</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-2xl p-6 border border-red-200 dark:border-red-700">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
+                          <span className="text-white font-bold">↑</span>
+                        </div>
+                        <h4 className="font-bold text-gray-800 dark:text-gray-200">High Values</h4>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Blood Pressure</span>
+                        <span className="font-semibold text-red-600">145/92</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Triglycerides</span>
+                        <span className="font-semibold text-red-600">210 mg/dL</span>
+                      </div>
+                      <div className="text-xs text-red-600 dark:text-red-400 mt-2">
+                        ⚠ Requires attention
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-700">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center">
-                        <span className="text-white font-bold">!</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-yellow-500 rounded-xl flex items-center justify-center">
+                          <span className="text-white font-bold">!</span>
+                        </div>
+                        <h4 className="font-bold text-gray-800 dark:text-gray-200">Alerts</h4>
                       </div>
-                      <h4 className="font-bold text-gray-800 dark:text-gray-200">Watch</h4>
+                      <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">2</span>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Blood pressure slightly elevated. Consider lifestyle changes.</p>
+                    <div className="space-y-2">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-yellow-600">•</span>
+                          <span className="text-xs">BP elevated in last 3 readings</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-yellow-600">•</span>
+                          <span className="text-xs">Schedule follow-up within 2 weeks</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-700">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-                        <FaChartLine className="text-white text-sm" />
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+                          <FaChartLine className="text-white text-sm" />
+                        </div>
+                        <h4 className="font-bold text-gray-800 dark:text-gray-200">Overall</h4>
                       </div>
-                      <h4 className="font-bold text-gray-800 dark:text-gray-200">Trends</h4>
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">Overall health metrics showing positive improvement trend.</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400 text-sm">Health Score</span>
+                        <span className="font-bold text-blue-600 text-xl">78/100</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div className="bg-blue-500 h-2 rounded-full" style={{width: '78%'}}></div>
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                        📈 +5 from last month
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Health Trends Section */}
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-indigo-200 dark:border-indigo-700 mb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="font-bold text-gray-800 dark:text-gray-200 text-lg">Health Trends</h4>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => setTrendPeriod('day')}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                          trendPeriod === 'day' 
+                            ? 'bg-indigo-500 text-white shadow-md' 
+                            : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-indigo-50'
+                        }`}
+                      >
+                        Last 7 Days
+                      </button>
+                      <button 
+                        onClick={() => setTrendPeriod('week')}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                          trendPeriod === 'week' 
+                            ? 'bg-indigo-500 text-white shadow-md' 
+                            : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-indigo-50'
+                        }`}
+                      >
+                        Weekly
+                      </button>
+                      <button 
+                        onClick={() => setTrendPeriod('month')}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                          trendPeriod === 'month' 
+                            ? 'bg-indigo-500 text-white shadow-md' 
+                            : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-indigo-50'
+                        }`}
+                      >
+                        Monthly
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Blood Pressure Trend */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Blood Pressure</span>
+                        <span className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full">↑ Rising</span>
+                      </div>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">145/92</span>
+                        <span className="text-xs text-gray-500">mmHg</span>
+                      </div>
+                      {trendPeriod === 'day' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Mon</span><span>138/85</span></div>
+                          <div className="flex justify-between"><span>Tue</span><span>140/88</span></div>
+                          <div className="flex justify-between"><span>Wed</span><span>142/90</span></div>
+                          <div className="flex justify-between font-semibold text-red-600"><span>Today</span><span>145/92</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'week' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Week 1</span><span>135/82</span></div>
+                          <div className="flex justify-between"><span>Week 2</span><span>138/86</span></div>
+                          <div className="flex justify-between"><span>Week 3</span><span>142/88</span></div>
+                          <div className="flex justify-between font-semibold text-red-600"><span>Week 4</span><span>145/92</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'month' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Jan</span><span>132/80</span></div>
+                          <div className="flex justify-between"><span>Feb</span><span>135/84</span></div>
+                          <div className="flex justify-between"><span>Mar</span><span>140/88</span></div>
+                          <div className="flex justify-between font-semibold text-red-600"><span>Apr</span><span>145/92</span></div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Glucose Trend */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Glucose</span>
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">✓ Stable</span>
+                      </div>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">95</span>
+                        <span className="text-xs text-gray-500">mg/dL</span>
+                      </div>
+                      {trendPeriod === 'day' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Mon</span><span>92 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Tue</span><span>94 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Wed</span><span>96 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Today</span><span>95 mg/dL</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'week' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Week 1</span><span>98 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Week 2</span><span>96 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Week 3</span><span>94 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Week 4</span><span>95 mg/dL</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'month' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Jan</span><span>102 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Feb</span><span>98 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Mar</span><span>97 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Apr</span><span>95 mg/dL</span></div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Cholesterol Trend */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Cholesterol</span>
+                        <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">↓ Improving</span>
+                      </div>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-2xl font-bold text-gray-800 dark:text-gray-200">180</span>
+                        <span className="text-xs text-gray-500">mg/dL</span>
+                      </div>
+                      {trendPeriod === 'day' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Mon</span><span>188 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Tue</span><span>185 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Wed</span><span>182 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Today</span><span>180 mg/dL</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'week' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Week 1</span><span>195 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Week 2</span><span>190 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Week 3</span><span>185 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Week 4</span><span>180 mg/dL</span></div>
+                        </div>
+                      )}
+                      {trendPeriod === 'month' && (
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <div className="flex justify-between"><span>Jan</span><span>210 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Feb</span><span>200 mg/dL</span></div>
+                          <div className="flex justify-between"><span>Mar</span><span>190 mg/dL</span></div>
+                          <div className="flex justify-between font-semibold text-green-600"><span>Apr</span><span>180 mg/dL</span></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -222,16 +438,20 @@ const ReportsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
                   <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-2">AI Recommendations</h4>
                   <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <li className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      <span><strong>Urgent:</strong> Blood pressure trending upward - consult doctor immediately</span>
+                    </li>
+                    <li className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      Continue current medication regimen for blood pressure
+                      Review and adjust blood pressure medication dosage
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                      Schedule follow-up cholesterol check in 3 months
+                      Maintain current diet and exercise - cholesterol improving
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                      Consider adding cardiovascular exercise routine
+                      Schedule follow-up blood work in 2 weeks
                     </li>
                   </ul>
                 </div>
