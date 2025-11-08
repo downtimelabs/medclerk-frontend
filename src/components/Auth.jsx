@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useI18n } from '../i18n';
 import { register, login, forgotPassword } from '../services/authService';
 
 const Auth = ({ selectedRole, onAuthSuccess, isSignInMode = false, isSignUpMode = false }) => {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(isSignUpMode || !isSignInMode);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const { t } = useI18n();
@@ -346,8 +348,12 @@ const Auth = ({ selectedRole, onAuthSuccess, isSignInMode = false, isSignUpMode 
                       onClick={() => {
                         if (isForgotPassword) {
                           setIsForgotPassword(false);
+                        } else if (isSignUp) {
+                          // If in sign-up mode, toggle to sign-in
+                          setIsSignUp(false);
                         } else {
-                          setIsSignUp(!isSignUp);
+                          // If in sign-in mode, navigate to /signup
+                          navigate('/signup');
                         }
                       }}
                       disabled={isLoading}
