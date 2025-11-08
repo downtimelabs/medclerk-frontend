@@ -41,7 +41,8 @@ export const API_ENDPOINTS = {
   
   // Patient Document Query (RAG)
   PATIENT: {
-    QUERY_DOCUMENTS: `${API_BASE_URL}/patient/documents/query`
+    QUERY_DOCUMENTS: `${API_BASE_URL}/patient/documents/query`,
+    DETAILS: `${API_BASE_URL}/patient/details`
   }
 };
 

@@ -37,6 +37,8 @@ const Dashboard = ({ user, onLogout }) => {
   const [chatInput, setChatInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [expandedDoctor, setExpandedDoctor] = useState(null);
+  const [patientDetails, setPatientDetails] = useState(null);
+  const [loadingPatientDetails, setLoadingPatientDetails] = useState(false);
   const doctors = [
     'Dr. John Smith',
     'Dr. Emily Clark',
@@ -448,6 +450,110 @@ const Dashboard = ({ user, onLogout }) => {
     }
   };
 
+  // Function to fetch patient details
+  const fetchPatientDetails = async () => {
+    if (!user || user.role !== 'PATIENT') {
+      console.log('⚠️ Not a patient or no user, skipping fetch');
+      return;
+    }
+    
+    setLoadingPatientDetails(true);
+    try {
+      // Get auth token to verify it exists
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        console.error('❌ No access token found');
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
+      console.log('🔐 Fetching patient details from:', API_ENDPOINTS.PATIENT.DETAILS);
+      console.log('🔐 Auth token exists:', !!token);
+      
+      // Use apiFetch which automatically includes Authorization header
+      const response = await apiFetch(API_ENDPOINTS.PATIENT.DETAILS, {
+        method: 'GET',
+        headers: {
+          // Explicitly ensure Authorization header is included
+          ...getAuthHeaders()
+        }
+      });
+      
+      console.log('📥 Patient details API response:', response);
+      
+      // Handle both response formats: {success, data} or {status, data}
+      if ((response.success || response.status === 'success') && response.data) {
+        // Map the response structure to match our expected format
+        // API returns: { data: { personal: {...}, medical: {...}, careTeam: {...} } }
+        const mappedData = {
+          personalInfo: {
+            id: response.data.personal?.id,
+            name: response.data.personal?.name,
+            email: response.data.personal?.email,
+            phoneNumber: response.data.medical?.phone || response.data.personal?.phoneNumber,
+            countryCode: response.data.medical?.phone?.startsWith('+') ? response.data.medical.phone.split(' ')[0] : '',
+            country: response.data.personal?.country,
+            state: response.data.personal?.state,
+            avatarUrl: response.data.personal?.avatarUrl,
+            emailVerified: response.data.personal?.emailVerified,
+            createdAt: response.data.personal?.createdAt,
+            updatedAt: response.data.personal?.updatedAt
+          },
+          medicalInfo: {
+            dateOfBirth: response.data.medical?.dateOfBirth,
+            gender: response.data.medical?.gender,
+            bloodType: response.data.medical?.bloodGroup ? response.data.medical.bloodGroup.replace('-', '_NEGATIVE').replace('+', '_POSITIVE') : response.data.medical?.bloodType,
+            bloodGroup: response.data.medical?.bloodGroup, // e.g., "A-"
+            height: response.data.medical?.heightCm,
+            heightCm: response.data.medical?.heightCm, // Also store as heightCm for compatibility
+            weight: response.data.medical?.weightKg,
+            weightKg: response.data.medical?.weightKg, // Also store as weightKg for compatibility
+            allergies: response.data.medical?.allergies ? (Array.isArray(response.data.medical.allergies) ? response.data.medical.allergies : [response.data.medical.allergies]) : [],
+            medications: response.data.medical?.medications || [],
+            medicalConditions: response.data.medical?.chronicConditions || [],
+            chronicConditions: response.data.medical?.chronicConditions || [], // Also store as chronicConditions
+            emergencyContact: response.data.medical?.emergencyContact,
+            phone: response.data.medical?.phone, // Store phone directly from medical
+            profileCreatedAt: response.data.medical?.profileCreatedAt,
+            profileUpdatedAt: response.data.medical?.profileUpdatedAt
+          },
+          careTeam: response.data.careTeam || { doctors: [], caregivers: [] },
+          documentStats: response.data.documentStats || {}
+        };
+        
+        setPatientDetails(mappedData);
+        console.log('✅ Patient details loaded and mapped successfully:');
+        console.log('  - Personal Info:', mappedData.personalInfo);
+        console.log('  - Medical Info:', mappedData.medicalInfo);
+        console.log('  - Care Team:', mappedData.careTeam);
+      } else {
+        console.warn('⚠️ Response success but no data:', response);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch patient details:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+      // Don't show error to user, just use existing user data
+    } finally {
+      setLoadingPatientDetails(false);
+    }
+  };
+
+  // Fetch patient details when profile dropdown or modal is opened
+  useEffect(() => {
+    if ((showProfile || showProfileModal) && user?.role === 'PATIENT' && !loadingPatientDetails) {
+      // Always fetch when modal opens to ensure fresh data
+      if (showProfileModal && !patientDetails) {
+        console.log('🔄 Profile modal opened, fetching patient details...');
+        fetchPatientDetails();
+      } else if (showProfile && !patientDetails) {
+        console.log('🔄 Profile dropdown opened, fetching patient details...');
+        fetchPatientDetails();
+      }
+    }
+  }, [showProfile, showProfileModal]);
+
   // Function to get file URL for viewing/downloading
   const getFileUrl = async (s3Key) => {
     try {
@@ -632,17 +738,53 @@ const Dashboard = ({ user, onLogout }) => {
     input.click();
   };
 
+  // Helper function to format blood type (O_POSITIVE -> O+)
+  const formatBloodType = (bloodType) => {
+    if (!bloodType) return '';
+    return bloodType.replace('_', '+');
+  };
+
+  // Helper function to format date for input (ISO date to YYYY-MM-DD)
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    } catch {
+      return '';
+    }
+  };
+
+  // Helper function to format phone number with country code
+  const formatPhoneNumber = () => {
+    // Check medical.phone first (from API response)
+    if (patientDetails?.medicalInfo?.phone) {
+      return patientDetails.medicalInfo.phone;
+    }
+    // Check emergency contact phone
+    if (patientDetails?.medicalInfo?.emergencyContact?.phone) {
+      return patientDetails.medicalInfo.emergencyContact.phone;
+    }
+    // Check personalInfo.phoneNumber
+    if (patientDetails?.personalInfo?.phoneNumber) {
+      const countryCode = patientDetails.personalInfo.countryCode || '';
+      return countryCode ? `${countryCode} ${patientDetails.personalInfo.phoneNumber}` : patientDetails.personalInfo.phoneNumber;
+    }
+    return '';
+  };
+
   const handleEditProfile = () => {
     setIsEditingProfile(true);
+    // Use patientDetails if available, otherwise fall back to user data
     setEditFormData({
-      name: user?.name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      dob: user?.dob || '',
-      bloodGroup: user?.patientProfile?.bloodGroup || '',
-      heightCm: user?.patientProfile?.heightCm || '',
-      weightKg: user?.patientProfile?.weightKg || '',
-      gender: user?.patientProfile?.gender || ''
+      name: patientDetails?.personalInfo?.name || user?.name || '',
+      email: patientDetails?.personalInfo?.email || user?.email || '',
+      phone: formatPhoneNumber() || user?.phone || '',
+      dob: formatDateForInput(patientDetails?.medicalInfo?.dateOfBirth) || user?.dob || '',
+      bloodGroup: patientDetails?.medicalInfo?.bloodGroup || formatBloodType(patientDetails?.medicalInfo?.bloodType) || user?.patientProfile?.bloodGroup || '',
+      heightCm: patientDetails?.medicalInfo?.heightCm || patientDetails?.medicalInfo?.height || user?.patientProfile?.heightCm || '',
+      weightKg: patientDetails?.medicalInfo?.weightKg || patientDetails?.medicalInfo?.weight || user?.patientProfile?.weightKg || '',
+      gender: patientDetails?.medicalInfo?.gender || user?.patientProfile?.gender || ''
     });
   };
 
@@ -965,37 +1107,171 @@ const Dashboard = ({ user, onLogout }) => {
                 </button>
 
                 {showProfile && (
-                  <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
-                    <div className="p-4 border-b border-gray-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                          <FaUser className="text-white text-xl" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-800">{user?.name}</div>
-                          <div className="text-sm text-gray-500">{user?.email}</div>
-                        </div>
+                  <div className="absolute right-0 top-12 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-[600px] overflow-y-auto">
+                    {loadingPatientDetails ? (
+                      <div className="p-8 text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                        <p className="text-sm text-gray-500">Loading profile...</p>
                       </div>
-                    </div>
-                    <div className="p-2">
-                      <button
-                        onClick={() => {
-                          setShowProfile(false);
-                          setShowProfileModal(true);
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center gap-2"
-                      >
-                        <FaUser className="text-gray-500" />
-                        View Profile
-                      </button>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 rounded-lg flex items-center gap-2"
-                      >
-                        <FaSignOutAlt className="text-red-500" />
-                        Sign Out
-                      </button>
-                    </div>
+                    ) : (
+                      <>
+                        {/* Personal Info Section */}
+                        <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                          <div className="flex items-center gap-3 mb-4">
+                            {patientDetails?.personalInfo?.avatarUrl ? (
+                              <img 
+                                src={patientDetails.personalInfo.avatarUrl} 
+                                alt={patientDetails.personalInfo.name}
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                                <FaUser className="text-white text-xl" />
+                              </div>
+                            )}
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-800 dark:text-gray-200">
+                                {patientDetails?.personalInfo?.name || user?.name}
+                              </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {patientDetails?.personalInfo?.email || user?.email}
+                              </div>
+                              {patientDetails?.personalInfo?.phoneNumber && (
+                                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
+                                  <FaPhone className="text-xs" />
+                                  {patientDetails.personalInfo.countryCode} {patientDetails.personalInfo.phoneNumber}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {patientDetails?.personalInfo?.state && (
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                              <FaMapMarkerAlt />
+                              {patientDetails.personalInfo.state}, {patientDetails.personalInfo.country}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Medical Info Section */}
+                        {patientDetails?.medicalInfo && (
+                          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                              <FaHeartbeat className="text-red-500" />
+                              Medical Information
+                            </h3>
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                              {patientDetails.medicalInfo.bloodType && (
+                                <div>
+                                  <div className="text-gray-500 dark:text-gray-400">Blood Type</div>
+                                  <div className="font-medium text-gray-800 dark:text-gray-200">
+                                    {patientDetails.medicalInfo.bloodType.replace('_', '+')}
+                                  </div>
+                                </div>
+                              )}
+                              {patientDetails.medicalInfo.height && (
+                                <div>
+                                  <div className="text-gray-500 dark:text-gray-400">Height</div>
+                                  <div className="font-medium text-gray-800 dark:text-gray-200">
+                                    {patientDetails.medicalInfo.height} cm
+                                  </div>
+                                </div>
+                              )}
+                              {patientDetails.medicalInfo.weight && (
+                                <div>
+                                  <div className="text-gray-500 dark:text-gray-400">Weight</div>
+                                  <div className="font-medium text-gray-800 dark:text-gray-200">
+                                    {patientDetails.medicalInfo.weight} kg
+                                  </div>
+                                </div>
+                              )}
+                              {patientDetails.medicalInfo.gender && (
+                                <div>
+                                  <div className="text-gray-500 dark:text-gray-400">Gender</div>
+                                  <div className="font-medium text-gray-800 dark:text-gray-200">
+                                    {patientDetails.medicalInfo.gender}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {patientDetails.medicalInfo.allergies?.length > 0 && (
+                              <div className="mt-3">
+                                <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Allergies</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {patientDetails.medicalInfo.allergies.map((allergy, idx) => (
+                                    <span key={idx} className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-xs">
+                                      {allergy}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {patientDetails.medicalInfo.medications?.length > 0 && (
+                              <div className="mt-3">
+                                <div className="text-gray-500 dark:text-gray-400 text-xs mb-1">Medications</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {patientDetails.medicalInfo.medications.map((med, idx) => (
+                                    <span key={idx} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs">
+                                      {med}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Care Team Section */}
+                        {patientDetails?.careTeam && patientDetails.careTeam.doctors?.length > 0 && (
+                          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                              <FaStethoscope className="text-blue-500" />
+                              Care Team ({patientDetails.careTeam.total})
+                            </h3>
+                            <div className="space-y-2">
+                              {patientDetails.careTeam.doctors.slice(0, 3).map((doctor) => (
+                                <div key={doctor.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                  <FaUserMd className="text-blue-500" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate">
+                                      {doctor.name}
+                                    </div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                      {doctor.specialization}
+                                    </div>
+                                  </div>
+                                  {doctor.status === 'ACTIVE' && (
+                                    <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded text-xs">
+                                      Active
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="p-2">
+                          <button
+                            onClick={() => {
+                              setShowProfile(false);
+                              setShowProfileModal(true);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
+                          >
+                            <FaUser className="text-gray-500" />
+                            View Full Profile
+                          </button>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 mt-1"
+                          >
+                            <FaSignOutAlt className="text-red-500" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -2053,7 +2329,7 @@ const Dashboard = ({ user, onLogout }) => {
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-2xl font-bold text-gray-800">Profile Details</h3>
                 <div className="flex items-center gap-3">
-                  {!isEditingProfile && (
+                  {!isEditingProfile && !loadingPatientDetails && (
                     <button
                       onClick={handleEditProfile}
                       className="px-4 py-2 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -2074,6 +2350,13 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
 
               <div className="p-6 overflow-y-auto flex-grow">
+                {loadingPatientDetails ? (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                    <p className="text-gray-600 text-lg font-medium">Loading profile details...</p>
+                    <p className="text-gray-400 text-sm mt-2">Please wait while we fetch your information</p>
+                  </div>
+                ) : (
                 <div className="space-y-8">
                   {/* Basic Information */}
                   <div>
@@ -2090,7 +2373,7 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.name || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.name || user?.name || 'Not set'}</div>
                           </div>
                         )}
                       </div>
@@ -2105,7 +2388,7 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.email || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.email || user?.email || 'Not set'}</div>
                           </div>
                         )}
                       </div>
@@ -2120,7 +2403,7 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.phone || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">{formatPhoneNumber() || user?.phone || 'Not set'}</div>
                           </div>
                         )}
                       </div>
@@ -2135,7 +2418,11 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.dob || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">
+                              {patientDetails?.medicalInfo?.dateOfBirth 
+                                ? new Date(patientDetails.medicalInfo.dateOfBirth).toLocaleDateString() 
+                                : user?.dob || 'Not set'}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2166,7 +2453,9 @@ const Dashboard = ({ user, onLogout }) => {
                           </select>
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.patientProfile?.bloodGroup || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">
+                              {patientDetails?.medicalInfo?.bloodGroup || formatBloodType(patientDetails?.medicalInfo?.bloodType) || user?.patientProfile?.bloodGroup || 'Not set'}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2182,7 +2471,15 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.patientProfile?.heightCm ? `${user.patientProfile.heightCm} cm` : 'Not set'}</div>
+                            <div className="font-medium text-gray-900">
+                              {patientDetails?.medicalInfo?.heightCm 
+                                ? `${patientDetails.medicalInfo.heightCm} cm` 
+                                : patientDetails?.medicalInfo?.height 
+                                  ? `${patientDetails.medicalInfo.height} cm` 
+                                  : user?.patientProfile?.heightCm 
+                                    ? `${user.patientProfile.heightCm} cm` 
+                                    : 'Not set'}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2198,7 +2495,15 @@ const Dashboard = ({ user, onLogout }) => {
                           />
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.patientProfile?.weightKg ? `${user.patientProfile.weightKg} kg` : 'Not set'}</div>
+                            <div className="font-medium text-gray-900">
+                              {patientDetails?.medicalInfo?.weightKg 
+                                ? `${patientDetails.medicalInfo.weightKg} kg` 
+                                : patientDetails?.medicalInfo?.weight 
+                                  ? `${patientDetails.medicalInfo.weight} kg` 
+                                  : user?.patientProfile?.weightKg 
+                                    ? `${user.patientProfile.weightKg} kg` 
+                                    : 'Not set'}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2211,13 +2516,15 @@ const Dashboard = ({ user, onLogout }) => {
                             className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
                           >
                             <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
                           </select>
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{user?.patientProfile?.gender || 'Not set'}</div>
+                            <div className="font-medium text-gray-900">
+                              {patientDetails?.medicalInfo?.gender || user?.patientProfile?.gender || 'Not set'}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -2225,16 +2532,19 @@ const Dashboard = ({ user, onLogout }) => {
 
                     {/* Additional Medical Information */}
                     {(() => {
-                      const allergies = user?.patientProfile?.allergies;
-                      const chronicConditions = user?.patientProfile?.chronicConditions;
+                      // Use patientDetails if available, otherwise fall back to user data
+                      const allergies = patientDetails?.medicalInfo?.allergies || user?.patientProfile?.allergies;
+                      const medications = patientDetails?.medicalInfo?.medications || [];
+                      const medicalConditions = patientDetails?.medicalInfo?.chronicConditions || patientDetails?.medicalInfo?.medicalConditions || user?.patientProfile?.chronicConditions;
 
                       // Handle both array and string formats
                       const allergiesList = Array.isArray(allergies) ? allergies :
                         (typeof allergies === 'string' && allergies.trim()) ? [allergies] : [];
-                      const conditionsList = Array.isArray(chronicConditions) ? chronicConditions :
-                        (typeof chronicConditions === 'string' && chronicConditions.trim()) ? [chronicConditions] : [];
+                      const medicationsList = Array.isArray(medications) ? medications : [];
+                      const conditionsList = Array.isArray(medicalConditions) ? medicalConditions :
+                        (typeof medicalConditions === 'string' && medicalConditions.trim()) ? [medicalConditions] : [];
 
-                      return (allergiesList.length > 0 || conditionsList.length > 0) && (
+                      return (allergiesList.length > 0 || medicationsList.length > 0 || conditionsList.length > 0) && (
                         <div className="mt-6 space-y-4">
                           {allergiesList.length > 0 && (
                             <div>
@@ -2249,9 +2559,22 @@ const Dashboard = ({ user, onLogout }) => {
                             </div>
                           )}
 
+                          {medicationsList.length > 0 && (
+                            <div>
+                              <h5 className="text-md font-semibold text-gray-700 mb-2">Medications</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {medicationsList.map((medication, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                    {medication}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           {conditionsList.length > 0 && (
                             <div>
-                              <h5 className="text-md font-semibold text-gray-700 mb-2">Chronic Conditions</h5>
+                              <h5 className="text-md font-semibold text-gray-700 mb-2">Medical Conditions</h5>
                               <div className="flex flex-wrap gap-2">
                                 {conditionsList.map((condition, idx) => (
                                   <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
@@ -2266,22 +2589,34 @@ const Dashboard = ({ user, onLogout }) => {
                     })()}
 
                     {/* Emergency Contact */}
-                    {user?.patientProfile?.emergencyContact && (
+                    {(patientDetails?.medicalInfo?.emergencyContact || user?.patientProfile?.emergencyContact) && (
                       <div className="mt-6">
                         <h5 className="text-md font-semibold text-gray-700 mb-2">Emergency Contact</h5>
                         <div className="p-4 bg-gray-50 rounded-lg">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <div className="text-sm text-gray-500">Name</div>
-                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.name || 'Not set'}</div>
+                              <div className="font-medium text-gray-900">
+                                {patientDetails?.medicalInfo?.emergencyContact?.name || user?.patientProfile?.emergencyContact?.name || 'Not set'}
+                              </div>
                             </div>
                             <div>
                               <div className="text-sm text-gray-500">Phone</div>
-                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.phone || 'Not set'}</div>
+                              <div className="font-medium text-gray-900">
+                                {patientDetails?.medicalInfo?.emergencyContact?.phone || user?.patientProfile?.emergencyContact?.phone || 'Not set'}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">Email</div>
+                              <div className="font-medium text-gray-900">
+                                {patientDetails?.medicalInfo?.emergencyContact?.email || user?.patientProfile?.emergencyContact?.email || 'Not set'}
+                              </div>
                             </div>
                             <div>
                               <div className="text-sm text-gray-500">Relationship</div>
-                              <div className="font-medium text-gray-900">{user.patientProfile.emergencyContact.relationship || 'Not set'}</div>
+                              <div className="font-medium text-gray-900">
+                                {patientDetails?.medicalInfo?.emergencyContact?.relationship || user?.patientProfile?.emergencyContact?.relationship || 'Not set'}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2289,9 +2624,10 @@ const Dashboard = ({ user, onLogout }) => {
                     )}
                   </div>
                 </div>
+                )}
 
                 {/* Edit Mode Buttons */}
-                {isEditingProfile && (
+                {isEditingProfile && !loadingPatientDetails && (
                   <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
                     <button
                       onClick={handleCancelEdit}
