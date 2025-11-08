@@ -8,6 +8,7 @@ import LandingPage from './components/LandingPage.jsx';
 import AboutUs from './components/AboutUs.jsx';
 import Services from './components/Services.jsx';
 import Auth from './components/Auth.jsx';
+import PatientSignup from './components/PatientSignup.jsx';
 import PatientProfile from './components/PatientProfile.jsx';
 import DoctorProfile from './components/DoctorProfile.jsx';
 import DoctorDashboard from './components/DoctorDashboard.jsx';
@@ -18,8 +19,6 @@ import UploadPage from './components/UploadPage.jsx';
 import AppointmentsPage from './components/AppointmentsPage.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
-import PatientSignup from './components/PatientSignup.jsx';
-import DoctorSignup from './components/DoctorSignup.jsx';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -115,10 +114,6 @@ function App() {
                     <PatientSignup
                       onAuthSuccess={handleAuthSuccess}
                     />
-                  ) : selectedRole === 'doctor' ? (
-                    <DoctorSignup
-                      onAuthSuccess={handleAuthSuccess}
-                    />
                   ) : (
                     <Auth 
                       selectedRole={selectedRole}
@@ -183,29 +178,13 @@ function App() {
                   // Get role from user object
                   const userRole = user?.role?.toLowerCase();
                   
-                  // Doctor role routing
+                  // Doctor role routing - go directly to doctor dashboard
                   if (userRole === 'doctor') {
-                    if (!user?.doctorProfile && !user?.licenseNumber) {
-                      return (
-                        <DoctorProfile 
-                          user={user}
-                          onProfileComplete={handleProfileComplete}
-                        />
-                      );
-                    }
                     return <Navigate to="/doctor" replace />;
                   }
                   
-                  // Patient role routing  
+                  // Patient role routing - go directly to patient dashboard
                   if (userRole === 'patient') {
-                    if (!user?.patientProfile && !user?.bloodGroup) {
-                      return (
-                        <PatientProfile 
-                          user={user}
-                          onProfileComplete={handleProfileComplete}
-                        />
-                      );
-                    }
                     return (
                       <Dashboard 
                         user={user}
