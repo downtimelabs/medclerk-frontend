@@ -9,6 +9,7 @@ import AboutUs from './components/AboutUs.jsx';
 import Services from './components/Services.jsx';
 import Auth from './components/Auth.jsx';
 import PatientSignup from './components/PatientSignup.jsx';
+import DoctorSignup from './components/DoctorSignup.jsx';
 import PatientProfile from './components/PatientProfile.jsx';
 import DoctorProfile from './components/DoctorProfile.jsx';
 import DoctorDashboard from './components/DoctorDashboard.jsx';
@@ -152,6 +153,10 @@ function App() {
                 ) : !isAuthenticated ? (
                   selectedRole === 'patient' ? (
                     <PatientSignup
+                      onAuthSuccess={handleAuthSuccess}
+                    />
+                  ) : selectedRole === 'doctor' ? (
+                    <DoctorSignup
                       onAuthSuccess={handleAuthSuccess}
                     />
                   ) : (
