@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { I18nProvider } from './i18n.jsx';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
@@ -19,6 +19,34 @@ import UploadPage from './components/UploadPage.jsx';
 import AppointmentsPage from './components/AppointmentsPage.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
+
+// Component to clear role selection when navigating to auth routes
+function AuthRouteHandler({ children, clearRole, isAuthenticated }) {
+  const location = useLocation();
+  const prevPathRef = React.useRef(location.pathname);
+  const hasClearedRef = React.useRef(false);
+  
+  useEffect(() => {
+    const isAuthRoute = location.pathname === '/signup' || location.pathname === '/signin';
+    const pathChanged = prevPathRef.current !== location.pathname;
+    
+    // Only clear role when navigating TO an auth route from a different route
+    // Don't clear if already on the route (to allow role selection to work)
+    if (isAuthRoute && !isAuthenticated && pathChanged && !hasClearedRef.current) {
+      clearRole();
+      hasClearedRef.current = true;
+    }
+    
+    // Reset the cleared flag when leaving auth routes
+    if (!isAuthRoute) {
+      hasClearedRef.current = false;
+    }
+    
+    prevPathRef.current = location.pathname;
+  }, [location.pathname, clearRole, isAuthenticated]);
+  
+  return <>{children}</>;
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,6 +71,12 @@ function App() {
       }
     }
   }, []);
+
+  // Function to clear role selection
+  const clearRoleSelection = () => {
+    setSelectedRole(null);
+    localStorage.removeItem('selectedRole');
+  };
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -88,6 +122,7 @@ function App() {
       <Router>
         <I18nProvider>
           <ErrorBoundary>
+            <AuthRouteHandler clearRole={clearRoleSelection} isAuthenticated={isAuthenticated}>
             <div className="App">
             <Routes>
             <Route 
@@ -102,32 +137,13 @@ function App() {
               path="/services" 
               element={<Services />}
             />
+            {/* Redirect old /start route to /signup for backward compatibility */}
             <Route 
               path="/start" 
-              element={
-                !selectedRole ? (
-                  <RoleSelection 
-                    onSelect={handleRoleSelect} 
-                  />
-                ) : !isAuthenticated ? (
-                  selectedRole === 'patient' ? (
-                    <PatientSignup
-                      onAuthSuccess={handleAuthSuccess}
-                    />
-                  ) : (
-                    <Auth 
-                      selectedRole={selectedRole}
-                      onAuthSuccess={handleAuthSuccess}
-                      isSignUpMode={true}
-                    />
-                  )
-                ) : (
-                  <Navigate to="/dashboard" replace />
-                )
-              } 
+              element={<Navigate to="/signup" replace />} 
             />
             <Route 
-              path="/auth" 
+              path="/signup" 
               element={
                 !selectedRole ? (
                   <RoleSelection 
@@ -173,7 +189,7 @@ function App() {
               path="/dashboard" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (() => {
                   // Get role from user object
                   const userRole = user?.role?.toLowerCase();
@@ -207,7 +223,7 @@ function App() {
               path="/doctor" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <DoctorDashboard
                     user={user}
@@ -220,7 +236,7 @@ function App() {
               path="/doctors" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <DoctorsPage
                     user={user}
@@ -233,7 +249,7 @@ function App() {
               path="/uploads" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <UploadPage
                     user={user}
@@ -246,7 +262,7 @@ function App() {
               path="/appointments" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <AppointmentsPage
                     user={user}
@@ -259,7 +275,7 @@ function App() {
               path="/reports" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <ReportsPage
                     user={user}
@@ -272,7 +288,7 @@ function App() {
               path="/settings" 
               element={
                 !isAuthenticated ? (
-                  <Navigate to="/start" replace />
+                  <Navigate to="/signup" replace />
                 ) : (
                   <SettingsPage
                     user={user}
@@ -283,6 +299,7 @@ function App() {
             />
             </Routes>
             </div>
+            </AuthRouteHandler>
           </ErrorBoundary>
         </I18nProvider>
       </Router>

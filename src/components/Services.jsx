@@ -196,7 +196,7 @@ const Services = () => {
           </button>
           <button 
             className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all px-5 py-2 rounded-lg shadow-md"
-            onClick={() => navigate('/start')}
+            onClick={() => navigate('/signup')}
           >
             Get Started
           </button>
@@ -511,7 +511,7 @@ const Services = () => {
           </p>
           <motion.button 
             className="bg-white text-blue-600 hover:bg-blue-50 transition-all px-8 py-4 rounded-lg shadow-lg text-lg font-semibold"
-            onClick={() => navigate('/start')}
+            onClick={() => navigate('/signup')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

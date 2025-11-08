@@ -177,7 +177,7 @@ const DoctorSignup = ({ onAuthSuccess }) => {
             <img src="/logo1.jpg" alt="MedClerk Logo" className="h-12 md:h-14 object-contain" />
           </div>
           <button 
-            onClick={() => navigate('/auth')}
+            onClick={() => navigate('/signin')}
             className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors"
           >
             Sign In

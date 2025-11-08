@@ -221,7 +221,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
               </button>
               <motion.button 
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition-all px-4 py-1.5 rounded-lg text-sm shadow-md"
-                onClick={() => navigate('/start')}
+                onClick={() => navigate('/signup')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -272,7 +272,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
             >
               <motion.button 
                 className="btn btn-primary" 
-                onClick={() => navigate('/start')}
+                onClick={() => navigate('/signup')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -280,7 +280,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
               </motion.button>
               <motion.button 
                 className="btn btn-secondary" 
-                onClick={() => navigate('/start')}
+                onClick={() => navigate('/signup')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -418,7 +418,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
             </p>
             <motion.button
               className="btn btn-primary text-lg px-8 py-4"
-              onClick={() => navigate('/start')}
+              onClick={() => navigate('/signup')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -582,7 +582,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
           >
             <motion.button
               className="bg-white text-indigo-700 hover:bg-primary-50 transition-all px-10 py-4 rounded-lg text-lg font-bold shadow-2xl"
-              onClick={() => navigate('/start')}
+              onClick={() => navigate('/signup')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -631,7 +631,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
             </ul>
             <motion.button 
               className="btn btn-secondary mt-auto" 
-              onClick={() => navigate('/start')}
+              onClick={() => navigate('/signup')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -675,7 +675,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
             </ul>
             <motion.button 
               className="btn btn-secondary mt-auto" 
-              onClick={() => navigate('/start')}
+              onClick={() => navigate('/signup')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -723,7 +723,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
                 <li>
                   <motion.button 
                     className="text-dark-600 hover:text-indigo-600 transition-colors text-sm block w-full text-left"
-                    onClick={() => navigate('/start')}
+                    onClick={() => navigate('/signup')}
                     whileHover={{ x: 5 }}
                   >
                     How it Works
@@ -741,7 +741,7 @@ const LandingPage = ({ isAuthenticated, user }) => {
                 <li>
                   <motion.button 
                     className="text-dark-600 hover:text-primary-600 transition-colors text-sm block w-full text-left"
-                    onClick={() => navigate('/start')}
+                    onClick={() => navigate('/signup')}
                     whileHover={{ x: 5 }}
                   >
                     Get Started
