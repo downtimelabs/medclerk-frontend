@@ -20,7 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../i18n';
 import { useTheme } from '../contexts/ThemeContext';
 
-const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
+const DoctorsPage = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { isDarkMode } = useTheme();
@@ -43,8 +43,8 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
       avatar: '👩‍⚕️',
       specializes: ['Heart Disease', 'Hypertension', 'High Cholesterol'],
       icon: FaHeart,
-      color: 'from-red-500 to-pink-500',
-      bgColor: 'bg-red-50',
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-50',
       description: 'Specialist in cardiovascular diseases with expertise in preventive cardiology and heart disease management.',
       education: 'MD from Harvard Medical School',
       languages: ['English', 'Spanish'],
@@ -83,8 +83,8 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
       avatar: '👩‍⚕️',
       specializes: ['Asthma', 'COPD', 'Lung Diseases'],
       icon: FaLungs,
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-50',
       description: 'Pulmonologist specializing in asthma, COPD, and comprehensive respiratory care.',
       education: 'MD from Stanford University',
       languages: ['English', 'Spanish'],
@@ -103,8 +103,8 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
       avatar: '👨‍⚕️',
       specializes: ['Arthritis', 'Joint Pain', 'Autoimmune Disorders'],
       icon: FaBone,
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-orange-50',
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-50',
       description: 'Rheumatologist with extensive experience in arthritis treatment and joint health management.',
       education: 'MD from Mayo Clinic College of Medicine',
       languages: ['English'],
@@ -123,8 +123,8 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
       avatar: '👩‍⚕️',
       specializes: ['Depression', 'Anxiety', 'Mental Health'],
       icon: FaBrain,
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'from-blue-500 to-indigo-600',
+      bgColor: 'bg-blue-50',
       description: 'Psychiatrist specializing in depression, anxiety disorders, and comprehensive mental health care.',
       education: 'MD from UCLA School of Medicine',
       languages: ['English', 'French'],
@@ -229,36 +229,11 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
       <div className="bg-white/95 backdrop-blur-lg border-b border-gray-200 px-6 py-4 shadow-xl sticky top-0 z-40">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/dashboard')}
-              className="p-2 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 text-gray-600 hover:text-gray-800"
-            >
-              <FaArrowLeft />
-              <span className="hidden sm:inline">Back to Dashboard</span>
-            </button>
             <div className="flex items-center">
               <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <select
-              className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
-              value={selectedLanguage || 'en'}
-              onChange={(e) => onLanguageSelect?.(e.target.value)}
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="de">Deutsch</option>
-              <option value="it">Italiano</option>
-              <option value="pt">Português</option>
-              <option value="ru">Русский</option>
-              <option value="zh">中文</option>
-              <option value="ja">日本語</option>
-              <option value="ko">한국어</option>
-              <option value="ar">العربية</option>
-              <option value="hi">हिंदी</option>
-            </select>
             <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
               <FaSignOutAlt className="mr-2" /> Logout
             </button>
@@ -351,7 +326,7 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
                         <p className="text-gray-600 font-medium">{doctor.specialty}</p>
                       </div>
                       {doctor.isRecommended && (
-                        <div className="bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium flex-shrink-0">
+                        <div className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full font-medium flex-shrink-0">
                           Recommended
                         </div>
                       )}
@@ -449,23 +424,23 @@ const DoctorsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => 
                   </div>
                   <p className="text-gray-800 font-medium">{selectedDoctor.location}</p>
                 </div>
-                <div className="bg-green-50 rounded-2xl p-4">
+                <div className="bg-blue-50 rounded-2xl p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <FaClock className="text-green-600" />
+                    <FaClock className="text-blue-600" />
                     <span className="text-sm font-medium text-gray-600">Availability</span>
                   </div>
                   <p className="text-gray-800 font-medium">{selectedDoctor.availability}</p>
                 </div>
-                <div className="bg-purple-50 rounded-2xl p-4">
+                <div className="bg-blue-50 rounded-2xl p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <FaPhone className="text-purple-600" />
+                    <FaPhone className="text-blue-600" />
                     <span className="text-sm font-medium text-gray-600">Phone</span>
                   </div>
                   <p className="text-gray-800 font-medium">{selectedDoctor.phone}</p>
                 </div>
-                <div className="bg-orange-50 rounded-2xl p-4">
+                <div className="bg-blue-50 rounded-2xl p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <FaEnvelope className="text-orange-600" />
+                    <FaEnvelope className="text-blue-600" />
                     <span className="text-sm font-medium text-gray-600">Email</span>
                   </div>
                   <p className="text-gray-800 font-medium text-sm">{selectedDoctor.email}</p>

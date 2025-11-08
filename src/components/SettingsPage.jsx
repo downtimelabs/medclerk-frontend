@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaCog, FaUser, FaFileMedical, FaBell, FaLock, FaPalette, FaSignOutAlt, FaHome, FaUserMd, FaCloudUploadAlt, FaCalendarAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const SettingsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
+const SettingsPage = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('settings');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -130,17 +130,6 @@ const SettingsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) =>
                   </div>
                 )}
               </div>
-              
-              <select
-                className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
-                value={selectedLanguage || 'en'}
-                onChange={(e) => onLanguageSelect?.(e.target.value)}
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="hi">हिंदी</option>
-              </select>
               
               <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
                 <FaSignOutAlt className="mr-2" /> Logout
@@ -281,19 +270,6 @@ const SettingsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) =>
                   </h3>
                   
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
-                      <select
-                        className="w-full p-3 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                        value={selectedLanguage || 'en'}
-                        onChange={(e) => onLanguageSelect?.(e.target.value)}
-                      >
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="hi">हिंदी</option>
-                      </select>
-                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
                       <select

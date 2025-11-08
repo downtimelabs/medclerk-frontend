@@ -5,6 +5,8 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import RoleSelection from './components/RoleSelection.jsx';
 import LandingPage from './components/LandingPage.jsx';
+import AboutUs from './components/AboutUs.jsx';
+import Services from './components/Services.jsx';
 import Auth from './components/Auth.jsx';
 import PatientProfile from './components/PatientProfile.jsx';
 import DoctorProfile from './components/DoctorProfile.jsx';
@@ -16,9 +18,10 @@ import UploadPage from './components/UploadPage.jsx';
 import AppointmentsPage from './components/AppointmentsPage.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
+import PatientSignup from './components/PatientSignup.jsx';
+import DoctorSignup from './components/DoctorSignup.jsx';
 
 function App() {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedRole, setSelectedRole] = useState(null);
   const [user, setUser] = useState(null);
@@ -27,26 +30,20 @@ function App() {
   useEffect(() => {
     const savedAuth = localStorage.getItem('isAuthenticated');
     const savedUser = localStorage.getItem('user');
-    const savedLanguage = localStorage.getItem('selectedLanguage');
-    const savedRole = localStorage.getItem('selectedRole');
     
     if (savedAuth === 'true' && savedUser) {
+      const user = JSON.parse(savedUser);
       setIsAuthenticated(true);
-      setUser(JSON.parse(savedUser));
-    }
-    
-    if (savedLanguage) {
-      setSelectedLanguage(savedLanguage);
-    }
-    if (savedRole) {
-      setSelectedRole(savedRole);
+      setUser(user);
+      
+      // Always use role from user data
+      if (user.role) {
+        const role = user.role.toLowerCase();
+        setSelectedRole(role);
+        localStorage.setItem('selectedRole', role);
+      }
     }
   }, []);
-
-  const handleLanguageSelect = (language) => {
-    setSelectedLanguage(language);
-    localStorage.setItem('selectedLanguage', language);
-  };
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
@@ -54,8 +51,20 @@ function App() {
   };
 
   const handleAuthSuccess = (userData) => {
+    // Clear any old role data first
+    localStorage.removeItem('selectedRole');
+    
     setIsAuthenticated(true);
     setUser(userData);
+    
+    // Update selectedRole based on user's actual role
+    let finalRole = 'patient'; // default
+    if (userData?.role) {
+      finalRole = userData.role.toLowerCase();
+      setSelectedRole(finalRole);
+      localStorage.setItem('selectedRole', finalRole);
+    }
+    
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('user', JSON.stringify(userData));
   };
@@ -68,42 +77,55 @@ function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
-    setSelectedLanguage(null);
     setSelectedRole(null);
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
-    localStorage.removeItem('selectedLanguage');
     localStorage.removeItem('selectedRole');
+    localStorage.removeItem('doctorProfile');
   };
 
   return (
     <ThemeProvider>
       <Router>
-        <I18nProvider lang={selectedLanguage || 'en'}>
+        <I18nProvider>
           <ErrorBoundary>
             <div className="App">
             <Routes>
             <Route 
               path="/" 
-              element={<LandingPage selectedLanguage={selectedLanguage} onLanguageSelect={handleLanguageSelect} isAuthenticated={isAuthenticated} user={user} />}
+              element={<LandingPage isAuthenticated={isAuthenticated} user={user} />}
+            />
+            <Route 
+              path="/about" 
+              element={<AboutUs />}
+            />
+            <Route 
+              path="/services" 
+              element={<Services />}
             />
             <Route 
               path="/start" 
               element={
                 !selectedRole ? (
                   <RoleSelection 
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onSelect={handleRoleSelect} 
                   />
                 ) : !isAuthenticated ? (
-                  <Auth 
-                    selectedLanguage={selectedLanguage}
-                    selectedRole={selectedRole}
-                    onLanguageSelect={handleLanguageSelect}
-                    onAuthSuccess={handleAuthSuccess}
-                    isSignUpMode={true}
-                  />
+                  selectedRole === 'patient' ? (
+                    <PatientSignup
+                      onAuthSuccess={handleAuthSuccess}
+                    />
+                  ) : selectedRole === 'doctor' ? (
+                    <DoctorSignup
+                      onAuthSuccess={handleAuthSuccess}
+                    />
+                  ) : (
+                    <Auth 
+                      selectedRole={selectedRole}
+                      onAuthSuccess={handleAuthSuccess}
+                      isSignUpMode={true}
+                    />
+                  )
                 ) : (
                   <Navigate to="/dashboard" replace />
                 )
@@ -114,18 +136,20 @@ function App() {
               element={
                 !selectedRole ? (
                   <RoleSelection 
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onSelect={handleRoleSelect} 
                   />
                 ) : !isAuthenticated ? (
-                  <Auth 
-                    selectedLanguage={selectedLanguage}
-                    selectedRole={selectedRole}
-                    onLanguageSelect={handleLanguageSelect}
-                    onAuthSuccess={handleAuthSuccess}
-                    isSignUpMode={true}
-                  />
+                  selectedRole === 'patient' ? (
+                    <PatientSignup
+                      onAuthSuccess={handleAuthSuccess}
+                    />
+                  ) : (
+                    <Auth 
+                      selectedRole={selectedRole}
+                      onAuthSuccess={handleAuthSuccess}
+                      isSignUpMode={true}
+                    />
+                  )
                 ) : (
                   <Navigate to="/dashboard" replace />
                 )
@@ -138,16 +162,12 @@ function App() {
                   <Navigate to="/dashboard" replace />
                 ) : !selectedRole ? (
                   <RoleSelection 
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onSelect={handleRoleSelect}
                     isSignInFlow={true}
                   />
                 ) : (
                   <Auth 
-                    selectedLanguage={selectedLanguage}
                     selectedRole={selectedRole}
-                    onLanguageSelect={handleLanguageSelect}
                     onAuthSuccess={handleAuthSuccess}
                     isSignInMode={true}
                   />
@@ -160,46 +180,47 @@ function App() {
                 !isAuthenticated ? (
                   <Navigate to="/start" replace />
                 ) : (() => {
-                  // Debug: Log user data for routing decisions
-                  console.log('Dashboard routing - User data:', user);
-                  console.log('User role:', user?.role);
-                  console.log('Doctor profile exists:', !!user?.doctorProfile);
-                  console.log('Patient profile exists:', !!user?.patientProfile);
+                  // Get role from user object
+                  const userRole = user?.role?.toLowerCase();
                   
-                  if (user?.role === 'doctor' && !user?.doctorProfile) {
-                    console.log('Routing to DoctorProfile - no doctor profile');
-                    return (
-                      <DoctorProfile 
-                        user={user}
-                        selectedLanguage={selectedLanguage}
-                        onLanguageSelect={handleLanguageSelect}
-                        onProfileComplete={handleProfileComplete}
-                      />
-                    );
-                  } else if (user?.role === 'patient' && !user?.patientProfile) {
-                    console.log('Routing to PatientProfile - no patient profile');
-                    return (
-                      <PatientProfile 
-                        user={user}
-                        selectedLanguage={selectedLanguage}
-                        onLanguageSelect={handleLanguageSelect}
-                        onProfileComplete={handleProfileComplete}
-                      />
-                    );
-                  } else if (user?.role === 'doctor') {
-                    console.log('Routing to Doctor Dashboard - profile exists');
+                  // Doctor role routing
+                  if (userRole === 'doctor') {
+                    if (!user?.doctorProfile && !user?.licenseNumber) {
+                      return (
+                        <DoctorProfile 
+                          user={user}
+                          onProfileComplete={handleProfileComplete}
+                        />
+                      );
+                    }
                     return <Navigate to="/doctor" replace />;
-                  } else {
-                    console.log('Routing to Patient Dashboard - profile exists');
+                  }
+                  
+                  // Patient role routing  
+                  if (userRole === 'patient') {
+                    if (!user?.patientProfile && !user?.bloodGroup) {
+                      return (
+                        <PatientProfile 
+                          user={user}
+                          onProfileComplete={handleProfileComplete}
+                        />
+                      );
+                    }
                     return (
                       <Dashboard 
                         user={user}
-                        selectedLanguage={selectedLanguage}
-                        onLanguageSelect={handleLanguageSelect}
                         onLogout={handleLogout}
                       />
                     );
                   }
+                  
+                  // Fallback: default to patient dashboard
+                  return (
+                    <Dashboard 
+                      user={user}
+                      onLogout={handleLogout}
+                    />
+                  );
                 })()
               } 
             />
@@ -211,8 +232,6 @@ function App() {
                 ) : (
                   <DoctorDashboard
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
@@ -226,8 +245,6 @@ function App() {
                 ) : (
                   <DoctorsPage
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
@@ -241,8 +258,6 @@ function App() {
                 ) : (
                   <UploadPage
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
@@ -256,8 +271,6 @@ function App() {
                 ) : (
                   <AppointmentsPage
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
@@ -271,8 +284,6 @@ function App() {
                 ) : (
                   <ReportsPage
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )
@@ -286,8 +297,6 @@ function App() {
                 ) : (
                   <SettingsPage
                     user={user}
-                    selectedLanguage={selectedLanguage}
-                    onLanguageSelect={handleLanguageSelect}
                     onLogout={handleLogout}
                   />
                 )

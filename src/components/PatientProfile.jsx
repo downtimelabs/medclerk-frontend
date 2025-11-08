@@ -26,7 +26,7 @@ import {
 } from 'react-icons/fa';
 import { useI18n } from '../i18n';
 
-const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComplete, onLogout }) => {
+const PatientProfile = ({ user, onProfileComplete, onLogout }) => {
   const { t } = useI18n();
   const [formData, setFormData] = useState({
     bloodGroup: '',
@@ -282,32 +282,11 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
   return (
     <div className="min-h-screen bg-gradient-main flex flex-col text-dark-700">
       {/* Top bar */}
-      <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
+      <div className="flex justify-between items-center p-5 bg-white border-b border-dark-200 shadow-md">
         <div className="flex items-center">
           <img src="/logo1.jpg" alt="MedClerk Logo" className="h-16 w-26 object-contain" />
         </div>
         <div className="flex gap-4 items-center">
-          <div className="relative">
-            <select
-              className="appearance-none bg-white text-dark-700 border border-dark-200 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
-              value={selectedLanguage || 'en'}
-              onChange={(e) => onLanguageSelect?.(e.target.value)}
-            >
-              <option value="en" className="bg-white text-dark-700">English</option>
-              <option value="es" className="bg-white text-dark-700">Español</option>
-              <option value="fr" className="bg-white text-dark-700">Français</option>
-              <option value="de" className="bg-white text-dark-700">Deutsch</option>
-              <option value="it" className="bg-white text-dark-700">Italiano</option>
-              <option value="pt" className="bg-white text-dark-700">pt</option>
-              <option value="ru" className="bg-white text-dark-700">ru</option>
-              <option value="zh" className="bg-white text-dark-700">zh</option>
-              <option value="ja" className="bg-white text-dark-700">ja</option>
-              <option value="ko" className="bg-white text-dark-700">ko</option>
-              <option value="ar" className="bg-white text-dark-700">ar</option>
-              <option value="hi" className="bg-white text-dark-700">Hindi</option>
-            </select>
-          </div>
-          
           {/* Profile Dropdown */}
           <div className="relative">
             <button
@@ -631,8 +610,8 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
 
       {/* Profile Modal */}
       {showProfileModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowProfileMenu(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowProfileMenu(false)}>
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl ring-1 ring-black/5" onClick={e => e.stopPropagation()}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-dark-900">
@@ -650,43 +629,96 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
               </div>
 
               {!isEditMode ? (
-                // View Mode
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
-                      <div className="space-y-4">
+                // View Mode (modern card style)
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-semibold text-gray-900">Basic Information</h3>
+                      </div>
+                      <div className="space-y-3">
                         <div>
-                          <p className="text-sm text-gray-500">Full Name</p>
-                          <p className="font-medium">{user?.name || 'Not provided'}</p>
+                          <p className="text-xs text-gray-500">Full Name</p>
+                          <p className="font-medium text-gray-900">{user?.name || 'Not provided'}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Email</p>
-                          <p className="font-medium">{user?.email || 'Not provided'}</p>
+                          <p className="text-xs text-gray-500">Email</p>
+                          <p className="font-medium text-gray-900">{user?.email || 'Not provided'}</p>
                         </div>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-4">Medical Information</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <p className="text-sm text-gray-500">Blood Group</p>
-                          <p className="font-medium">{formData.bloodGroup || 'Not provided'}</p>
+                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-semibold text-gray-900">Medical Information</h3>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500">Blood Group</p>
+                            <p className="font-medium text-gray-900">{formData.bloodGroup || 'Not provided'}</p>
+                          </div>
+                          <button onClick={() => setIsEditMode(true)} className="text-sm text-blue-600 hover:underline">Edit</button>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Height</p>
-                          <p className="font-medium">{formData.heightCm ? `${formData.heightCm} cm` : 'Not provided'}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500">Height</p>
+                            <p className="font-medium text-gray-900">{formData.heightCm ? `${formData.heightCm} cm` : 'Not provided'}</p>
+                          </div>
+                          {!formData.heightCm && (
+                            <FaExclamationTriangle className="text-yellow-500" />
+                          )}
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-500">Weight</p>
-                          <p className="font-medium">{formData.weightKg ? `${formData.weightKg} kg` : 'Not provided'}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-gray-500">Weight</p>
+                            <p className="font-medium text-gray-900">{formData.weightKg ? `${formData.weightKg} kg` : 'Not provided'}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {!formData.weightKg && (
+                              <FaExclamationTriangle className="text-yellow-500" />
+                            )}
+                            <button onClick={() => setIsEditMode(true)} className="text-sm text-blue-600 hover:underline">Edit</button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4">Chronic Conditions</h3>
+                  {(!formData.emergencyContact?.name || !formData.emergencyContact?.phone) && (
+                    <div className="bg-amber-50 text-amber-900 rounded-xl border border-amber-200 px-4 py-3 flex items-start gap-3">
+                      <FaExclamationTriangle className="mt-0.5 text-amber-500" />
+                      <div className="flex-1">
+                        <p className="text-sm">No emergency contact recorded</p>
+                        <button onClick={() => setIsEditMode(true)} className="text-sm text-blue-600 hover:underline">Set Now</button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-base font-semibold text-gray-900">Emergency Contact</h3>
+                      <button onClick={() => setIsEditMode(true)} className="text-sm text-blue-600 hover:underline">Edit</button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500">Name</p>
+                        <p className="font-medium text-gray-900">{formData.emergencyContact?.name || 'Not provided'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Phone</p>
+                        <p className="font-medium text-gray-900">{formData.emergencyContact?.phone || 'Not provided'}</p>
+                      </div>
+                      <div className="md:col-span-2">
+                        <p className="text-xs text-gray-500">Email</p>
+                        <p className="font-medium text-gray-900">{formData.emergencyContact?.email || 'Not provided'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-base font-semibold text-gray-900">Health Data</h3>
+                    </div>
                     {formData.chronicConditions?.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {formData.chronicConditions.map(condition => (
@@ -696,29 +728,14 @@ const PatientProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileCom
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500">No chronic conditions recorded</p>
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <span>No chronic conditions recorded</span>
+                        <button onClick={() => setIsEditMode(true)} className="text-blue-600 hover:underline">Add Now</button>
+                      </div>
                     )}
                   </div>
 
-                  <div className="pt-4 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4">Emergency Contact</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">Name</p>
-                        <p className="font-medium">{formData.emergencyContact?.name || 'Not provided'}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Phone</p>
-                        <p className="font-medium">{formData.emergencyContact?.phone || 'Not provided'}</p>
-                      </div>
-                      <div className="md:col-span-2">
-                        <p className="text-sm text-gray-500">Email</p>
-                        <p className="font-medium">{formData.emergencyContact?.email || 'Not provided'}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-4 border-t border-gray-100">
+                  <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={() => setIsEditMode(true)}

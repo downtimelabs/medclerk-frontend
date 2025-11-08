@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaIdBadge, FaUserMd, FaHospital, FaClock, FaArrowRight } from 'react-icons/fa';
 
-const DoctorProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComplete }) => {
+const DoctorProfile = ({ user, onProfileComplete }) => {
   const [formData, setFormData] = useState({
     licenseNumber: '',
     specialization: '',
@@ -75,28 +75,6 @@ const DoctorProfile = ({ user, selectedLanguage, onLanguageSelect, onProfileComp
       <div className="flex justify-between items-center p-5 bg-white/90 backdrop-blur-md border-b border-dark-200 shadow-sm">
         <div className="flex items-center">
           <img src="/logo1.jpg" alt="MedClerk Logo" className="h-14 w-22 object-contain" />
-        </div>
-        <div className="flex gap-4 items-center">
-          <div className="relative">
-            <select
-              className="appearance-none bg-white text-dark-700 border border-dark-200 rounded-lg px-3 py-2 pr-7 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15"
-              value={selectedLanguage || 'en'}
-              onChange={(e) => onLanguageSelect?.(e.target.value)}
-            >
-              <option value="en" className="bg-white text-dark-700">English</option>
-              <option value="es" className="bg-white text-dark-700">Español</option>
-              <option value="fr" className="bg-white text-dark-700">Français</option>
-              <option value="de" className="bg-white text-dark-700">Deutsch</option>
-              <option value="it" className="bg-white text-dark-700">Italiano</option>
-              <option value="pt" className="bg-white text-dark-700">pt</option>
-              <option value="ru" className="bg-white text-dark-700">ru</option>
-              <option value="zh" className="bg-white text-dark-700">zh</option>
-              <option value="ja" className="bg-white text-dark-700">ja</option>
-              <option value="ko" className="bg-white text-dark-700">ko</option>
-              <option value="ar" className="bg-white text-dark-700">ar</option>
-              <option value="hi" className="bg-white text-dark-700">Hindi</option>
-            </select>
-          </div>
         </div>
       </div>
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaPlus, FaUser, FaSignOutAlt, FaHome, FaUserMd, FaFileMedical, FaCog, FaCloudUploadAlt, FaBell, FaPhone } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const AppointmentsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
+const AppointmentsPage = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [activeSection, setActiveSection] = useState('appointments');
@@ -196,17 +196,6 @@ const AppointmentsPage = ({ user, selectedLanguage, onLanguageSelect, onLogout }
                   </div>
                 )}
               </div>
-              
-              <select
-                className="appearance-none bg-white/80 text-gray-700 border border-gray-200 rounded-xl px-4 py-2 pr-8 text-sm cursor-pointer focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500 focus:ring-opacity-15 transition-all"
-                value={selectedLanguage || 'en'}
-                onChange={(e) => onLanguageSelect?.(e.target.value)}
-              >
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="hi">हिंदी</option>
-              </select>
               
               <button className="btn btn-secondary px-4 py-2 text-sm hover:shadow-lg transition-all" onClick={handleLogout}>
                 <FaSignOutAlt className="mr-2" /> Logout

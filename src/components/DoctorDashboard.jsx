@@ -378,7 +378,7 @@ const SidebarItem = ({ active, icon, label, badge, onClick }) => (
   </div>
 );
 
-const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout }) => {
+const DoctorDashboard = ({ user, onLogout }) => {
   const { t } = useI18n();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -392,24 +392,57 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
   const [filterTime, setFilterTime] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [profileData, setProfileData] = useState(() => {
-    // Try to load from localStorage first
+    // Prioritize actual user data from authentication
+    if (user) {
+      return {
+        name: user.name || 'Dr. Unknown',
+        email: user.email || 'doctor@hospital.com',
+        phone: user.phone || user.phoneNumber || '+1 (555) 123-4567',
+        specialty: user.doctorProfile?.specialization || user.specialty || 'General Practitioner',
+        license: user.doctorProfile?.licenseNumber || user.license || 'Not provided',
+        experience: user.doctorProfile?.yearsOfExperience ? `${user.doctorProfile.yearsOfExperience} years` : user.experience || 'Not specified',
+        hospital: user.doctorProfile?.clinicName || user.hospital || 'Not specified',
+        education: user.education || 'Not specified',
+        bio: user.bio || 'Professional healthcare provider dedicated to patient care.'
+      };
+    }
+    
+    // Fallback to localStorage only if no user data
     const savedProfile = localStorage.getItem('doctorProfile');
     if (savedProfile) {
       return JSON.parse(savedProfile);
     }
-    // Otherwise use default values
+    
+    // Final fallback to default values
     return {
-      name: user?.name || 'Dr. John Doe',
-      email: user?.email || 'doctor@hospital.com',
-      phone: user?.phone || '+1 (555) 123-4567',
-      specialty: user?.specialty || 'General Practitioner',
-      license: user?.license || 'MD-123456',
-      experience: user?.experience || '10 years',
-      hospital: user?.hospital || 'City General Hospital',
-      education: user?.education || 'MD from Harvard Medical School',
-      bio: user?.bio || 'Experienced physician dedicated to providing quality healthcare.'
+      name: 'Dr. Unknown',
+      email: 'doctor@hospital.com',
+      phone: '+1 (555) 123-4567',
+      specialty: 'General Practitioner',
+      license: 'Not provided',
+      experience: 'Not specified',
+      hospital: 'Not specified',
+      education: 'Not specified',
+      bio: 'Professional healthcare provider dedicated to patient care.'
     };
   });
+
+  // Sync profile data when user prop changes
+  React.useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || 'Dr. Unknown',
+        email: user.email || 'doctor@hospital.com',
+        phone: user.phone || user.phoneNumber || '+1 (555) 123-4567',
+        specialty: user.doctorProfile?.specialization || user.specialty || 'General Practitioner',
+        license: user.doctorProfile?.licenseNumber || user.license || 'Not provided',
+        experience: user.doctorProfile?.yearsOfExperience ? `${user.doctorProfile.yearsOfExperience} years` : user.experience || 'Not specified',
+        hospital: user.doctorProfile?.clinicName || user.hospital || 'Not specified',
+        education: user.education || 'Not specified',
+        bio: user.bio || 'Professional healthcare provider dedicated to patient care.'
+      });
+    }
+  }, [user]);
 
   // Add CSS animations for charts
   React.useEffect(() => {
@@ -546,8 +579,8 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
               // First clear local storage and authentication
               localStorage.removeItem('isAuthenticated');
               localStorage.removeItem('user');
-              localStorage.removeItem('selectedLanguage');
               localStorage.removeItem('selectedRole');
+              localStorage.removeItem('doctorProfile');
               // Then call the logout handler
               if (onLogout) onLogout();
               // Force a full page reload with a small delay to ensure state is cleared
@@ -617,25 +650,6 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
               <p className="text-sm text-gray-600 mt-1">Track, manage and forecast your patient reports and data.</p>
             </div>
             <div className="flex items-center gap-3">
-              <select
-                className="appearance-none bg-white/80 backdrop-blur text-gray-700 border border-blue-200 rounded-xl px-4 py-2.5 pr-8 text-sm cursor-pointer focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-200 shadow-sm hover:shadow transition-all"
-                value={selectedLanguage || 'en'}
-                onChange={(e) => onLanguageSelect?.(e.target.value)}
-              >
-                <option value="en" className="bg-white text-gray-700">English</option>
-                <option value="es" className="bg-white text-gray-700">Español</option>
-                <option value="fr" className="bg-white text-gray-700">Français</option>
-                <option value="de" className="bg-white text-gray-700">Deutsch</option>
-                <option value="it" className="bg-white text-gray-700">Italiano</option>
-                <option value="pt" className="bg-white text-gray-700">pt</option>
-                <option value="ru" className="bg-white text-gray-700">ru</option>
-                <option value="zh" className="bg-white text-gray-700">zh</option>
-                <option value="ja" className="bg-white text-gray-700">ja</option>
-                <option value="ko" className="bg-white text-gray-700">ko</option>
-                <option value="ar" className="bg-white text-gray-700">ar</option>
-                <option value="hi" className="bg-white text-gray-700">Hindi</option>
-              </select>
-              
               {/* Profile Dropdown */}
               <div className="relative">
                 <button
@@ -661,7 +675,7 @@ const DoctorDashboard = ({ user, selectedLanguage, onLanguageSelect, onLogout })
                         <FaUserCircle className="text-2xl" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-dark-900 truncate">{profileData?.name || 'Dr. John Doe'}</div>
+                        <div className="text-sm font-semibold text-dark-900 truncate">{profileData?.name || 'Dr. Unknown'}</div>
                         <div className="text-xs text-dark-500 truncate">{profileData?.email || 'doctor@hospital.com'}</div>
                       </div>
                     </div>
