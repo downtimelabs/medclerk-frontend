@@ -11,7 +11,8 @@ import {
   X,
   Activity,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,6 +24,7 @@ const DashboardLayout = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: FileText, label: 'Documents', path: '/dashboard/documents' },
     { icon: UploadCloud, label: 'Upload Report', path: '/dashboard/upload' },
     { icon: MessageSquare, label: 'AI Chat', path: '/dashboard/chat' },
     { icon: Stethoscope, label: 'Find Doctors', path: '/dashboard/doctors' },

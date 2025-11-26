@@ -7,6 +7,8 @@ import DoctorSignup from './pages/DoctorSignup';
 import DashboardLayout from './layouts/DashboardLayout';
 import Overview from './pages/dashboard/Overview';
 import Doctors from './pages/dashboard/Doctors';
+import Documents from './pages/dashboard/Documents';
+import DocumentCategory from './pages/dashboard/DocumentCategory';
 import Chat from './pages/dashboard/Chat';
 
 function App() {
@@ -23,6 +25,8 @@ function App() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Overview />} />
           <Route path="doctors" element={<Doctors />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="documents/:category" element={<DocumentCategory />} />
           <Route path="chat" element={<Chat />} />
         </Route>
       </Routes>
