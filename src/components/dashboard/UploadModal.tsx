@@ -65,7 +65,7 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -75,9 +75,9 @@ const UploadModal = ({ isOpen, onClose }: UploadModalProps) => {
             {/* Close Button */}
             <button 
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-black/5 transition-colors z-10"
+                className="absolute top-6 right-6 p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-black/5 transition-colors z-10"
             >
-                <X size={20} />
+                <X size={24} />
             </button>
 
             <div className="p-8 pb-0 flex flex-col items-center text-center">
