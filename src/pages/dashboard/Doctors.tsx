@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Star, Stethoscope, Filter, Clock, ChevronRight, UserPlus } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -166,66 +165,59 @@ const PendingRequestItem = ({ request }: { request: typeof pendingRequests[0] })
   </div>
 );
 
-
-const DoctorResultCard = ({ doctor }: { doctor: typeof exploreDoctors[0] }) => {
-  const navigate = useNavigate();
-
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
-      <div className="p-5">
-        <div className="flex gap-4">
-          <img 
-            src={doctor.image} 
-            alt={doctor.name} 
-            className="w-20 h-20 rounded-xl object-cover shadow-sm"
-          />
-          <div className="flex-1">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#FF9800] transition-colors">{doctor.name}</h3>
-                <div className="flex items-center gap-1 text-[#FF9800] text-sm font-medium mb-1">
-                  <Stethoscope size={14} />
-                  {doctor.specialization}
-                </div>
-              </div>
-              <div className="flex flex-col items-end">
-                 <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
-                  <Star size={12} className="text-yellow-500 fill-yellow-500" />
-                  <span className="font-bold text-slate-900 text-xs">{doctor.rating}</span>
-                </div>
+const DoctorResultCard = ({ doctor }: { doctor: typeof exploreDoctors[0] }) => (
+  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+    <div className="p-5">
+      <div className="flex gap-4">
+        <img 
+          src={doctor.image} 
+          alt={doctor.name} 
+          className="w-20 h-20 rounded-xl object-cover shadow-sm"
+        />
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#FF9800] transition-colors">{doctor.name}</h3>
+              <div className="flex items-center gap-1 text-[#FF9800] text-sm font-medium mb-1">
+                <Stethoscope size={14} />
+                {doctor.specialization}
               </div>
             </div>
-            
-            <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
-              <MapPin size={12} />
-              {doctor.address}
-            </div>
-            
-            <div className="mt-3 flex flex-wrap gap-2">
-              {doctor.tags.map((tag, i) => (
-                <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
-                  {tag}
-                </span>
-              ))}
+            <div className="flex flex-col items-end">
+               <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
+                <Star size={12} className="text-yellow-500 fill-yellow-500" />
+                <span className="font-bold text-slate-900 text-xs">{doctor.rating}</span>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex gap-3 mt-6">
-          <Button 
-              onClick={() => navigate(`/dashboard/doctors/${doctor.id}`)}
-              className="flex-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all font-semibold"
-          >
-              View Profile
-          </Button>
-          <Button className="flex-1 bg-[#0277BD] hover:bg-[#01579B] text-white shadow-md shadow-blue-100 transition-all font-semibold">
-              Connect
-          </Button>
+          
+          <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
+            <MapPin size={12} />
+            {doctor.address}
+          </div>
+          
+          <div className="mt-3 flex flex-wrap gap-2">
+            {doctor.tags.map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
-    </Card>
-  );
-};
+
+      <div className="flex gap-3 mt-5 pt-4 border-t border-slate-100">
+        <Button variant="outline" className="flex-1 h-10 text-sm hover:border-[#FF9800] hover:text-[#FF9800]">
+          View Profile
+        </Button>
+        <Button className="flex-1 h-10 text-sm bg-[#FF9800] hover:bg-[#F57C00] text-white border-none shadow-md shadow-orange-200">
+          <UserPlus size={16} className="mr-2" />
+          Connect
+        </Button>
+      </div>
+    </div>
+  </Card>
+);
 
 const Doctors = () => {
   const [activeTab, setActiveTab] = useState<'my-doctors' | 'find-doctors'>('my-doctors');
