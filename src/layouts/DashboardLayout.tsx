@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  UploadCloud, 
   MessageSquare, 
   Stethoscope, 
   Settings, 
@@ -24,8 +23,7 @@ const DashboardLayout = () => {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: FileText, label: 'Documents', path: '/dashboard/documents' },
-    { icon: UploadCloud, label: 'Upload Report', path: '/dashboard/upload' },
+    { icon: FileText, label: 'Report Centre', path: '/dashboard/documents' },
     { icon: MessageSquare, label: 'AI Chat', path: '/dashboard/chat' },
     { icon: Stethoscope, label: 'Find Doctors', path: '/dashboard/doctors' },
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },

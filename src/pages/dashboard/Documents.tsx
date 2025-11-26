@@ -8,9 +8,13 @@ import {
   Search, 
   Download, 
   Trash2, 
-  Eye
+  Eye,
+  PieChart,
+  HardDrive,
+  Activity
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import UploadModal from '../../components/dashboard/UploadModal';
 
 // --- Mock Data ---
 
@@ -19,6 +23,13 @@ const folders = [
   { id: 'medical-info', name: 'Medical Information', files: 8, size: '56 MB' },
   { id: 'prescriptions', name: 'Prescriptions', files: 20, size: '11 MB' },
   { id: 'archived', name: 'Archived', files: 99, size: '267 MB' }
+];
+
+const stats = [
+  { label: 'Total Documents', value: '207', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
+  { label: 'Storage Used', value: '502 MB', icon: HardDrive, color: 'text-orange-600', bg: 'bg-orange-50' },
+  { label: 'Most Active', value: 'Health Report', icon: Activity, color: 'text-green-600', bg: 'bg-green-50' },
+  { label: 'File Types', value: '4 Types', icon: PieChart, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
 
 const recentFiles = [
@@ -37,6 +48,7 @@ const allFiles = [
 const Documents = () => {
   const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState<number | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const toggleMenu = (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
@@ -50,10 +62,12 @@ const Documents = () => {
 
   return (
     <div className="space-y-10 pb-12 font-sans">
+      <UploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Documents</h1>
+           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Report Centre</h1>
            <p className="text-slate-500 mt-1">Manage and organize your medical records.</p>
         </div>
         <div className="flex gap-4">
@@ -65,7 +79,10 @@ const Documents = () => {
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] shadow-sm transition-all"
               />
            </div>
-           <Button className="bg-gradient-to-r from-[#0277BD] to-[#01579B] hover:shadow-lg hover:shadow-blue-200 text-white px-6 rounded-xl font-semibold transition-all">
+           <Button 
+             onClick={() => setIsUploadModalOpen(true)}
+             className="bg-gradient-to-r from-[#0277BD] to-[#01579B] hover:shadow-lg hover:shadow-blue-200 text-white px-6 rounded-xl font-semibold transition-all"
+           >
               <Plus size={18} className="mr-2" />
               Upload
            </Button>
@@ -93,6 +110,27 @@ const Documents = () => {
                 <span>{folder.files} Files</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                 <span>{folder.size}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Statistics Section */}
+      <section>
+        <h2 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
+            <PieChart size={20} className="text-[#FF9800]" />
+            Overview
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <div key={index} className="p-5 bg-white border border-slate-200 rounded-2xl flex items-center gap-4 shadow-sm">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
+                <stat.icon size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{stat.label}</p>
+                <p className="text-xl font-bold text-slate-900">{stat.value}</p>
               </div>
             </div>
           ))}
