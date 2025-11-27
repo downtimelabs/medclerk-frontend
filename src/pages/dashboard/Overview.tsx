@@ -1,280 +1,258 @@
 import { 
   Activity, 
-  Droplets, 
-  Heart, 
+  Calendar, 
+  FileText, 
+  Upload, 
+  Settings, 
   ChevronRight, 
-  MoreHorizontal,
-  Search,
-  Bell,
-  ArrowUpRight
+  Star, 
+  Clock, 
+  MapPin,
+  Plus
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 
 const Overview = () => {
+  const navigate = useNavigate();
+
+  // Mock Data
+  const careTeam = [
+    { id: 1, name: "Dr. Sarah Wilson", specialization: "Cardiologist", image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Tomorrow, 10:00 AM" },
+    { id: 2, name: "Dr. James Chen", specialization: "Dermatologist", image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Oct 24, 2:30 PM" },
+    { id: 3, name: "Dr. Emily Parker", specialization: "General Physician", image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Nov 02, 9:15 AM" },
+    { id: 4, name: "Dr. Michael Brown", specialization: "Neurologist", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Nov 15, 11:00 AM" },
+  ];
+
+  const quickActions = [
+    { icon: Calendar, label: "Book Appointment", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", path: "/dashboard/doctors" },
+    { icon: Upload, label: "Upload Records", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-900/20", path: "/dashboard/documents" },
+    { icon: Activity, label: "Vitals", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", path: "/dashboard/vitals" },
+    { icon: Settings, label: "Settings", color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-800", path: "/dashboard/settings" },
+  ];
+
+  const recentDocuments = [
+    { id: 1, title: "Blood Test Results", type: "Lab Report", date: "Oct 15, 2023", doctor: "Dr. Emily Parker" },
+    { id: 2, title: "Cardiology Consultation", type: "Prescription", date: "Oct 10, 2023", doctor: "Dr. Sarah Wilson" },
+    { id: 3, title: "MRI Scan Report", type: "Radiology", date: "Sep 28, 2023", doctor: "Dr. Michael Brown" },
+  ];
+
+  const recommendedDoctors = [
+    { id: 101, name: "Dr. Alice M.", specialization: "Endocrinologist", rating: 4.9, reviews: 128, image: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=300&h=300" },
+    { id: 102, name: "Dr. Robert F.", specialization: "Orthopedic", rating: 4.8, reviews: 95, image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300" },
+  ];
+
   return (
-    <div className="flex flex-col xl:flex-row gap-8">
+    <div className="flex flex-col xl:flex-row gap-8 pb-8">
       {/* Main Content Area */}
-      <div className="flex-1 space-y-8 min-w-0">
+      <div className="flex-1 min-w-0 space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-            <p className="text-slate-500 text-sm">Overview of your health metrics</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome Back, <span className="text-[#0277BD]">John</span></h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">You have <span className="font-semibold text-slate-900 dark:text-white">5 appointments</span> scheduled for today.</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] w-64"
-              />
-            </div>
-            <button className="p-2 bg-white border border-slate-200 rounded-full text-slate-600 hover:bg-slate-50 relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            <div className="text-sm text-slate-500 font-medium bg-slate-100 px-3 py-1.5 rounded-lg">
-              12 April 2025
-            </div>
-          </div>
+          <Button className="bg-[#0277BD] hover:bg-[#015f96] text-white shadow-lg shadow-blue-200/50 dark:shadow-none">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Appointment
+          </Button>
         </div>
 
-        {/* Vitals Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Heart Rate */}
-          <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 border-none shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <Heart size={24} fill="currentColor" className="text-blue-500" />
-              </div>
-              <h3 className="font-bold text-slate-900 text-lg">Heart Rate</h3>
-              <div className="text-3xl font-bold text-slate-900 mt-2">80 <span className="text-sm font-medium text-slate-500">BPM</span></div>
-            </div>
-            {/* Decorative BG */}
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-blue-200/30 rounded-full blur-2xl"></div>
-          </Card>
-
-          {/* Blood Pressure */}
-          <Card className="p-6 bg-gradient-to-br from-cyan-50 to-cyan-100/50 border-none shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-cyan-600 mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <Activity size={24} className="text-cyan-500" />
-              </div>
-              <h3 className="font-bold text-slate-900 text-lg">Blood Pressure</h3>
-              <div className="text-3xl font-bold text-slate-900 mt-2">120/80 <span className="text-sm font-medium text-slate-500">mmHg</span></div>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-cyan-200/30 rounded-full blur-2xl"></div>
-          </Card>
-
-          {/* Glucose Level */}
-          <Card className="p-6 bg-gradient-to-br from-pink-50 to-pink-100/50 border-none shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-            <div className="relative z-10">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-600 mb-4 shadow-sm group-hover:scale-110 transition-transform">
-                <Droplets size={24} className="text-pink-500" />
-              </div>
-              <h3 className="font-bold text-slate-900 text-lg">Glucose Level</h3>
-              <div className="text-3xl font-bold text-slate-900 mt-2">60 - 80 <span className="text-sm font-medium text-slate-500">mg/dl</span></div>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-pink-200/30 rounded-full blur-2xl"></div>
-          </Card>
-        </div>
-
-        {/* Activity Chart Section */}
-        <Card className="p-6 border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-lg text-slate-900">Activity</h3>
-            <div className="flex bg-slate-100 p-1 rounded-lg">
-              <button className="px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-900">Weekly</button>
-              <button className="px-3 py-1 text-xs font-medium bg-white text-[#0277BD] shadow-sm rounded-md">Monthly</button>
-              <button className="px-3 py-1 text-xs font-medium text-slate-500 hover:text-slate-900">Yearly</button>
-            </div>
+        {/* Care Team Section - Horizontal Scroll */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Care Team</h2>
+            <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/doctors')}>
+              View All
+            </Button>
           </div>
-          
-          {/* Simple SVG Chart Mockup */}
-          <div className="h-64 w-full relative">
-            {/* Grid Lines */}
-            <div className="absolute inset-0 flex flex-col justify-between text-xs text-slate-400">
-              {[800, 600, 400, 200, 0].map((val, i) => (
-                <div key={i} className="flex items-center gap-4 w-full">
-                  <span className="w-8 text-right">{val}</span>
-                  <div className="h-px bg-slate-100 flex-1"></div>
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+            {careTeam.map((doctor) => (
+              <Card key={doctor.id} className="min-w-[280px] p-4 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group border-slate-200 dark:border-slate-700">
+                <div className="relative">
+                  <img src={doctor.image} alt={doctor.name} className="w-14 h-14 rounded-full object-cover border-2 border-slate-100 dark:border-slate-600 group-hover:border-[#0277BD] transition-colors" />
+                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">{doctor.name}</h3>
+                  <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium truncate">{doctor.specialization}</p>
+                  <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                    <Clock size={10} />
+                    <span className="truncate">{doctor.nextAppt}</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            <Card className="min-w-[100px] flex flex-col items-center justify-center gap-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-[#0277BD] dark:hover:border-blue-400 cursor-pointer transition-all" onClick={() => navigate('/dashboard/doctors')}>
+              <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                <Plus size={16} />
+              </div>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Add New</span>
+            </Card>
+          </div>
+        </section>
+
+        {/* Quick Actions Grid */}
+        <section>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {quickActions.map((action, i) => (
+              <Card 
+                key={i} 
+                className="p-4 hover:shadow-md transition-all cursor-pointer group border-slate-200 dark:border-slate-700 flex flex-col items-center text-center gap-3"
+                onClick={() => navigate(action.path)}
+              >
+                <div className={`w-12 h-12 rounded-2xl ${action.bg} flex items-center justify-center ${action.color} group-hover:scale-110 transition-transform`}>
+                  <action.icon size={24} />
+                </div>
+                <span className="font-semibold text-slate-900 dark:text-white text-sm">{action.label}</span>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Recent Documents */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Documents</h2>
+              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/documents')}>
+                See All
+              </Button>
+            </div>
+            <Card className="divide-y divide-slate-100 dark:divide-slate-700 border-slate-200 dark:border-slate-700">
+              {recentDocuments.map((doc) => (
+                <div key={doc.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#0277BD] dark:text-blue-400 group-hover:bg-[#0277BD] group-hover:text-white transition-colors">
+                    <FileText size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{doc.title}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{doc.type} • {doc.date}</p>
+                  </div>
+                  <ChevronRight size={16} className="text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400" />
                 </div>
               ))}
-            </div>
-            
-            {/* Chart Lines (SVG) */}
-            <svg className="absolute inset-0 w-full h-full pl-12 pb-6 pt-2" preserveAspectRatio="none">
-              {/* Blue Line */}
-              <path 
-                d="M0,150 C50,150 100,120 150,130 C200,140 250,100 300,80 C350,60 400,90 450,70 C500,50 550,100 600,110 C650,120 700,100 750,110" 
-                fill="none" 
-                stroke="#0277BD" 
-                strokeWidth="3" 
-                strokeLinecap="round"
-              />
-              {/* Cyan Line */}
-              <path 
-                d="M0,180 C50,170 100,190 150,220 C200,250 250,180 300,160 C350,140 400,160 450,180 C500,200 550,180 600,160 C650,140 700,150 750,140" 
-                fill="none" 
-                stroke="#06b6d4" 
-                strokeWidth="3" 
-                strokeLinecap="round"
-                opacity="0.6"
-              />
-              
-              {/* Tooltip Point */}
-              <circle cx="450" cy="70" r="6" fill="#0277BD" stroke="white" strokeWidth="3" />
-            </svg>
-            
-            {/* Tooltip Label */}
-            <div className="absolute top-[15%] left-[55%] bg-white p-2 rounded-lg shadow-lg border border-slate-100 text-xs z-10">
-              <div className="font-bold text-slate-900">$27,632</div>
-              <div className="text-slate-500">August</div>
-            </div>
-          </div>
-        </Card>
+            </Card>
+          </section>
 
-        {/* Bottom Section: Recommendations & Treatment */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Recommendations */}
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-lg text-slate-900">Recommendation</h3>
-              <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal size={20} /></button>
+          {/* Recommended Doctors */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recommended</h2>
+              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/doctors')}>
+                Find More
+              </Button>
             </div>
             <div className="space-y-4">
-              {[
-                { title: "What is Arteriosclerosis?", date: "12 April 2023", color: "bg-orange-100 text-orange-600" },
-                { title: "Cardiologist Consultation", date: "14 April 2023", color: "bg-blue-100 text-blue-600" }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer">
-                  <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center ${item.color}`}>
-                    <Activity size={20} />
+              {recommendedDoctors.map((doctor) => (
+                <Card key={doctor.id} className="p-4 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer border-slate-200 dark:border-slate-700">
+                  <img src={doctor.image} alt={doctor.name} className="w-12 h-12 rounded-xl object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm">{doctor.name}</h4>
+                    <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium">{doctor.specialization}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Star size={12} className="text-yellow-400 fill-yellow-400" />
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{doctor.rating}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">({doctor.reviews})</span>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm">{item.title}</h4>
-                    <p className="text-xs text-slate-500">{item.date}</p>
-                  </div>
-                </div>
+                  <Button variant="outline" className="h-8 text-xs border-slate-200 dark:border-slate-600 hover:border-[#0277BD] dark:hover:border-blue-400 hover:text-[#0277BD] dark:hover:text-blue-400">
+                    Profile
+                  </Button>
+                </Card>
               ))}
             </div>
-          </Card>
-
-          {/* Treatment */}
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-lg text-slate-900">Treatment</h3>
-              <button className="text-slate-400 hover:text-slate-600"><MoreHorizontal size={20} /></button>
-            </div>
-            <div className="space-y-4">
-              {[
-                { name: "Vitamin A", dose: "1 tablet twice a day", color: "bg-purple-100 text-purple-600" },
-                { name: "Vitamin B", dose: "1 tablet twice a day", color: "bg-cyan-100 text-cyan-600" }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors cursor-pointer">
-                  <div className={`w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center ${item.color}`}>
-                    <Droplets size={20} />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-slate-900 text-sm">{item.name}</h4>
-                    <p className="text-xs text-slate-500">{item.dose}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          </section>
         </div>
       </div>
 
-      {/* Right Sidebar (Desktop) */}
-      <div className="w-full xl:w-80 flex-shrink-0 space-y-8">
-        {/* Calendar Widget Placeholder */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-slate-900">April 2023</h3>
-            <div className="flex gap-1">
-              <button className="p-1 hover:bg-slate-100 rounded"><ChevronRight className="rotate-180" size={16} /></button>
-              <button className="p-1 hover:bg-slate-100 rounded"><ChevronRight size={16} /></button>
+      {/* Right Sidebar - Health Info */}
+      <div className="w-full xl:w-80 flex-shrink-0 space-y-6">
+        {/* Profile Summary Card */}
+        <Card className="p-6 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm relative overflow-hidden">
+          <div className="relative z-10">
+            <div className="text-left mb-6">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">My Health</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">32 Years • Male</p>
             </div>
-          </div>
-          {/* Simple Calendar Grid Mock */}
-          <div className="grid grid-cols-7 gap-2 text-center text-xs mb-2">
-            {['S','M','T','W','T','F','S'].map(d => <span key={d} className="text-slate-400 font-medium">{d}</span>)}
-          </div>
-          <div className="grid grid-cols-7 gap-2 text-center text-sm">
-            {Array.from({length: 30}, (_, i) => i + 1).map(d => (
-              <div 
-                key={d} 
-                className={`
-                  aspect-square flex items-center justify-center rounded-full cursor-pointer
-                  ${d === 23 ? 'bg-[#0277BD] text-white shadow-md' : 'hover:bg-slate-50 text-slate-700'}
-                `}
-              >
-                {d}
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Doctors List */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-slate-900">Doctors</h3>
-            <button className="text-xs text-[#0277BD] font-medium hover:underline">See All</button>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {[1,2,3,4].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-2 min-w-[60px]">
-                <div className="w-14 h-14 rounded-full bg-slate-200 border-2 border-white shadow-sm overflow-hidden">
-                  <img src={`https://i.pravatar.cc/150?img=${i + 10}`} alt="Doctor" className="w-full h-full object-cover" />
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-red-900/30">
+                <div className="text-[10px] text-red-500 dark:text-red-400 uppercase font-bold mb-1">Blood</div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">A+</div>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                <div className="text-[10px] text-blue-500 dark:text-blue-400 uppercase font-bold mb-1">Height</div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">182<span className="text-[10px] text-slate-500 ml-0.5">cm</span></div>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                <div className="text-[10px] text-emerald-500 dark:text-emerald-400 uppercase font-bold mb-1">Weight</div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">78<span className="text-[10px] text-slate-500 ml-0.5">kg</span></div>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-left">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Profile Completion</span>
+                  <span className="text-[#0277BD] dark:text-blue-400 font-bold">85%</span>
                 </div>
-                <span className="text-xs font-medium text-slate-600">Dr. {['Lee', 'Kim', 'Raj', 'Roy'][i-1]}</span>
+                <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#0277BD] w-[85%] rounded-full"></div>
+                </div>
               </div>
-            ))}
+            </div>
+            
+            <Button className="w-full mt-6 bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600" onClick={() => navigate('/dashboard/settings')}>
+              Edit Profile
+            </Button>
+          </div>
+        </Card>
+
+        {/* Insurance / ID Card Mockup */}
+        <div className="bg-gradient-to-br from-[#0277BD] to-[#015f96] rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+          <div className="relative z-10">
+            <div className="flex justify-between items-start mb-8">
+              <Activity className="text-white/80" />
+              <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-medium backdrop-blur-sm">PREMIUM</span>
+            </div>
+            <div className="space-y-1 mb-4">
+              <div className="text-xs text-blue-200">Member ID</div>
+              <div className="font-mono text-lg tracking-wider">8824 9921 4421</div>
+            </div>
+            <div className="flex justify-between items-end">
+              <div>
+                <div className="text-[10px] text-blue-200">Exp Date</div>
+                <div className="text-sm font-medium">12/26</div>
+              </div>
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" alt="Mastercard" className="h-6 opacity-80 grayscale brightness-200" />
+            </div>
           </div>
         </div>
 
-        {/* Health Details */}
-        <Card className="p-6 border-slate-100 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-lg text-slate-900">Details</h3>
-            <button className="text-xs text-[#0277BD] font-medium hover:underline">See All</button>
-          </div>
-          <div className="flex justify-between text-center">
-            <div>
-              <div className="text-xs text-slate-500 mb-1">Blood</div>
-              <div className="font-bold text-slate-900">A+</div>
+        {/* Upcoming Appointment Mini Widget */}
+        <Card className="p-5 border-slate-200 dark:border-slate-700">
+          <h3 className="font-bold text-slate-900 dark:text-white mb-4 text-sm">Next Appointment</h3>
+          <div className="flex gap-3 items-start">
+            <div className="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 rounded-lg p-2 min-w-[50px]">
+              <span className="text-xs text-[#0277BD] dark:text-blue-400 font-bold uppercase">Oct</span>
+              <span className="text-xl font-bold text-slate-900 dark:text-white">24</span>
             </div>
-            <div className="w-px bg-slate-100"></div>
             <div>
-              <div className="text-xs text-slate-500 mb-1">Height</div>
-              <div className="font-bold text-slate-900">170 cm</div>
-            </div>
-            <div className="w-px bg-slate-100"></div>
-            <div>
-              <div className="text-xs text-slate-500 mb-1">Weight</div>
-              <div className="font-bold text-slate-900">70 kg</div>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Dr. James Chen</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Dermatologist</p>
+              <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+                <MapPin size={10} />
+                <span>City Clinic, Floor 2</span>
+              </div>
             </div>
           </div>
         </Card>
 
-        {/* Upgrade Card */}
-        <div className="relative rounded-2xl overflow-hidden bg-black text-white p-6 text-center">
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black z-0"></div>
-          <div className="relative z-10">
-            <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <ArrowUpRight className="text-white" />
-            </div>
-            <h3 className="font-bold text-lg mb-2">Upgrade to Pro</h3>
-            <p className="text-slate-400 text-xs mb-6">Get unlimited AI analysis and cloud storage.</p>
-            <Button className="w-full bg-white text-black hover:bg-slate-100 font-bold h-10">
-              Get Started
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

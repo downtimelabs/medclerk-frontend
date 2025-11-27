@@ -10,6 +10,8 @@ import Doctors from './pages/dashboard/Doctors';
 import Documents from './pages/dashboard/Documents';
 import DocumentCategory from './pages/dashboard/DocumentCategory';
 import Chat from './pages/dashboard/Chat';
+import Settings from './pages/dashboard/Settings';
+import Help from './pages/dashboard/Help';
 
 function App() {
   return (
@@ -28,6 +30,8 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="documents/:category" element={<DocumentCategory />} />
           <Route path="chat" element={<Chat />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="help" element={<Help />} />
         </Route>
       </Routes>
     </Router>

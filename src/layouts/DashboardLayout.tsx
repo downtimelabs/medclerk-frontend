@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -9,24 +9,50 @@ import {
   Menu,
   X,
   Activity,
-  ChevronLeft,
-  ChevronRight,
-  FileText
+  Search,
+  Bell,
+  FileText,
+  HelpCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile toggle
-  const [isCollapsed, setIsCollapsed] = useState(false); // Desktop collapse
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: FileText, label: 'Report Centre', path: '/dashboard/documents' },
-    { icon: MessageSquare, label: 'AI Chat', path: '/dashboard/chat' },
-    { icon: Stethoscope, label: 'Find Doctors', path: '/dashboard/doctors' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+  // Handle Dark Mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
+  const menuGroups = [
+    {
+      title: "Main Menu",
+      items: [
+        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
+        { icon: Stethoscope, label: 'Find Doctors', path: '/dashboard/doctors' },
+        { icon: MessageSquare, label: 'AI Chat', path: '/dashboard/chat' },
+      ]
+    },
+    {
+      title: "Records",
+      items: [
+        { icon: FileText, label: 'Report Centre', path: '/dashboard/documents' },
+      ]
+    },
+    {
+      title: "Help & Settings",
+      items: [
+        { icon: HelpCircle, label: 'Help & Center', path: '/dashboard/help' },
+        { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+      ]
+    }
   ];
 
   const isActive = (path: string) => {
@@ -36,7 +62,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen flex bg-[#F5F6FA] dark:bg-slate-900 transition-colors duration-200">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -52,122 +78,141 @@ const DashboardLayout = () => {
 
       {/* Sidebar */}
       <motion.aside
-        animate={{ width: isCollapsed ? 80 : 256 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
         className={`
-          fixed lg:static inset-y-0 left-0 z-50 bg-white border-r border-slate-200 shadow-sm
-          ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full lg:translate-x-0'}
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          transition-all duration-300 ease-in-out
         `}
       >
-        <div className="h-full flex flex-col relative">
-          {/* Collapse Button (Desktop Only) */}
-          <button 
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:flex absolute -right-3 top-8 bg-white border border-slate-200 rounded-full p-1 text-slate-400 hover:text-slate-600 shadow-sm z-10"
-          >
-            {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-          </button>
-
-          {/* Logo */}
-          <div className={`h-16 flex items-center ${isCollapsed ? 'justify-center' : 'px-6'} border-b border-slate-100 transition-all`}>
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="bg-[#0277BD] p-1.5 rounded-lg flex-shrink-0">
-                <Activity className="h-5 w-5 text-white" />
-              </div>
-              {!isCollapsed && (
-                <motion.span 
-                  initial={{ opacity: 0 }} 
-                  animate={{ opacity: 1 }} 
-                  className="font-bold text-lg text-slate-800 tracking-tight whitespace-nowrap"
-                >
-                  MedClerk
-                </motion.span>
-              )}
-            </div>
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              className="ml-auto lg:hidden text-slate-400 hover:text-slate-600"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-6 space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsSidebarOpen(false);
-                }}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative
-                  ${isActive(item.path) 
-                    ? 'bg-blue-50 text-[#0277BD]' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
-                  ${isCollapsed ? 'justify-center' : ''}
-                `}
-              >
-                <item.icon size={20} className={`flex-shrink-0 ${isActive(item.path) ? 'text-[#0277BD]' : 'text-slate-400'}`} />
-                {!isCollapsed && <span>{item.label}</span>}
-                
-                {/* Tooltip for collapsed state */}
-                {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                    {item.label}
-                  </div>
-                )}
-              </button>
-            ))}
-          </nav>
-
-          {/* User Profile & Logout */}
-          <div className="p-4 border-t border-slate-100">
-            <div className={`flex items-center gap-3 mb-4 ${isCollapsed ? 'justify-center' : 'px-2'}`}>
-              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs flex-shrink-0">
-                JD
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">John Doe</p>
-                  <p className="text-xs text-slate-500 truncate">Patient Account</p>
-                </div>
-              )}
-            </div>
-            <button 
-              onClick={() => navigate('/login')}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-              title={isCollapsed ? "Sign Out" : ""}
-            >
-              <LogOut size={20} className="flex-shrink-0" />
-              {!isCollapsed && "Sign Out"}
-            </button>
-          </div>
-        </div>
-      </motion.aside>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Mobile Header */}
-        <header className="lg:hidden bg-white border-b border-slate-200 h-16 flex items-center px-4 justify-between">
-          <div className="flex items-center gap-2">
+        {/* Logo */}
+        <div className="h-20 flex items-center px-8 border-b border-slate-50/50 dark:border-slate-700/50">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="bg-[#0277BD] p-1.5 rounded-lg">
               <Activity className="h-5 w-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-slate-800">MedClerk</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg text-slate-800 dark:text-white leading-none">MedClerk</span>
+            </div>
           </div>
           <button 
-            onClick={() => setIsSidebarOpen(true)}
-            className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+            onClick={() => setIsSidebarOpen(false)}
+            className="ml-auto lg:hidden text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
-            <Menu size={24} />
+            <X size={20} />
           </button>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8">
+          {menuGroups.map((group, idx) => (
+            <div key={idx}>
+              <h3 className="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">
+                {group.title}
+              </h3>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const active = isActive(item.path);
+                  return (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`
+                        w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all relative
+                        ${active 
+                          ? 'text-[#0277BD] bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' 
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                        }
+                      `}
+                    >
+                      {active && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#0277BD] rounded-r-full"></div>
+                      )}
+                      <item.icon size={20} className={active ? 'text-[#0277BD] dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Dark Mode Toggle & Footer */}
+        <div className="p-6 border-t border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Dark mode</span>
+            <button 
+              onClick={() => setDarkMode(!darkMode)}
+              className={`w-11 h-6 rounded-full transition-colors relative ${darkMode ? 'bg-[#0277BD]' : 'bg-slate-200'}`}
+            >
+              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
+            </button>
+          </div>
+          <button 
+            onClick={() => navigate('/login')}
+            className="flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors px-2"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* Main Content Wrapper */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* Top Bar */}
+        <header className="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-8 flex-shrink-0 transition-colors duration-200">
+          <div className="flex items-center gap-4 flex-1">
+            <button 
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden p-2 text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg"
+            >
+              <Menu size={20} />
+            </button>
+            
+            {/* Search */}
+            <div className="hidden md:flex items-center gap-3 w-full bg-slate-50 dark:bg-slate-700/50 px-4 py-2.5 rounded-xl border-none focus-within:ring-2 focus-within:ring-[#0277BD]/20 transition-all">
+              <Search size={18} className="text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search anything here..." 
+                className="bg-transparent border-none outline-none text-sm text-slate-700 dark:text-slate-200 w-full placeholder:text-slate-400"
+              />
+            </div>
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-4 lg:gap-6">
+            <button className="relative p-2 text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700 rounded-full transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-800"></span>
+            </button>
+            
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+            
+            <div 
+              className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-xl transition-colors"
+              onClick={() => navigate('/dashboard/settings')}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100" 
+                alt="Profile" 
+                className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-600"
+              />
+              <div className="hidden sm:block text-left">
+                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">John Doe</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Patient Account</p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth dark:bg-slate-900">
+          <div className="max-w-[1600px] mx-auto">
             <Outlet />
           </div>
         </main>

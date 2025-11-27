@@ -20,9 +20,9 @@ const Chat = () => {
   ];
 
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto pb-2">
+    <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto pb-0">
       {/* Header */}
-      <div className="flex-none mb-12 text-left">
+      <div className="flex-none mb-12 mt-10 text-left">
         <h1 className="text-6xl font-bold text-slate-900 mb-4 tracking-tight">
           Hi there, <span className="text-[#0277BD]">John</span>
         </h1>
