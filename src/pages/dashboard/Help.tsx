@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, MessageCircle, HelpCircle as HelpIcon } from 'lucide-react';
+import { Mail, Phone, MessageCircle, HelpCircle as HelpIcon } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 

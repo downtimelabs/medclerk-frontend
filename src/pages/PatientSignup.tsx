@@ -46,13 +46,13 @@ const PatientSignup = () => {
     e.preventDefault();
     console.log('Final Signup Data:', formData);
     // TODO: API Call
-    navigate('/dashboard');
+    navigate('/patient/dashboard');
   };
 
   const skipStep2 = () => {
     console.log('Skipped Step 2. Signup Data:', formData);
     // TODO: API Call with partial data
-    navigate('/dashboard');
+    navigate('/patient/dashboard');
   };
 
   return (

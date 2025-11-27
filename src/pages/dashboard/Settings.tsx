@@ -1,35 +1,71 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, User, Activity, AlertCircle } from 'lucide-react';
+import { Save, User, Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
+import { usePatientStore } from '../../store/patientStore';
+import { useOnFocus } from '../../hooks/useRefresh';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'medical'>('profile');
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const { profile, loading, fetchProfile, updatePatientProfile } = usePatientStore();
 
   // Profile Form State
   const [profileData, setProfileData] = useState({
-    name: 'John Doe',
-    phoneNumber: '+1 (555) 123-4567',
-    country: 'United States',
-    state: 'California',
+    name: '',
+    phoneNumber: '',
+    country: '',
+    state: '',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
   });
 
   // Medical Form State
   const [medicalData, setMedicalData] = useState({
-    dob: '1990-01-01',
-    bloodGroup: 'O+',
-    heightCm: '175',
-    weightKg: '70',
-    allergies: 'Peanuts',
-    chronicConditions: 'None',
-    emergencyContactName: 'Jane Doe',
-    emergencyContactPhone: '+1 (555) 987-6543',
-    emergencyContactEmail: 'jane@example.com'
+    dob: '',
+    bloodGroup: '',
+    heightCm: '',
+    weightKg: '',
+    allergies: '',
+    chronicConditions: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    emergencyContactEmail: ''
   });
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  useOnFocus(() => {
+    fetchProfile();
+  });
+
+  // Sync store data to local state
+  useEffect(() => {
+    if (profile) {
+      setProfileData({
+        name: profile.name || '',
+        phoneNumber: profile.phoneNumber || '',
+        country: profile.address?.country || '',
+        state: profile.address?.state || '',
+        avatarUrl: profile.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+      });
+
+      setMedicalData({
+        dob: profile.patientProfile?.dateOfBirth ? new Date(profile.patientProfile.dateOfBirth).toISOString().split('T')[0] : '',
+        bloodGroup: profile.patientProfile?.bloodGroup || '',
+        heightCm: profile.patientProfile?.height?.toString() || '',
+        weightKg: profile.patientProfile?.weight?.toString() || '',
+        allergies: profile.patientProfile?.allergies?.join(', ') || '',
+        chronicConditions: profile.patientProfile?.chronicConditions?.join(', ') || '',
+        emergencyContactName: profile.patientProfile?.emergencyContact?.name || '',
+        emergencyContactPhone: profile.patientProfile?.emergencyContact?.phoneNumber || '',
+        emergencyContactEmail: profile.patientProfile?.emergencyContact?.email || '' // Assuming email exists in backend or we map it
+      });
+    }
+  }, [profile]);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,23 +79,44 @@ const Settings = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // In a real app, we would update the user profile endpoint
+    // For now, we'll just log it as the updatePatientProfile is for medical info mostly in the current store structure
+    // or we can assume updatePatientProfile handles basic info too if backend supports it.
+    // Based on previous context, updatePatientProfile updates PatientHealthProfile.
+    // We might need a separate endpoint for basic user info (name, phone) if they are in AuthUser table.
+    // For this integration, I'll assume we can only update medical info via updatePatientProfile for now, 
+    // or we'd need to extend the API.
     console.log('Saving Profile:', profileData);
-    setIsLoading(false);
-    // TODO: Show success toast
+    alert("Profile update not fully implemented in backend yet.");
   };
 
   const handleSaveMedical = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Saving Medical:', medicalData);
-    setIsLoading(false);
-    // TODO: Show success toast
+    
+    const payload = {
+      dateOfBirth: medicalData.dob ? new Date(medicalData.dob).toISOString() : undefined,
+      bloodGroup: medicalData.bloodGroup,
+      height: medicalData.heightCm ? parseFloat(medicalData.heightCm) : undefined,
+      weight: medicalData.weightKg ? parseFloat(medicalData.weightKg) : undefined,
+      allergies: medicalData.allergies.split(',').map(s => s.trim()).filter(Boolean),
+      chronicConditions: medicalData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean),
+      emergencyContact: {
+        name: medicalData.emergencyContactName,
+        phoneNumber: medicalData.emergencyContactPhone,
+        relation: 'Family' // Defaulting for now
+      }
+    };
+
+    await updatePatientProfile(payload);
   };
+
+  if (loading && !profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0277BD]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -155,9 +212,9 @@ const Settings = () => {
               </div>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={loading}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isLoading ? 'Saving...' : 'Save Changes'}
+                  {loading ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </motion.form>
@@ -284,9 +341,9 @@ const Settings = () => {
               </section>
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={loading}>
                   <Save className="w-4 h-4 mr-2" />
-                  {isLoading ? 'Saving...' : 'Save Medical Info'}
+                  {loading ? 'Saving...' : 'Save Medical Info'}
                 </Button>
               </div>
             </motion.form>

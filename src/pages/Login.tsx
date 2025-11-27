@@ -14,7 +14,7 @@ const Login = () => {
     e.preventDefault();
     // TODO: Implement actual login logic
     console.log('Login attempt:', { email, password });
-    navigate('/dashboard'); // Placeholder navigation
+    navigate('/patient/dashboard'); // Placeholder navigation
   };
 
   return (

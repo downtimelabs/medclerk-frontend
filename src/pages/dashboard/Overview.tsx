@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { 
   Activity, 
   Calendar, 
@@ -8,40 +9,65 @@ import {
   Star, 
   Clock, 
   MapPin,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { usePatientStore } from '../../store/patientStore';
+import { useOnFocus } from '../../hooks/useRefresh';
 
 const Overview = () => {
   const navigate = useNavigate();
+  const { 
+    profile, 
+    stats, 
+    activeDoctors, 
+    documents,
+    loading, 
+    fetchProfile, 
+    fetchStats, 
+    fetchActiveDoctors,
+    fetchDocuments
+  } = usePatientStore();
 
-  // Mock Data
-  const careTeam = [
-    { id: 1, name: "Dr. Sarah Wilson", specialization: "Cardiologist", image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Tomorrow, 10:00 AM" },
-    { id: 2, name: "Dr. James Chen", specialization: "Dermatologist", image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Oct 24, 2:30 PM" },
-    { id: 3, name: "Dr. Emily Parker", specialization: "General Physician", image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Nov 02, 9:15 AM" },
-    { id: 4, name: "Dr. Michael Brown", specialization: "Neurologist", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", nextAppt: "Nov 15, 11:00 AM" },
-  ];
+  // Fetch data on mount
+  useEffect(() => {
+    fetchProfile();
+    fetchStats();
+    fetchActiveDoctors();
+    fetchDocuments();
+  }, []);
+
+  // Refetch on focus to prevent stale data
+  useOnFocus(() => {
+    fetchProfile();
+    fetchStats();
+    fetchActiveDoctors();
+    fetchDocuments();
+  });
 
   const quickActions = [
-    { icon: Calendar, label: "Book Appointment", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", path: "/dashboard/doctors" },
-    { icon: Upload, label: "Upload Records", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-900/20", path: "/dashboard/documents" },
-    { icon: Activity, label: "Vitals", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", path: "/dashboard/vitals" },
-    { icon: Settings, label: "Settings", color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-800", path: "/dashboard/settings" },
+    { icon: Calendar, label: "Book Appointment", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", path: "/patient/doctors" },
+    { icon: Upload, label: "Upload Records", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-900/20", path: "/patient/documents" },
+    { icon: Activity, label: "Vitals", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", path: "/patient/vitals" }, // Placeholder path
+    { icon: Settings, label: "Settings", color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-800", path: "/patient/settings" },
   ];
 
-  const recentDocuments = [
-    { id: 1, title: "Blood Test Results", type: "Lab Report", date: "Oct 15, 2023", doctor: "Dr. Emily Parker" },
-    { id: 2, title: "Cardiology Consultation", type: "Prescription", date: "Oct 10, 2023", doctor: "Dr. Sarah Wilson" },
-    { id: 3, title: "MRI Scan Report", type: "Radiology", date: "Sep 28, 2023", doctor: "Dr. Michael Brown" },
-  ];
-
+  // Mock recommended doctors (could be moved to a store later)
   const recommendedDoctors = [
     { id: 101, name: "Dr. Alice M.", specialization: "Endocrinologist", rating: 4.9, reviews: 128, image: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=300&h=300" },
     { id: 102, name: "Dr. Robert F.", specialization: "Orthopedic", rating: 4.8, reviews: 95, image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300" },
   ];
+
+  if (loading && !profile) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0277BD]" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 pb-8">
@@ -51,8 +77,12 @@ const Overview = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Welcome Back, <span className="text-[#0277BD]">John</span></h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">You have <span className="font-semibold text-slate-900 dark:text-white">5 appointments</span> scheduled for today.</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+              Welcome Back, <span className="text-[#0277BD]">{profile?.name?.split(' ')[0] || 'Patient'}</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
+              You have <span className="font-semibold text-slate-900 dark:text-white">{stats?.linkedDoctors || 0} active doctors</span> and <span className="font-semibold text-slate-900 dark:text-white">{stats?.totalDocuments || 0} documents</span>.
+            </p>
           </div>
           <Button className="bg-[#0277BD] hover:bg-[#015f96] text-white shadow-lg shadow-blue-200/50 dark:shadow-none">
             <Plus className="w-4 h-4 mr-2" />
@@ -64,34 +94,50 @@ const Overview = () => {
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Your Care Team</h2>
-            <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/doctors')}>
+            <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/patient/doctors')}>
               View All
             </Button>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
-            {careTeam.map((doctor) => (
-              <Card key={doctor.id} className="min-w-[280px] p-4 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group border-slate-200 dark:border-slate-700">
-                <div className="relative">
-                  <img src={doctor.image} alt={doctor.name} className="w-14 h-14 rounded-full object-cover border-2 border-slate-100 dark:border-slate-600 group-hover:border-[#0277BD] transition-colors" />
-                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">{doctor.name}</h3>
-                  <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium truncate">{doctor.specialization}</p>
-                  <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                    <Clock size={10} />
-                    <span className="truncate">{doctor.nextAppt}</span>
+          
+          {activeDoctors.length > 0 ? (
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
+              {activeDoctors.map((doctor) => (
+                <Card key={doctor.id} className="min-w-[280px] p-4 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group border-slate-200 dark:border-slate-700">
+                  <div className="relative">
+                    <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xl border-2 border-slate-100 dark:border-slate-600 group-hover:border-[#0277BD] transition-colors">
+                      {doctor.doctorName.charAt(0)}
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">{doctor.doctorName}</h3>
+                    <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium truncate">{doctor.doctorProfile?.specialization || 'General'}</p>
+                    <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                      <Clock size={10} />
+                      <span className="truncate">{doctor.doctorProfile?.clinicName || 'Clinic'}</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              <Card className="min-w-[100px] flex flex-col items-center justify-center gap-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-[#0277BD] dark:hover:border-blue-400 cursor-pointer transition-all" onClick={() => navigate('/patient/doctors')}>
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                  <Plus size={16} />
                 </div>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Add New</span>
               </Card>
-            ))}
-            <Card className="min-w-[100px] flex flex-col items-center justify-center gap-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-[#0277BD] dark:hover:border-blue-400 cursor-pointer transition-all" onClick={() => navigate('/dashboard/doctors')}>
-              <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500">
-                <Plus size={16} />
+            </div>
+          ) : (
+            <Card className="p-8 flex flex-col items-center justify-center text-center border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+              <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#0277BD] dark:text-blue-400 mb-3">
+                <Plus size={24} />
               </div>
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Add New</span>
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-1">No Doctors Linked</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 max-w-xs">Connect with your doctors to share records and manage appointments.</p>
+              <Button onClick={() => navigate('/patient/doctors')} className="bg-[#0277BD] hover:bg-[#015f96] text-white">
+                Find Doctors
+              </Button>
             </Card>
-          </div>
+          )}
         </section>
 
         {/* Quick Actions Grid */}
@@ -118,23 +164,31 @@ const Overview = () => {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Documents</h2>
-              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/documents')}>
+              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/patient/documents')}>
                 See All
               </Button>
             </div>
             <Card className="divide-y divide-slate-100 dark:divide-slate-700 border-slate-200 dark:border-slate-700">
-              {recentDocuments.map((doc) => (
-                <div key={doc.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#0277BD] dark:text-blue-400 group-hover:bg-[#0277BD] group-hover:text-white transition-colors">
-                    <FileText size={20} />
+              {documents.length > 0 ? (
+                documents.slice(0, 3).map((doc) => (
+                  <div key={doc.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#0277BD] dark:text-blue-400 group-hover:bg-[#0277BD] group-hover:text-white transition-colors">
+                      <FileText size={20} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{doc.fileName}</h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {doc.documentType || 'Document'} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{doc.title}</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{doc.type} • {doc.date}</p>
-                  </div>
-                  <ChevronRight size={16} className="text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400" />
+                ))
+              ) : (
+                <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+                  No documents uploaded yet.
                 </div>
-              ))}
+              )}
             </Card>
           </section>
 
@@ -142,7 +196,7 @@ const Overview = () => {
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recommended</h2>
-              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/dashboard/doctors')}>
+              <Button variant="ghost" className="text-sm text-[#0277BD] dark:text-blue-400 hover:text-[#015f96] dark:hover:text-blue-300 p-0 h-auto font-medium" onClick={() => navigate('/patient/doctors')}>
                 Find More
               </Button>
             </div>
@@ -176,21 +230,27 @@ const Overview = () => {
           <div className="relative z-10">
             <div className="text-left mb-6">
               <h3 className="font-bold text-lg text-slate-900 dark:text-white">My Health</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">32 Years • Male</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {profile?.patientProfile?.age ? `${profile.patientProfile.age} Years` : 'Age N/A'} • {profile?.patientProfile?.gender || 'Gender N/A'}
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-red-900/30">
                 <div className="text-[10px] text-red-500 dark:text-red-400 uppercase font-bold mb-1">Blood</div>
-                <div className="font-bold text-slate-900 dark:text-white text-lg">A+</div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">{profile?.patientProfile?.bloodGroup || 'N/A'}</div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30">
                 <div className="text-[10px] text-blue-500 dark:text-blue-400 uppercase font-bold mb-1">Height</div>
-                <div className="font-bold text-slate-900 dark:text-white text-lg">182<span className="text-[10px] text-slate-500 ml-0.5">cm</span></div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">
+                  {profile?.patientProfile?.height || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">cm</span>
+                </div>
               </div>
               <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
                 <div className="text-[10px] text-emerald-500 dark:text-emerald-400 uppercase font-bold mb-1">Weight</div>
-                <div className="font-bold text-slate-900 dark:text-white text-lg">78<span className="text-[10px] text-slate-500 ml-0.5">kg</span></div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">
+                  {profile?.patientProfile?.weight || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">kg</span>
+                </div>
               </div>
             </div>
 
@@ -206,7 +266,7 @@ const Overview = () => {
               </div>
             </div>
             
-            <Button className="w-full mt-6 bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600" onClick={() => navigate('/dashboard/settings')}>
+            <Button className="w-full mt-6 bg-slate-900 dark:bg-slate-700 text-white hover:bg-slate-800 dark:hover:bg-slate-600" onClick={() => navigate('/patient/settings')}>
               Edit Profile
             </Button>
           </div>

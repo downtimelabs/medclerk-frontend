@@ -35,7 +35,7 @@ const DocumentCategory = () => {
     <div className="space-y-8 pb-12 font-sans">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate('/dashboard/documents')} className="p-2 hover:bg-slate-100 rounded-full">
+        <Button variant="ghost" onClick={() => navigate('/patient/documents')} className="p-2 hover:bg-slate-100 rounded-full">
           <ArrowLeft size={24} className="text-slate-700" />
         </Button>
         <div>

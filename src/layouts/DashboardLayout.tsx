@@ -35,29 +35,29 @@ const DashboardLayout = () => {
     {
       title: "Main Menu",
       items: [
-        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
-        { icon: Stethoscope, label: 'Find Doctors', path: '/dashboard/doctors' },
-        { icon: MessageSquare, label: 'AI Chat', path: '/dashboard/chat' },
+        { icon: LayoutDashboard, label: 'Overview', path: '/patient/dashboard' },
+        { icon: Stethoscope, label: 'Find Doctors', path: '/patient/doctors' },
+        { icon: MessageSquare, label: 'AI Chat', path: '/patient/chat' },
       ]
     },
     {
       title: "Records",
       items: [
-        { icon: FileText, label: 'Report Centre', path: '/dashboard/documents' },
+        { icon: FileText, label: 'Report Centre', path: '/patient/documents' },
       ]
     },
     {
       title: "Help & Settings",
       items: [
-        { icon: HelpCircle, label: 'Help & Center', path: '/dashboard/help' },
-        { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+        { icon: HelpCircle, label: 'Help & Center', path: '/patient/help' },
+        { icon: Settings, label: 'Settings', path: '/patient/settings' },
       ]
     }
   ];
 
   const isActive = (path: string) => {
-    if (path === '/dashboard' && location.pathname === '/dashboard') return true;
-    if (path !== '/dashboard' && location.pathname.startsWith(path)) return true;
+    if (path === '/patient/dashboard' && location.pathname === '/patient/dashboard') return true;
+    if (path !== '/patient/dashboard' && location.pathname.startsWith(path)) return true;
     return false;
   };
 
@@ -195,7 +195,7 @@ const DashboardLayout = () => {
             
             <div 
               className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-xl transition-colors"
-              onClick={() => navigate('/dashboard/settings')}
+              onClick={() => navigate('/patient/settings')}
             >
               <img 
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100" 

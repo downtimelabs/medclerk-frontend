@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import GetStarted from './pages/GetStarted';
 import Login from './pages/Login';
@@ -23,9 +23,10 @@ function App() {
         <Route path="/signup/patient" element={<PatientSignup />} />
         <Route path="/signup/doctor" element={<DoctorSignup />} />
         
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Overview />} />
+        {/* Patient Dashboard Routes */}
+        <Route path="/patient" element={<DashboardLayout />}>
+          <Route index element={<Navigate to="/patient/dashboard" replace />} />
+          <Route path="dashboard" element={<Overview />} />
           <Route path="doctors" element={<Doctors />} />
           <Route path="documents" element={<Documents />} />
           <Route path="documents/:category" element={<DocumentCategory />} />
