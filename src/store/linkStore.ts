@@ -4,6 +4,8 @@ import type {
   PatientDoctorRequest,
   DoctorPatientRequest,
 } from '../interfaces/linking';
+import type { PublicDoctorProfile } from '../interfaces/discovery';
+import { searchDoctors } from '../api/discovery';
 import {
   getActiveDoctorsForPatient,
   getPatientPendingDoctorRequests,
@@ -18,7 +20,7 @@ interface LinkState {
   activeDoctors: LinkedDoctor[];
   pendingRequests: PatientDoctorRequest[];
   doctorPendingPatients: DoctorPatientRequest[];
-  discoverableDoctors: any[]; // Using any for now as we don't have a full Doctor type for discovery yet
+  discoverableDoctors: PublicDoctorProfile[];
   loading: boolean;
   error: string | null;
 
@@ -98,34 +100,10 @@ export const useLinkStore = create<LinkState>((set, get) => ({
   discoverDoctors: async () => {
       set({ loading: true, error: null });
       try {
-          // Mock discovery for now as we don't have an endpoint in api/linking.ts yet
-          // In a real app, this would call `searchDoctors` or similar
-          const mockDoctors = [
-            {
-                id: 'doc-1',
-                name: "Dr. Michael Ross",
-                doctorProfile: {
-                    specialization: "General Physician",
-                    experienceYears: 20,
-                    clinicName: "City Health Clinic",
-                    clinicAddress: "321 5th Ave, New York",
-                },
-                rating: 4.7,
-            },
-            {
-                id: 'doc-2',
-                name: "Dr. Lisa Chang",
-                doctorProfile: {
-                    specialization: "Neurologist",
-                    experienceYears: 15,
-                    clinicName: "Brain & Spine Institute",
-                    clinicAddress: "88 West End, New York",
-                },
-                rating: 4.9,
-            }
-          ];
-          set({ discoverableDoctors: mockDoctors, loading: false });
+          const response = await searchDoctors({});
+          set({ discoverableDoctors: response.doctors, loading: false });
       } catch (error) {
+          console.error('Failed to discover doctors:', error);
           set({ error: 'Failed to discover doctors', loading: false });
       }
   },

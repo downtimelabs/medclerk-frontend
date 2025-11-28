@@ -4,17 +4,40 @@ import { Activity, ArrowRight, FileText, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { useAuthStore } from '../store/authStore';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual login logic
-    console.log('Login attempt:', { email, password });
-    navigate('/patient/dashboard'); // Placeholder navigation
+    setLoading(true);
+    setError(null);
+
+    try {
+      await login(email, password);
+      
+      // Get user from store to check role
+      const user = useAuthStore.getState().user;
+      
+      // Redirect based on role
+      if (user?.role === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else {
+        navigate('/patient/dashboard');
+      }
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,6 +57,11 @@ const Login = () => {
             <p className="text-slate-600">
               Enter your credentials to access your secure medical dashboard.
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                {error}
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -68,9 +96,18 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 text-base mt-2 shadow-lg shadow-blue-500/20">
-              Sign In to Dashboard
-              <ArrowRight className="ml-2 h-4 w-4" />
+            <Button type="submit" className="w-full h-12 text-base mt-2 shadow-lg shadow-blue-500/20" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In to Dashboard
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </Button>
           </form>
 

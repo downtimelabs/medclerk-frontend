@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, Check, ChevronRight, Stethoscope, ShieldCheck } from 'lucide-react';
+import { Activity, Check, ChevronRight, Stethoscope, ShieldCheck, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { registerDoctorApi } from '../api/auth';
+import type { RegisterDoctorRequest } from '../interfaces/auth';
 
 const DoctorSignup = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -42,11 +46,49 @@ const DoctorSignup = () => {
     setStep(2);
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Final Doctor Signup Data:', formData);
-    // TODO: API Call
-    navigate('/');
+    setLoading(true);
+    setError(null);
+
+    try {
+      const payload: RegisterDoctorRequest = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'DOCTOR',
+        address: {
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          country: 'USA', // Defaulting for now
+          postalCode: '00000', // Defaulting
+        },
+        doctorProfile: {
+          licenseNumber: formData.licenseNumber,
+          specialization: formData.specialization,
+          clinicName: formData.clinicName,
+          yearsOfExperience: formData.yearsOfExperience ? parseInt(formData.yearsOfExperience) : undefined,
+          clinicAddress: {
+            street: formData.street, // Using same address for clinic for simplicity if not separate
+            city: formData.city,
+            state: formData.state,
+            country: 'USA',
+            postalCode: '00000'
+          }
+        }
+      };
+
+      await registerDoctorApi(payload);
+      // On success, redirect to login
+      navigate('/login');
+    } catch (err: any) {
+      console.error('Signup failed:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const skipStep2 = () => {
@@ -129,6 +171,11 @@ const DoctorSignup = () => {
                 ? "Expand your practice and streamline patient care." 
                 : "Tell us about your practice. You can add this later."}
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                {error}
+              </div>
+            )}
           </div>
 
           <AnimatePresence mode="wait">
@@ -267,9 +314,18 @@ const DoctorSignup = () => {
                 </div>
 
                 <div className="flex flex-col gap-3 mt-6">
-                  <Button type="submit" className="w-full h-12 text-base bg-[#004D40] hover:bg-[#00382e]">
-                    Complete Signup
-                    <Check className="ml-2 h-4 w-4" />
+                  <Button type="submit" className="w-full h-12 text-base bg-[#004D40] hover:bg-[#00382e]" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        Complete Signup
+                        <Check className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                   <Button type="button" variant="ghost" onClick={skipStep2} className="w-full">
                     Skip for now

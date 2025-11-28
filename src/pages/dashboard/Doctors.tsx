@@ -74,7 +74,7 @@ const DoctorResultCard = ({ doctor, onClick, onConnect }: { doctor: any, onClick
               <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#0277BD] transition-colors">{doctor.name}</h3>
               <div className="flex items-center gap-1 text-[#0277BD] text-sm font-medium mb-1">
                 <Stethoscope size={14} />
-                {doctor.doctorProfile?.specialization || 'Specialist'}
+                {doctor.profile?.specialization || 'Specialist'}
               </div>
             </div>
             <div className="flex flex-col items-end">
@@ -87,12 +87,12 @@ const DoctorResultCard = ({ doctor, onClick, onConnect }: { doctor: any, onClick
           
           <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
             <MapPin size={12} />
-            {doctor.doctorProfile?.clinicAddress || 'Location N/A'}
+            {doctor.profile?.clinicAddress?.street || doctor.profile?.clinicAddress?.city || 'Location N/A'}
           </div>
           
           <div className="mt-3 flex flex-wrap gap-2">
              <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
-                {doctor.doctorProfile?.experienceYears || 0} Years Exp
+                {doctor.profile?.yearsOfExperience || 0} Years Exp
              </span>
           </div>
         </div>
@@ -157,7 +157,7 @@ const Doctors = () => {
   // Filter discoverable doctors
   const filteredDoctors = discoverableDoctors.filter(doc => 
     doc.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.doctorProfile?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.profile?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
