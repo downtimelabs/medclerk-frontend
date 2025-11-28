@@ -11,7 +11,7 @@ import type {
 
 // 1. Search doctors with filters
 export async function searchDoctors(query: SearchDoctorsQuery): Promise<DoctorSearchResponse> {
-  const response = await api.get<APIResponse<DoctorSearchResponse>>('/available-doctors', {
+  const response = await api.get<APIResponse<DoctorSearchResponse>>('/doctors', {
     params: query,
   });
   return response.data.data;

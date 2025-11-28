@@ -5,11 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
+import { registerPatientApi } from '../api/auth';
+import type { RegisterPatientRequest } from '../types/registerPatient';
+import { Loader2 } from 'lucide-react';
 
 
 const PatientSignup = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -20,6 +25,7 @@ const PatientSignup = () => {
     confirmPassword: '',
     // Step 2: Optional
     dob: '',
+    gender: '',
     bloodGroup: '',
     height: '',
     weight: '',
@@ -42,11 +48,50 @@ const PatientSignup = () => {
     setStep(2);
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Final Signup Data:', formData);
-    // TODO: API Call
-    navigate('/patient/dashboard');
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Calculate age from DOB
+      let age: number | null = null;
+      if (formData.dob) {
+        const birthDate = new Date(formData.dob);
+        const today = new Date();
+        age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+      }
+
+      const payload: RegisterPatientRequest = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'PATIENT',
+        patientProfile: {
+          age: age,
+          gender: formData.gender as "MALE" | "FEMALE" | "OTHER" | null,
+          bloodGroup: formData.bloodGroup || null,
+          height: formData.height ? parseFloat(formData.height) : null,
+          weight: formData.weight ? parseFloat(formData.weight) : null,
+          knownConditions: formData.chronicConditions 
+            ? formData.chronicConditions.split(',').map(c => c.trim()).filter(c => c) 
+            : [],
+        }
+      };
+
+      await registerPatientApi(payload);
+      navigate('/login');
+    } catch (err: any) {
+      console.error('Signup failed:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const skipStep2 = () => {
@@ -129,6 +174,11 @@ const PatientSignup = () => {
                 ? "Join thousands of patients managing their health smarter." 
                 : "Help us personalize your experience. You can skip this for now."}
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                {error}
+              </div>
+            )}
           </div>
 
           <AnimatePresence mode="wait">
@@ -202,6 +252,17 @@ const PatientSignup = () => {
                     onChange={handleInputChange}
                   />
                   <Select
+                    label="Gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleInputChange}
+                    options={[
+                      { value: 'MALE', label: 'Male' },
+                      { value: 'FEMALE', label: 'Female' },
+                      { value: 'OTHER', label: 'Other' },
+                    ]}
+                  />
+                  <Select
                     label="Blood Group"
                     name="bloodGroup"
                     value={formData.bloodGroup}
@@ -255,9 +316,18 @@ const PatientSignup = () => {
                 />
 
                 <div className="flex flex-col gap-3 mt-6">
-                  <Button type="submit" className="w-full h-12 text-base">
-                    Complete Signup
-                    <Check className="ml-2 h-4 w-4" />
+                  <Button type="submit" className="w-full h-12 text-base" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        Complete Signup
+                        <Check className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                   <Button type="button" variant="ghost" onClick={skipStep2} className="w-full">
                     Skip for now

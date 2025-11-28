@@ -16,6 +16,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { usePatientStore } from '../../store/patientStore';
+import { useUploadStore } from '../../store/uploadStore';
 import { useOnFocus } from '../../hooks/useRefresh';
 
 const Overview = () => {
@@ -31,6 +32,7 @@ const Overview = () => {
     fetchActiveDoctors,
     fetchDocuments
   } = usePatientStore();
+  const { viewDocument, viewingKey } = useUploadStore();
 
   // Fetch data on mount
   useEffect(() => {
@@ -171,14 +173,22 @@ const Overview = () => {
             <Card className="divide-y divide-slate-100 dark:divide-slate-700 border-slate-200 dark:border-slate-700">
               {documents.length > 0 ? (
                 documents.slice(0, 3).map((doc) => (
-                  <div key={doc.id} className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                  <div 
+                    key={doc.id} 
+                    className="p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                    onClick={() => viewDocument(doc.objectKey)}
+                  >
                     <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-[#0277BD] dark:text-blue-400 group-hover:bg-[#0277BD] group-hover:text-white transition-colors">
-                      <FileText size={20} />
+                      {viewingKey === doc.objectKey ? (
+                        <Loader2 size={20} className="animate-spin" />
+                      ) : (
+                        <FileText size={20} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{doc.fileName}</h4>
+                      <h4 className="font-semibold text-slate-900 dark:text-white text-sm truncate">{doc.title}</h4>
                       <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {doc.documentType || 'Document'} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                        {doc.type || 'Document'} • {new Date(doc.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <ChevronRight size={16} className="text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400" />

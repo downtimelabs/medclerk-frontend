@@ -39,7 +39,7 @@ const Documents = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { documents, loading, fetchDocuments } = useUploadStore();
+  const { documents, loading, fetchDocuments, viewDocument, viewingKey } = useUploadStore();
 
   useEffect(() => {
     fetchDocuments();
@@ -55,14 +55,13 @@ const Documents = () => {
   };
 
   const handleFileClick = (file: any) => {
-    // In a real app, this would open a modal or download
-    console.log(`Previewing ${file.fileName}`);
+    viewDocument(file.objectKey);
   };
 
   // Derived stats
   const totalSize = documents.reduce((acc, doc) => acc + (doc.fileSize || 0), 0);
   const formattedTotalSize = (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
-  const fileTypes = new Set(documents.map(d => d.fileType)).size;
+  const fileTypes = new Set(documents.map(d => d.mimeType)).size;
 
   const stats = [
     { label: 'Total Documents', value: documents.length.toString(), icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -72,8 +71,8 @@ const Documents = () => {
   ];
 
   const filteredDocuments = documents.filter(doc => 
-    doc.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.documentType?.toLowerCase().includes(searchTerm.toLowerCase())
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.type?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -154,9 +153,9 @@ const Documents = () => {
                     <FileText size={24} />
                 </div>
                 <div>
-                    <h4 className="font-bold text-slate-900 text-sm truncate max-w-[150px]">{file.fileName}</h4>
+                    <h4 className="font-bold text-slate-900 text-sm truncate max-w-[150px]">{file.title}</h4>
                     <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                    <span className="font-medium text-slate-600">{file.documentType || 'Doc'}</span>
+                    <span className="font-medium text-slate-600">{file.type || 'Doc'}</span>
                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                     <span>{(file.fileSize / 1024).toFixed(0)} KB</span>
                     </div>
@@ -193,16 +192,16 @@ const Documents = () => {
                       <div className="w-10 h-10 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center group-hover:bg-white group-hover:text-[#0277BD] group-hover:shadow-sm transition-all">
                         <FileText size={20} />
                       </div>
-                      <span className="font-semibold text-slate-900 text-sm truncate max-w-[200px]">{file.fileName}</span>
+                      <span className="font-semibold text-slate-900 text-sm truncate max-w-[200px]">{file.title}</span>
                     </div>
                   </td>
                   <td className="p-5">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                        {file.documentType || 'Document'}
+                        {file.type || 'Document'}
                       </span>
                   </td>
                   <td className="p-5 text-sm text-slate-600 font-medium">{(file.fileSize / 1024).toFixed(0)} KB</td>
-                  <td className="p-5 text-sm text-slate-500">{new Date(file.uploadedAt).toLocaleDateString()}</td>
+                  <td className="p-5 text-sm text-slate-500">{new Date(file.createdAt).toLocaleDateString()}</td>
                   <td className="p-5 text-right relative">
                     <button 
                       onClick={(e) => toggleMenu(e, file.id)}
@@ -219,8 +218,20 @@ const Documents = () => {
                           onClick={(e) => { e.stopPropagation(); setActiveMenu(null); }}
                         />
                         <div className="absolute right-8 top-10 w-40 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 flex flex-col animate-in fade-in zoom-in-95 duration-100">
-                          <button className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium">
-                            <Eye size={16} /> Preview
+                          <button 
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              viewDocument(file.objectKey);
+                            }}
+                            disabled={viewingKey === file.objectKey}
+                          >
+                            {viewingKey === file.objectKey ? (
+                              <Loader2 size={16} className="animate-spin text-[#0277BD]" />
+                            ) : (
+                              <Eye size={16} />
+                            )}
+                            Preview
                           </button>
                           <button className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium">
                             <Download size={16} /> Download

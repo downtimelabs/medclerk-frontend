@@ -79,9 +79,28 @@ export interface LoginResponse extends Tokens {
 }
 
 export interface RegisterPatientResponse {
+  statusCode: number;
   message: string;
-  user: AuthUser;
-  verificationToken?: string;
+  data: {
+    id: string;
+    email: string;
+    emailVerified: boolean;
+    name: string;
+    role: 'PATIENT';
+    plan: string;
+    createdAt: string;
+    updatedAt: string;
+    patientProfile: {
+      id: string;
+      userId: string;
+      age: number | null;
+      gender: "MALE" | "FEMALE" | "OTHER" | null;
+      bloodGroup: string | null;
+      height: number | null;
+      weight: number | null;
+      knownConditions: string[];
+    };
+  };
 }
 
 export interface RefreshTokenRequest {
