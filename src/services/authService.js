@@ -35,33 +35,44 @@ export const login = async ({ email, password }) => {
     email: email
   });
   
-  const res = await apiFetch(API_ENDPOINTS.AUTH.LOGIN, {
-    method: 'POST',
-    body: JSON.stringify({ email, password })
-  });
-  
-  console.log('📥 Login response:', res);
-  console.log('📥 Full response structure:', JSON.stringify(res, null, 2));
-  
-  // Try multiple possible token locations
-  const tokens = res?.data?.tokens || res?.tokens || res?.data || {};
-  console.log('🔑 Extracted tokens:', tokens);
-  
-  // Check for different token field names
-  const accessToken = tokens.accessToken || tokens.access_token || tokens.token;
-  const refreshToken = tokens.refreshToken || tokens.refresh_token;
-  
-  console.log('🔑 Access token found:', !!accessToken);
-  console.log('🔑 Refresh token found:', !!refreshToken);
-  
-  if (accessToken) {
-    saveTokens({ accessToken, refreshToken });
-    console.log('✅ Tokens saved to localStorage');
-  } else {
-    console.error('❌ No access token found in response');
+  try {
+    const res = await apiFetch(API_ENDPOINTS.AUTH.LOGIN, {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+    
+    console.log('📥 Login response:', res);
+    console.log('📥 Full response structure:', JSON.stringify(res, null, 2));
+    
+    // Try multiple possible token locations
+    const tokens = res?.data?.tokens || res?.tokens || res?.data || {};
+    console.log('🔑 Extracted tokens:', tokens);
+    
+    // Check for different token field names
+    const accessToken = tokens.accessToken || tokens.access_token || tokens.token;
+    const refreshToken = tokens.refreshToken || tokens.refresh_token;
+    
+    console.log('🔑 Access token found:', !!accessToken);
+    console.log('🔑 Refresh token found:', !!refreshToken);
+    
+    if (accessToken) {
+      saveTokens({ accessToken, refreshToken });
+      console.log('✅ Tokens saved to localStorage');
+    } else {
+      console.error('❌ No access token found in response');
+      console.error('❌ Available response keys:', Object.keys(res || {}));
+      if (res?.data) {
+        console.error('❌ Available data keys:', Object.keys(res.data || {}));
+      }
+    }
+    
+    return res;
+  } catch (error) {
+    console.error('❌ Login error:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    throw error;
   }
-  
-  return res;
 };
 
 export const me = async () => {

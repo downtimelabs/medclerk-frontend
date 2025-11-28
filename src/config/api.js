@@ -4,7 +4,12 @@
 
 
 // Backend API base URL
-export const API_BASE_URL = 'https://medclerk-backend.vercel.app/api/v1';
+// Note: If the production backend is down, you can switch to local development
+  export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://medclerk-backend.vercel.app/api/v1';
+
+// Alternative URLs for fallback (uncomment if needed)
+// export const API_BASE_URL = 'http://localhost:3000/api/v1'; // Local development
+// export const API_BASE_URL = 'https://your-alternative-backend.com/api/v1'; // Alternative backend
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -142,7 +147,39 @@ export const apiFetch = async (url, options = {}) => {
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      
+      // Provide more specific error messages based on status code
+      let errorMessage = errorData.message || errorData.error;
+      
+      if (!errorMessage) {
+        switch (response.status) {
+          case 400:
+            errorMessage = 'Bad request. Please check your input.';
+            break;
+          case 401:
+            errorMessage = 'Invalid credentials. Please check your email and password.';
+            break;
+          case 403:
+            errorMessage = 'Access denied. You do not have permission to perform this action.';
+            break;
+          case 404:
+            errorMessage = 'Resource not found. Please try again.';
+            break;
+          case 500:
+            errorMessage = 'The server is experiencing internal issues. Please try again in a few minutes.';
+            break;
+          case 502:
+            errorMessage = 'Service temporarily unavailable. Please try again later.';
+            break;
+          case 503:
+            errorMessage = 'Service unavailable. Please try again later.';
+            break;
+          default:
+            errorMessage = `Request failed (${response.status}). Please try again.`;
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -152,6 +189,17 @@ export const apiFetch = async (url, options = {}) => {
     return await makeRequest();
   } catch (error) {
     console.error('API Fetch Error:', error);
+    
+    // Handle network connectivity issues
+    if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      throw new Error('Network error. Please check your internet connection and try again.');
+    }
+    
+    // Handle backend service unavailable
+    if (error.message.includes('404') || error.message.includes('Not Found')) {
+      throw new Error('Service temporarily unavailable. The backend service may be down. Please try again later.');
+    }
+    
     throw error;
   }
 };

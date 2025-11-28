@@ -120,7 +120,7 @@ const Dashboard = ({ user, onLogout }) => {
     console.log('- Stored data:', stored);
     console.log('- Current uploadedFiles length:', uploadedFiles.length);
     console.log('- Current uploadedFiles:', uploadedFiles);
-    
+
     // Check for failed uploads
     const failedUploads = uploadedFiles.filter(f => f.uploadError);
     if (failedUploads.length > 0) {
@@ -133,13 +133,13 @@ const Dashboard = ({ user, onLogout }) => {
         console.log(`    Can Retry: ${file.canRetry}`);
       });
     }
-    
+
     // Check authentication status
     const token = localStorage.getItem('accessToken');
     console.log('🔐 Auth Status:');
     console.log('- Access token exists:', !!token);
     console.log('- User object:', user);
-    
+
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
@@ -147,7 +147,7 @@ const Dashboard = ({ user, onLogout }) => {
         console.log('- Token expired:', isExpired);
         console.log('- Token expires at:', new Date(payload.exp * 1000));
         console.log('- Current time:', new Date());
-        
+
         if (isExpired) {
           console.log('⚠️ TOKEN IS EXPIRED - Please log out and log in again');
         }
@@ -226,10 +226,10 @@ const Dashboard = ({ user, onLogout }) => {
   const uploadFileToS3 = async (file, metadata, onProgress) => {
     try {
       console.log(`📤 Starting upload for ${file.name}...`);
-      
+
       // Step 1: Get presigned URL
       onProgress?.({ stage: 'presigned', percent: 10 });
-      
+
       let presignedResponse;
       try {
         presignedResponse = await apiFetch(API_ENDPOINTS.UPLOAD.PRESIGNED_URL, {
@@ -256,7 +256,7 @@ const Dashboard = ({ user, onLogout }) => {
 
       const uploadResponse = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        
+
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
             const percent = 20 + Math.round((e.loaded / e.total) * 60);
@@ -273,7 +273,7 @@ const Dashboard = ({ user, onLogout }) => {
         });
 
         xhr.addEventListener('error', () => reject(new Error('S3 upload failed')));
-        
+
         xhr.open('PUT', presignedUrl);
         // Only set Content-Type for S3 upload - NO Authorization header needed
         // The presigned URL contains all necessary authentication
@@ -308,11 +308,11 @@ const Dashboard = ({ user, onLogout }) => {
 
     } catch (error) {
       console.error('❌ Upload error:', error);
-      
+
       // Provide more specific error messages
       let errorMessage = error.message;
       let errorType = 'Unknown';
-      
+
       if (error.message.includes('presigned')) {
         errorType = 'Presigned URL';
         errorMessage = 'Failed to get upload URL from server';
@@ -332,7 +332,7 @@ const Dashboard = ({ user, onLogout }) => {
         errorType = 'File Size';
         errorMessage = 'File is too large (max 10MB)';
       }
-      
+
       return {
         success: false,
         error: errorMessage,
@@ -345,8 +345,8 @@ const Dashboard = ({ user, onLogout }) => {
   // Helper function to query uploaded documents using RAG
   const queryDocuments = async (question) => {
     try {
-        console.log('🤖 Querying documents:', question);
-      
+      console.log('🤖 Querying documents:', question);
+
       // Validate question length (1-500 characters as per API spec)
       if (!question || question.trim().length === 0) {
         throw new Error('Question cannot be empty');
@@ -378,10 +378,10 @@ const Dashboard = ({ user, onLogout }) => {
       }
     } catch (error) {
       console.error('❌ Document query error:', error);
-      
+
       // Handle different error types
       let errorMessage = 'Sorry, I encountered an error while searching your documents.';
-      
+
       if (error.message.includes('401') || error.message.includes('not authenticated')) {
         errorMessage = 'Please log in to query your documents.';
       } else if (error.message.includes('400') || error.message.includes('Validation error')) {
@@ -424,7 +424,7 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       console.log('📥 Loading documents from backend...');
       const response = await apiFetch(API_ENDPOINTS.UPLOAD.DOCUMENTS);
-      
+
       if (response.data && Array.isArray(response.data)) {
         const backendFiles = response.data.map(doc => ({
           id: doc.id,
@@ -441,7 +441,7 @@ const Dashboard = ({ user, onLogout }) => {
           backendDocument: doc,
           fromBackend: true
         }));
-        
+
         setUploadedFiles(backendFiles);
         console.log(`📥 Loaded ${backendFiles.length} documents from backend`);
       }
@@ -456,7 +456,7 @@ const Dashboard = ({ user, onLogout }) => {
       console.log('⚠️ Not a patient or no user, skipping fetch');
       return;
     }
-    
+
     setLoadingPatientDetails(true);
     try {
       // Get auth token to verify it exists
@@ -465,10 +465,10 @@ const Dashboard = ({ user, onLogout }) => {
         console.error('❌ No access token found');
         throw new Error('Authentication required. Please log in again.');
       }
-      
+
       console.log('🔐 Fetching patient details from:', API_ENDPOINTS.PATIENT.DETAILS);
       console.log('🔐 Auth token exists:', !!token);
-      
+
       // Use apiFetch which automatically includes Authorization header
       const response = await apiFetch(API_ENDPOINTS.PATIENT.DETAILS, {
         method: 'GET',
@@ -477,9 +477,9 @@ const Dashboard = ({ user, onLogout }) => {
           ...getAuthHeaders()
         }
       });
-      
+
       console.log('📥 Patient details API response:', response);
-      
+
       // Handle both response formats: {success, data} or {status, data}
       if ((response.success || response.status === 'success') && response.data) {
         // Map the response structure to match our expected format
@@ -519,7 +519,7 @@ const Dashboard = ({ user, onLogout }) => {
           careTeam: response.data.careTeam || { doctors: [], caregivers: [] },
           documentStats: response.data.documentStats || {}
         };
-        
+
         setPatientDetails(mappedData);
         console.log('✅ Patient details loaded and mapped successfully:');
         console.log('  - Personal Info:', mappedData.personalInfo);
@@ -571,9 +571,9 @@ const Dashboard = ({ user, onLogout }) => {
     if (!file || !file.canRetry) return;
 
     console.log(`🔄 Retrying upload for ${file.name}...`);
-    
+
     // Reset file status
-    setUploadedFiles(prev => prev.map(f => 
+    setUploadedFiles(prev => prev.map(f =>
       f.id === fileId ? {
         ...f,
         processing: true,
@@ -588,7 +588,7 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       // For now, just show that retry was attempted
       setTimeout(() => {
-        setUploadedFiles(prev => prev.map(f => 
+        setUploadedFiles(prev => prev.map(f =>
           f.id === fileId ? {
             ...f,
             processing: false,
@@ -616,7 +616,7 @@ const Dashboard = ({ user, onLogout }) => {
       documentId: 'test-doc-id',
       ocrProcessing: false
     };
-    
+
     setUploadedFiles(prev => [...prev, testFile]);
     console.log('✅ Added test file for persistence testing');
   };
@@ -624,10 +624,10 @@ const Dashboard = ({ user, onLogout }) => {
   const handleFileTypeSelection = (fileType) => {
     setSelectedFileType(fileType);
     setShowFileTypeModal(false);
-    
+
     const input = document.createElement('input');
     input.type = 'file';
-    
+
     if (fileType === 'pdf') {
       input.accept = '.pdf';
     } else if (fileType === 'image') {
@@ -636,7 +636,7 @@ const Dashboard = ({ user, onLogout }) => {
       // 'any' - allow all supported types
       input.accept = 'image/*,application/pdf,.doc,.docx,text/plain';
     }
-    
+
     input.multiple = true; // Allow multiple files
     input.onchange = async (e) => {
       const files = Array.from(e.target.files || []);
@@ -679,14 +679,14 @@ const Dashboard = ({ user, onLogout }) => {
               },
               (progress) => {
                 // Update progress in real-time
-                setUploadedFiles(prev => prev.map(f => 
+                setUploadedFiles(prev => prev.map(f =>
                   f.id === fileId ? { ...f, uploadProgress: progress } : f
                 ));
               }
             );
 
             // Update file data with upload results
-            setUploadedFiles(prev => prev.map(f => 
+            setUploadedFiles(prev => prev.map(f =>
               f.id === fileId ? {
                 ...f,
                 processing: false,
@@ -708,7 +708,7 @@ const Dashboard = ({ user, onLogout }) => {
 
           // Wait for all uploads to complete
           const results = await Promise.allSettled(uploadPromises);
-          
+
           // Count successes and failures
           const successful = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
           const failed = results.filter(r => r.status === 'rejected' || !r.value?.success).length;
@@ -724,7 +724,7 @@ const Dashboard = ({ user, onLogout }) => {
           if (failed > 0) {
             message += `${successful > 0 ? '\n' : ''}❌ Failed to upload ${failed} file(s)`;
           }
-          
+
           alert(message || 'Upload completed');
 
         } catch (error) {
@@ -856,27 +856,14 @@ const Dashboard = ({ user, onLogout }) => {
     try {
       // Query uploaded documents using RAG
       const queryResult = await queryDocuments(question);
-      
+
       let botResponse;
       let botMessage;
-      
+
       if (queryResult.success && queryResult.answer) {
         // Use AI-generated answer from documents
         botResponse = queryResult.answer;
-        
-        // Add source information if available
-        if (queryResult.sources && queryResult.sources.length > 0) {
-          const sourceInfo = queryResult.sources.map(source => 
-            `📄 ${source.source_name} (${Math.round(source.relevance_score * 100)}% relevant)`
-          ).join('\n');
-          botResponse += `\n\n**Sources:**\n${sourceInfo}`;
-          
-          // Add processing time if available
-          if (queryResult.processing_time) {
-            botResponse += `\n\n⏱️ *Processed in ${queryResult.processing_time.toFixed(2)}s*`;
-          }
-        }
-        
+
         botMessage = {
           id: Date.now() + 1,
           type: 'bot',
@@ -889,7 +876,7 @@ const Dashboard = ({ user, onLogout }) => {
       } else {
         // Use the error message from the API or fallback
         botResponse = queryResult.answer || "I don't have specific information about that in your uploaded documents. Please upload your medical reports first, or consult with your healthcare provider.";
-        
+
         botMessage = {
           id: Date.now() + 1,
           type: 'bot',
@@ -900,7 +887,7 @@ const Dashboard = ({ user, onLogout }) => {
       }
 
       setChatMessages(prev => [...prev, botMessage]);
-      
+
       // Auto-scroll to bottom after message is added
       setTimeout(() => {
         const chatContainer = document.getElementById('chat-messages');
@@ -917,7 +904,7 @@ const Dashboard = ({ user, onLogout }) => {
         time: new Date().toLocaleTimeString()
       };
       setChatMessages(prev => [...prev, errorMessage]);
-      
+
       // Auto-scroll to bottom after error message is added
       setTimeout(() => {
         const chatContainer = document.getElementById('chat-messages');
@@ -964,18 +951,18 @@ const Dashboard = ({ user, onLogout }) => {
           <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Select Document Type</h3>
-              <button 
+              <button
                 onClick={() => setShowFileTypeModal(false)}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <FaTimes className="text-gray-500" />
               </button>
             </div>
-            
+
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Choose the type of medical document you want to upload
             </p>
-            
+
             <div className="space-y-4">
               <button
                 onClick={() => handleFileTypeSelection('image')}
@@ -992,7 +979,7 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 </div>
               </button>
-              
+
               <button
                 onClick={() => handleFileTypeSelection('pdf')}
                 className="w-full p-6 border-2 border-gray-200 dark:border-gray-600 rounded-2xl hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group"
@@ -1008,7 +995,7 @@ const Dashboard = ({ user, onLogout }) => {
                   </div>
                 </div>
               </button>
-              
+
               <div className="pt-3 border-t border-gray-200 dark:border-gray-600">
                 <button
                   onClick={() => handleFileTypeSelection('any')}
@@ -1049,15 +1036,15 @@ const Dashboard = ({ user, onLogout }) => {
               <div
                 key={item.id}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer ${isActive
-                    ? 'bg-primary-500 text-white'
-                    : 'hover:bg-blue-50 dark:hover:bg-gray-700'
+                  ? 'bg-primary-500 text-white'
+                  : 'hover:bg-blue-50 dark:hover:bg-gray-700'
                   }`}
                 onClick={() => setActiveSection(item.id)}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl transition-all duration-300 transform hover:scale-110 ${isActive
-                      ? 'bg-white/20 text-white shadow-lg'
-                      : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-600 dark:to-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white/20 text-white shadow-lg'
+                    : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-600 dark:to-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
                     } flex items-center justify-center`}>
                     <Icon className={`transition-all duration-300 ${isActive ? 'text-lg' : 'text-base hover:text-lg'}`} />
                   </div>
@@ -1065,8 +1052,8 @@ const Dashboard = ({ user, onLogout }) => {
                 </div>
                 {item.badge > 0 && (
                   <span className={`text-xs px-2 py-0.5 rounded-full transition-all ${isActive
-                      ? 'bg-white/20 text-white'
-                      : item.id === 'uploads' ? 'bg-blue-500 text-white' : 'bg-primary-500 text-white'
+                    ? 'bg-white/20 text-white'
+                    : item.id === 'uploads' ? 'bg-blue-500 text-white' : 'bg-primary-500 text-white'
                     }`}>
                     {item.badge}
                   </span>
@@ -1119,8 +1106,8 @@ const Dashboard = ({ user, onLogout }) => {
                         <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                           <div className="flex items-center gap-3 mb-4">
                             {patientDetails?.personalInfo?.avatarUrl ? (
-                              <img 
-                                src={patientDetails.personalInfo.avatarUrl} 
+                              <img
+                                src={patientDetails.personalInfo.avatarUrl}
                                 alt={patientDetails.personalInfo.name}
                                 className="w-12 h-12 rounded-full object-cover"
                               />
@@ -1316,206 +1303,196 @@ const Dashboard = ({ user, onLogout }) => {
           <div className="max-w-6xl mx-auto">
             {activeSection === 'overview' && (
               <>
-                {/* Welcome section */}
-                <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden">
-                  {/* Background decoration */}
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full -translate-y-32 translate-x-32"></div>
-                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-indigo-200/20 to-blue-200/20 rounded-full translate-y-24 -translate-x-24"></div>
-
-                  <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">
-                          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
-                        </h1>
-                        <span className="text-3xl">👋</span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-base mb-6">Manage your medical reports and health information</p>
-
-                      <div className="flex flex-wrap items-center gap-6">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Last visit:</span>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">Dec 15, 2024</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">Health Score:</span>
-                          <span className="text-sm font-bold text-blue-600 dark:text-blue-400">85/100</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="hidden lg:block">
-                      <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl transform hover:scale-105 transition-transform duration-300">
-                        <FaUser className="text-4xl text-white" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 {/* Enhanced stat cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                  {[
-                    { label: 'TOTAL REPORTS', value: '4', icon: FaFileMedical, iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-600 dark:text-blue-400', change: '+5 this week', changeColor: 'text-blue-600', arrow: '↗' },
-                    { label: 'THIS MONTH', value: '0', icon: FaCalendarAlt, iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-600 dark:text-green-400', change: '+3 from last month', changeColor: 'text-green-600', arrow: '↗' },
-                    { label: 'AI ANSWERS', value: '3', icon: FaChartLine, iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-600 dark:text-purple-400', change: '94% accuracy', changeColor: 'text-purple-600', arrow: '↗' },
-                    { label: 'ALERTS', value: '1', icon: FaBell, iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-600 dark:text-red-400', change: 'Requires attention', changeColor: 'text-red-600', arrow: '⚠' }
-                  ].map((stat, idx) => {
-                    const Icon = stat.icon;
-                    return (
-                      <div key={idx} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group">
-                        <div className="flex items-start gap-3 mb-4">
-                          <div className={`w-10 h-10 ${stat.iconBg} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300`}>
-                            <Icon className={`${stat.iconColor} text-lg`} />
+                  {(() => {
+                    // Calculate real-time statistics
+                    const totalReports = uploadedFiles.length;
 
+                    // Calculate reports this month
+                    const now = new Date();
+                    const currentMonth = now.getMonth();
+                    const currentYear = now.getFullYear();
+                    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+                    const reportsThisMonth = uploadedFiles.filter(file => {
+                      const fileDate = new Date(file.uploadDate);
+                      return fileDate.getMonth() === currentMonth && fileDate.getFullYear() === currentYear;
+                    }).length;
+
+                    const reportsLastMonth = uploadedFiles.filter(file => {
+                      const fileDate = new Date(file.uploadDate);
+                      return fileDate.getMonth() === lastMonth && fileDate.getFullYear() === lastMonthYear;
+                    }).length;
+
+                    const monthDiff = reportsThisMonth - reportsLastMonth;
+                    const monthDiffText = monthDiff > 0
+                      ? `+${monthDiff} from last month`
+                      : monthDiff < 0
+                        ? `${monthDiff} from last month`
+                        : 'Same as last month';
+                    const monthDiffColor = monthDiff > 0 ? 'text-green-600' : monthDiff < 0 ? 'text-red-600' : 'text-gray-600';
+                    const monthArrow = monthDiff > 0 ? '↗' : monthDiff < 0 ? '↘' : '→';
+
+                    // Calculate AI answers (bot responses in chat)
+                    const aiAnswers = chatMessages.filter(msg => msg.type === 'bot').length;
+
+                    // Calculate alerts (files with errors or processing issues)
+                    const alerts = uploadedFiles.filter(file => file.uploadError || file.processing).length;
+                    const alertsText = alerts > 0 ? 'Requires attention' : 'All good';
+                    const alertsColor = alerts > 0 ? 'text-red-600' : 'text-green-600';
+
+                    return [
+                      {
+                        label: 'TOTAL REPORTS',
+                        value: totalReports.toString(),
+                        icon: FaFileMedical,
+                        iconBg: 'bg-blue-100 dark:bg-blue-900/30',
+                        iconColor: 'text-blue-600 dark:text-blue-400',
+                        change: totalReports > 0 ? `${totalReports} uploaded` : 'No reports yet',
+                        changeColor: 'text-blue-600',
+                        
+                      },
+                      {
+                        label: 'THIS MONTH',
+                        value: reportsThisMonth.toString(),
+                        icon: FaCalendarAlt,
+                        iconBg: 'bg-green-100 dark:bg-green-900/30',
+                        iconColor: 'text-green-600 dark:text-green-400',
+                        change: monthDiffText,
+                        changeColor: monthDiffColor,
+                        arrow: monthArrow
+                      },
+                      {
+                        label: 'AI ANSWERS',
+                        value: aiAnswers.toString(),
+                        icon: FaChartLine,
+                        iconBg: 'bg-purple-100 dark:bg-purple-900/30',
+                        iconColor: 'text-purple-600 dark:text-purple-400',
+                        change: aiAnswers > 0 ? `${aiAnswers} responses` : 'No questions yet',
+                        changeColor: 'text-purple-600',
+                        arrow: '💬'
+                      },
+                      {
+                        label: 'ALERTS',
+                        value: alerts.toString(),
+                        icon: FaBell,
+                        iconBg: 'bg-red-100 dark:bg-red-900/30',
+                        iconColor: 'text-red-600 dark:text-red-400',
+                        change: alertsText,
+                        changeColor: alertsColor,
+                        arrow: alerts > 0 ? '⚠' : '✓'
+                      }
+                    ].map((stat, idx) => {
+                      const Icon = stat.icon;
+                      return (
+                        <div key={idx} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className={`w-10 h-10 ${stat.iconBg} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300`}>
+                              <Icon className={`${stat.iconColor} text-lg`} />
+
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">{stat.label}</div>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">{stat.label}</div>
+                          <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">{stat.value}</div>
+                          <div className={`text-xs font-medium ${stat.changeColor} flex items-center gap-1`}>
+                            <span className="text-sm">{stat.arrow}</span>
+                            {stat.change}
                           </div>
                         </div>
-                        <div className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">{stat.value}</div>
-                        <div className={`text-xs font-medium ${stat.changeColor} flex items-center gap-1`}>
-                          <span className="text-sm">{stat.arrow}</span>
-                          {stat.change}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    });
+                  })()}
                 </div>
 
                 {/* AI Chat Interface */}
                 <div className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-gray-700 mb-8">
                   <div className="max-w-4xl mx-auto">
-                    {/* Chat Header */}
-                    <div className="text-center mb-8">
-                      <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-                        Hi there, <span className="text-purple-600 dark:text-purple-400">{user?.name?.split(' ')[0] || 'Patient'}</span>
-                      </h2>
-                      <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
-                        What would <span className="text-blue-600 dark:text-blue-400">like to know?</span>
-                      </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Use one of the most common prompts below or use your own to begin
-                      </p>
-                    </div>
-
-                    {/* Quick Prompt Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                      {[
-                        {
-                          title: "Analyze my latest lab report",
-                          subtitle: "Get insights from recent tests",
-                          icon: "📊"
-                        },
-                        {
-                          title: "Explain my prescription details",
-                          subtitle: "Understand medication info",
-                          icon: "💊"
-                        },
-                        {
-                          title: "Summarize my medical history",
-                          subtitle: "Get a comprehensive overview",
-                          icon: "📋"
-                        },
-                        {
-                          title: "What should I discuss with my doctor?",
-                          subtitle: "Prepare for your next visit",
-                          icon: "👩‍⚕️"
-                        }
-                      ].map((prompt, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setChatInput(prompt.title);
-                            // Simulate form submission
-                            const fakeEvent = { preventDefault: () => {} };
-                            handleSendMessage(fakeEvent);
-                          }}
-                          className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 text-left group"
-                        >
-                          <div className="text-2xl mb-2">{prompt.icon}</div>
-                          <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                            {prompt.title}
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {prompt.subtitle}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Refresh Prompts Button */}
-                    <div className="text-center mb-6">
-                      <button className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh Prompts
-                      </button>
-                    </div>
-
-                    {/* Chat Input */}
-                    <div className="relative max-w-3xl mx-auto">
-                      <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-sm">
-                        {/* Attachment Button */}
-                        <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                          </svg>
-                        </button>
-
-                        {/* Input Field */}
-                        <input
-                          type="text"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              const fakeEvent = { preventDefault: () => {} };
-                              handleSendMessage(fakeEvent);
-                            }
-                          }}
-                          placeholder="Ask whatever you want..."
-                          className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
-                        />
-
-                        {/* Character Count */}
-                        <div className="text-xs text-gray-400 dark:text-gray-500">
-                          {chatInput.length}/500
+                    {/* Show header and quick prompts only when no messages */}
+                    {chatMessages.length <= 1 && (
+                      <>
+                        {/* Chat Header */}
+                        <div className="text-center mb-8">
+                          <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            Hi there, <span className="text-purple-600 dark:text-purple-400">{user?.name?.split(' ')[0] || 'Patient'}</span>
+                          </h2>
+                          <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
+                            What would <span className="text-blue-600 dark:text-blue-400">like to know?</span>
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Use one of the most common prompts below or use your own to begin
+                          </p>
                         </div>
 
-                        {/* Send Button */}
-                        <button
-                          onClick={() => {
-                            const fakeEvent = { preventDefault: () => {} };
-                            handleSendMessage(fakeEvent);
-                          }}
-                          disabled={!chatInput.trim() || isTyping}
-                          className="p-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-xl transition-colors disabled:cursor-not-allowed"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                          </svg>
-                        </button>
-                      </div>
+                        {/* Quick Prompt Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                          {[
+                            {
+                              title: "Analyze my latest lab report",
+                              subtitle: "Get insights from recent tests",
+                              icon: "📊"
+                            },
+                            {
+                              title: "Explain my prescription details",
+                              subtitle: "Understand medication info",
+                              icon: "💊"
+                            },
+                            {
+                              title: "Summarize my medical history",
+                              subtitle: "Get a comprehensive overview",
+                              icon: "📋"
+                            },
+                            {
+                              title: "What should I discuss with my doctor?",
+                              subtitle: "Prepare for your next visit",
+                              icon: "👩‍⚕️"
+                            }
+                          ].map((prompt, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setChatInput(prompt.title);
+                                // Simulate form submission
+                                const fakeEvent = { preventDefault: () => { } };
+                                handleSendMessage(fakeEvent);
+                              }}
+                              className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 text-left group"
+                            >
+                              <div className="text-2xl mb-2">{prompt.icon}</div>
+                              <div className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                                {prompt.title}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {prompt.subtitle}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
 
-                      {/* AI Web Badge */}
-                      <div className="absolute -top-3 right-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400">
-                        🤖 AI Web
-                      </div>
-                    </div>
+                        {/* Refresh Prompts Button */}
+                        <div className="text-center mb-6">
+                          <button className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Refresh Prompts
+                          </button>
+                        </div>
+                      </>
+                    )}
 
-                    {/* Chat Messages Display */}
+                    {/* Chat Messages Display - Now at the TOP */}
                     {chatMessages.length > 1 && (
-                      <div className="mt-8 space-y-4 max-h-96 overflow-y-auto px-4" id="chat-messages">
+                      <div className="mb-6 space-y-4 max-h-[500px] overflow-y-auto px-4" id="chat-messages">
                         {chatMessages.slice(1).map((message, idx) => (
                           <div key={idx} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[70%] px-4 py-3 rounded-2xl ${
-                              message.type === 'user' 
-                                ? 'bg-purple-600 text-white rounded-br-md' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-md'
-                            }`}>
+                            <div className={`max-w-[70%] px-4 py-3 rounded-2xl ${message.type === 'user'
+                              ? 'bg-purple-600 text-white rounded-br-md'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-md'
+                              }`}>
                               <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                                 {message.message}
                               </div>
@@ -1532,6 +1509,57 @@ const Dashboard = ({ user, onLogout }) => {
                         ))}
                       </div>
                     )}
+
+                    {/* Chat Input - Now at the BOTTOM */}
+                    <div className="relative max-w-3xl mx-auto">
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-200 dark:border-gray-600 shadow-sm">
+                        {/* Attachment Button */}
+                        <button className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                          </svg>
+                        </button>
+
+                        {/* Input Field */}
+                        <input
+                          type="text"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              const fakeEvent = { preventDefault: () => { } };
+                              handleSendMessage(fakeEvent);
+                            }
+                          }}
+                          placeholder="Ask whatever you want..."
+                          className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+
+                        {/* Character Count */}
+                        <div className="text-xs text-gray-400 dark:text-gray-500">
+                          {chatInput.length}/500
+                        </div>
+
+                        {/* Send Button */}
+                        <button
+                          onClick={() => {
+                            const fakeEvent = { preventDefault: () => { } };
+                            handleSendMessage(fakeEvent);
+                          }}
+                          disabled={!chatInput.trim() || isTyping}
+                          className="p-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 text-white rounded-xl transition-colors disabled:cursor-not-allowed"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* AI Web Badge */}
+                      <div className="absolute -top-3 right-4 bg-white dark:bg-gray-800 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-600 text-xs text-gray-600 dark:text-gray-400">
+                        🤖 AI Web
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -1806,7 +1834,7 @@ const Dashboard = ({ user, onLogout }) => {
                                 <span>•</span>
                                 <span className="capitalize">{file.documentType?.replace('_', ' ').toLowerCase()}</span>
                               </div>
-                              
+
                               {/* Status indicators */}
                               <div className="flex items-center gap-2 mt-2">
                                 {file.processing && (
@@ -1815,19 +1843,19 @@ const Dashboard = ({ user, onLogout }) => {
                                     {file.uploadProgress ? `${file.uploadProgress.stage} (${file.uploadProgress.percent}%)` : 'Processing...'}
                                   </span>
                                 )}
-                                
+
                                 {file.processed && !file.uploadError && (
                                   <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
                                     ✓ Uploaded
                                   </span>
                                 )}
-                                
+
                                 {file.ocrProcessing && (
                                   <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium">
                                     🤖 OCR Processing
                                   </span>
                                 )}
-                                
+
                                 {file.uploadError && (
                                   <div className="flex items-center gap-2">
                                     <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">
@@ -1844,14 +1872,14 @@ const Dashboard = ({ user, onLogout }) => {
                                     )}
                                   </div>
                                 )}
-                                
+
                                 {/* Error details tooltip */}
                                 {file.uploadError && file.error && (
                                   <div className="text-xs text-red-600 dark:text-red-400 mt-1">
                                     {file.error}
                                   </div>
                                 )}
-                                
+
                                 {file.fromBackend && (
                                   <span className="px-2 py-1 bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400 rounded-full text-xs font-medium">
                                     📁 From Server
@@ -1860,7 +1888,7 @@ const Dashboard = ({ user, onLogout }) => {
                               </div>
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <button
                               onClick={async () => {
@@ -1885,7 +1913,7 @@ const Dashboard = ({ user, onLogout }) => {
                             >
                               <FaDownload />
                             </button>
-                            
+
                             <button
                               onClick={async () => {
                                 if (file.s3Key) {
@@ -1906,7 +1934,7 @@ const Dashboard = ({ user, onLogout }) => {
                             >
                               <FaEye />
                             </button>
-                            
+
                             <button
                               onClick={() => handleDeleteFile(file.id)}
                               disabled={file.processing}
@@ -1999,8 +2027,8 @@ const Dashboard = ({ user, onLogout }) => {
                           <div
                             key={d}
                             className={`py-4 rounded-xl text-sm font-medium cursor-pointer transition-all ${appointmentDays.has(d)
-                                ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg transform scale-105'
-                                : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm hover:scale-105'
+                              ? 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg transform scale-105'
+                              : 'text-gray-700 hover:bg-gray-50 hover:shadow-sm hover:scale-105'
                               }`}
                           >
                             {d}
@@ -2039,8 +2067,8 @@ const Dashboard = ({ user, onLogout }) => {
                             <div key={a.id} className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl hover:shadow-md transition-all group">
                               <div className="flex items-center justify-between mb-3">
                                 <span className={`text-xs px-3 py-1 rounded-full font-medium ${a.status === 'Confirmed'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-yellow-100 text-yellow-700'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-yellow-100 text-yellow-700'
                                   }`}>
                                   {a.status}
                                 </span>
@@ -2109,15 +2137,6 @@ const Dashboard = ({ user, onLogout }) => {
                         My Reports
                       </h2>
                       <p className="text-gray-600">Manage and view your medical reports</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={handleUploadReport}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                      >
-                        <FaCloudUploadAlt />
-                        Upload Report
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -2357,273 +2376,273 @@ const Dashboard = ({ user, onLogout }) => {
                     <p className="text-gray-400 text-sm mt-2">Please wait while we fetch your information</p>
                   </div>
                 ) : (
-                <div className="space-y-8">
-                  {/* Basic Information */}
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-700 mb-4">Basic Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Full Name</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="text"
-                            value={editFormData.name}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.name || user?.name || 'Not set'}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Email</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="email"
-                            value={editFormData.email}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.email || user?.email || 'Not set'}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Phone</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="tel"
-                            value={editFormData.phone}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">{formatPhoneNumber() || user?.phone || 'Not set'}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Date of Birth</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="date"
-                            value={editFormData.dob}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, dob: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">
-                              {patientDetails?.medicalInfo?.dateOfBirth 
-                                ? new Date(patientDetails.medicalInfo.dateOfBirth).toLocaleDateString() 
-                                : user?.dob || 'Not set'}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Medical Information */}
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-700 mb-4">Medical Information</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Blood Group</label>
-                        {isEditingProfile ? (
-                          <select
-                            value={editFormData.bloodGroup}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, bloodGroup: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          >
-                            <option value="">Select Blood Group</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                          </select>
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">
-                              {patientDetails?.medicalInfo?.bloodGroup || formatBloodType(patientDetails?.medicalInfo?.bloodType) || user?.patientProfile?.bloodGroup || 'Not set'}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Height (cm)</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="number"
-                            value={editFormData.heightCm}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, heightCm: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                            placeholder="Enter height in cm"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">
-                              {patientDetails?.medicalInfo?.heightCm 
-                                ? `${patientDetails.medicalInfo.heightCm} cm` 
-                                : patientDetails?.medicalInfo?.height 
-                                  ? `${patientDetails.medicalInfo.height} cm` 
-                                  : user?.patientProfile?.heightCm 
-                                    ? `${user.patientProfile.heightCm} cm` 
-                                    : 'Not set'}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Weight (kg)</label>
-                        {isEditingProfile ? (
-                          <input
-                            type="number"
-                            value={editFormData.weightKg}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, weightKg: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                            placeholder="Enter weight in kg"
-                          />
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">
-                              {patientDetails?.medicalInfo?.weightKg 
-                                ? `${patientDetails.medicalInfo.weightKg} kg` 
-                                : patientDetails?.medicalInfo?.weight 
-                                  ? `${patientDetails.medicalInfo.weight} kg` 
-                                  : user?.patientProfile?.weightKg 
-                                    ? `${user.patientProfile.weightKg} kg` 
-                                    : 'Not set'}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-500 mb-2">Gender</label>
-                        {isEditingProfile ? (
-                          <select
-                            value={editFormData.gender}
-                            onChange={(e) => setEditFormData(prev => ({ ...prev, gender: e.target.value }))}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-                          >
-                            <option value="">Select Gender</option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                            <option value="OTHER">Other</option>
-                          </select>
-                        ) : (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="font-medium text-gray-900">
-                              {patientDetails?.medicalInfo?.gender || user?.patientProfile?.gender || 'Not set'}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Additional Medical Information */}
-                    {(() => {
-                      // Use patientDetails if available, otherwise fall back to user data
-                      const allergies = patientDetails?.medicalInfo?.allergies || user?.patientProfile?.allergies;
-                      const medications = patientDetails?.medicalInfo?.medications || [];
-                      const medicalConditions = patientDetails?.medicalInfo?.chronicConditions || patientDetails?.medicalInfo?.medicalConditions || user?.patientProfile?.chronicConditions;
-
-                      // Handle both array and string formats
-                      const allergiesList = Array.isArray(allergies) ? allergies :
-                        (typeof allergies === 'string' && allergies.trim()) ? [allergies] : [];
-                      const medicationsList = Array.isArray(medications) ? medications : [];
-                      const conditionsList = Array.isArray(medicalConditions) ? medicalConditions :
-                        (typeof medicalConditions === 'string' && medicalConditions.trim()) ? [medicalConditions] : [];
-
-                      return (allergiesList.length > 0 || medicationsList.length > 0 || conditionsList.length > 0) && (
-                        <div className="mt-6 space-y-4">
-                          {allergiesList.length > 0 && (
-                            <div>
-                              <h5 className="text-md font-semibold text-gray-700 mb-2">Allergies</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {allergiesList.map((allergy, idx) => (
-                                  <span key={idx} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                                    {allergy}
-                                  </span>
-                                ))}
-                              </div>
+                  <div className="space-y-8">
+                    {/* Basic Information */}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-700 mb-4">Basic Information</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Full Name</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="text"
+                              value={editFormData.name}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.name || user?.name || 'Not set'}</div>
                             </div>
                           )}
-
-                          {medicationsList.length > 0 && (
-                            <div>
-                              <h5 className="text-md font-semibold text-gray-700 mb-2">Medications</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {medicationsList.map((medication, idx) => (
-                                  <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                    {medication}
-                                  </span>
-                                ))}
-                              </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Email</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="email"
+                              value={editFormData.email}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="font-medium text-gray-900">{patientDetails?.personalInfo?.email || user?.email || 'Not set'}</div>
                             </div>
                           )}
-
-                          {conditionsList.length > 0 && (
-                            <div>
-                              <h5 className="text-md font-semibold text-gray-700 mb-2">Medical Conditions</h5>
-                              <div className="flex flex-wrap gap-2">
-                                {conditionsList.map((condition, idx) => (
-                                  <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                    {condition}
-                                  </span>
-                                ))}
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Phone</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="tel"
+                              value={editFormData.phone}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, phone: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="font-medium text-gray-900">{formatPhoneNumber() || user?.phone || 'Not set'}</div>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Date of Birth</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="date"
+                              value={editFormData.dob}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, dob: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
+                              <div className="font-medium text-gray-900">
+                                {patientDetails?.medicalInfo?.dateOfBirth
+                                  ? new Date(patientDetails.medicalInfo.dateOfBirth).toLocaleDateString()
+                                  : user?.dob || 'Not set'}
                               </div>
                             </div>
                           )}
                         </div>
-                      );
-                    })()}
+                      </div>
+                    </div>
 
-                    {/* Emergency Contact */}
-                    {(patientDetails?.medicalInfo?.emergencyContact || user?.patientProfile?.emergencyContact) && (
-                      <div className="mt-6">
-                        <h5 className="text-md font-semibold text-gray-700 mb-2">Emergency Contact</h5>
-                        <div className="p-4 bg-gray-50 rounded-lg">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <div className="text-sm text-gray-500">Name</div>
+                    {/* Medical Information */}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-700 mb-4">Medical Information</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Blood Group</label>
+                          {isEditingProfile ? (
+                            <select
+                              value={editFormData.bloodGroup}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, bloodGroup: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            >
+                              <option value="">Select Blood Group</option>
+                              <option value="A+">A+</option>
+                              <option value="A-">A-</option>
+                              <option value="B+">B+</option>
+                              <option value="B-">B-</option>
+                              <option value="AB+">AB+</option>
+                              <option value="AB-">AB-</option>
+                              <option value="O+">O+</option>
+                              <option value="O-">O-</option>
+                            </select>
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
                               <div className="font-medium text-gray-900">
-                                {patientDetails?.medicalInfo?.emergencyContact?.name || user?.patientProfile?.emergencyContact?.name || 'Not set'}
+                                {patientDetails?.medicalInfo?.bloodGroup || formatBloodType(patientDetails?.medicalInfo?.bloodType) || user?.patientProfile?.bloodGroup || 'Not set'}
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Phone</div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Height (cm)</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="number"
+                              value={editFormData.heightCm}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, heightCm: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                              placeholder="Enter height in cm"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
                               <div className="font-medium text-gray-900">
-                                {patientDetails?.medicalInfo?.emergencyContact?.phone || user?.patientProfile?.emergencyContact?.phone || 'Not set'}
+                                {patientDetails?.medicalInfo?.heightCm
+                                  ? `${patientDetails.medicalInfo.heightCm} cm`
+                                  : patientDetails?.medicalInfo?.height
+                                    ? `${patientDetails.medicalInfo.height} cm`
+                                    : user?.patientProfile?.heightCm
+                                      ? `${user.patientProfile.heightCm} cm`
+                                      : 'Not set'}
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Email</div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Weight (kg)</label>
+                          {isEditingProfile ? (
+                            <input
+                              type="number"
+                              value={editFormData.weightKg}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, weightKg: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                              placeholder="Enter weight in kg"
+                            />
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
                               <div className="font-medium text-gray-900">
-                                {patientDetails?.medicalInfo?.emergencyContact?.email || user?.patientProfile?.emergencyContact?.email || 'Not set'}
+                                {patientDetails?.medicalInfo?.weightKg
+                                  ? `${patientDetails.medicalInfo.weightKg} kg`
+                                  : patientDetails?.medicalInfo?.weight
+                                    ? `${patientDetails.medicalInfo.weight} kg`
+                                    : user?.patientProfile?.weightKg
+                                      ? `${user.patientProfile.weightKg} kg`
+                                      : 'Not set'}
                               </div>
                             </div>
-                            <div>
-                              <div className="text-sm text-gray-500">Relationship</div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm text-gray-500 mb-2">Gender</label>
+                          {isEditingProfile ? (
+                            <select
+                              value={editFormData.gender}
+                              onChange={(e) => setEditFormData(prev => ({ ...prev, gender: e.target.value }))}
+                              className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                            >
+                              <option value="">Select Gender</option>
+                              <option value="MALE">Male</option>
+                              <option value="FEMALE">Female</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          ) : (
+                            <div className="p-4 bg-gray-50 rounded-lg">
                               <div className="font-medium text-gray-900">
-                                {patientDetails?.medicalInfo?.emergencyContact?.relationship || user?.patientProfile?.emergencyContact?.relationship || 'Not set'}
+                                {patientDetails?.medicalInfo?.gender || user?.patientProfile?.gender || 'Not set'}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Additional Medical Information */}
+                      {(() => {
+                        // Use patientDetails if available, otherwise fall back to user data
+                        const allergies = patientDetails?.medicalInfo?.allergies || user?.patientProfile?.allergies;
+                        const medications = patientDetails?.medicalInfo?.medications || [];
+                        const medicalConditions = patientDetails?.medicalInfo?.chronicConditions || patientDetails?.medicalInfo?.medicalConditions || user?.patientProfile?.chronicConditions;
+
+                        // Handle both array and string formats
+                        const allergiesList = Array.isArray(allergies) ? allergies :
+                          (typeof allergies === 'string' && allergies.trim()) ? [allergies] : [];
+                        const medicationsList = Array.isArray(medications) ? medications : [];
+                        const conditionsList = Array.isArray(medicalConditions) ? medicalConditions :
+                          (typeof medicalConditions === 'string' && medicalConditions.trim()) ? [medicalConditions] : [];
+
+                        return (allergiesList.length > 0 || medicationsList.length > 0 || conditionsList.length > 0) && (
+                          <div className="mt-6 space-y-4">
+                            {allergiesList.length > 0 && (
+                              <div>
+                                <h5 className="text-md font-semibold text-gray-700 mb-2">Allergies</h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {allergiesList.map((allergy, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm">
+                                      {allergy}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {medicationsList.length > 0 && (
+                              <div>
+                                <h5 className="text-md font-semibold text-gray-700 mb-2">Medications</h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {medicationsList.map((medication, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                      {medication}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {conditionsList.length > 0 && (
+                              <div>
+                                <h5 className="text-md font-semibold text-gray-700 mb-2">Medical Conditions</h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {conditionsList.map((condition, idx) => (
+                                    <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                      {condition}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Emergency Contact */}
+                      {(patientDetails?.medicalInfo?.emergencyContact || user?.patientProfile?.emergencyContact) && (
+                        <div className="mt-6">
+                          <h5 className="text-md font-semibold text-gray-700 mb-2">Emergency Contact</h5>
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <div className="text-sm text-gray-500">Name</div>
+                                <div className="font-medium text-gray-900">
+                                  {patientDetails?.medicalInfo?.emergencyContact?.name || user?.patientProfile?.emergencyContact?.name || 'Not set'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-sm text-gray-500">Phone</div>
+                                <div className="font-medium text-gray-900">
+                                  {patientDetails?.medicalInfo?.emergencyContact?.phone || user?.patientProfile?.emergencyContact?.phone || 'Not set'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-sm text-gray-500">Email</div>
+                                <div className="font-medium text-gray-900">
+                                  {patientDetails?.medicalInfo?.emergencyContact?.email || user?.patientProfile?.emergencyContact?.email || 'Not set'}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-sm text-gray-500">Relationship</div>
+                                <div className="font-medium text-gray-900">
+                                  {patientDetails?.medicalInfo?.emergencyContact?.relationship || user?.patientProfile?.emergencyContact?.relationship || 'Not set'}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
                 )}
 
                 {/* Edit Mode Buttons */}

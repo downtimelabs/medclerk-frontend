@@ -128,7 +128,23 @@ const Auth = ({ selectedRole, onAuthSuccess, isSignInMode = false, isSignUpMode 
       }, 1000);
 
     } catch (err) {
-      const errorMessage = err.message || (isSignUp ? 'Failed to create account' : 'Login failed');
+      console.error('Auth error:', err);
+      
+      let errorMessage = err.message || (isSignUp ? 'Failed to create account' : 'Login failed');
+      
+      // Handle specific error cases
+      if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (err.message?.includes('400') || err.message?.includes('Bad Request')) {
+        errorMessage = 'Invalid request. Please check your input and try again.';
+      } else if (err.message?.includes('500') || err.message?.includes('Internal Server Error') || err.message?.includes('An unexpected error occurred')) {
+        errorMessage = 'The server is experiencing issues. This could be due to:\n• Database connection problems\n• Server configuration issues\n• Temporary service outage\n\nPlease try again in a few minutes or contact support if the issue persists.';
+      } else if (err.message?.includes('Network') || err.message?.includes('fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (err.message?.includes('timeout')) {
+        errorMessage = 'Request timeout. Please try again.';
+      }
+      
       setError(errorMessage);
     } finally {
       setIsLoading(false);
