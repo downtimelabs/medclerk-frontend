@@ -80,10 +80,10 @@ const Overview = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Welcome Back, <span className="text-[#0277BD]">{profile?.name?.split(' ')[0] || 'Patient'}</span>
+              Welcome Back, <span className="text-[#0277BD]">{profile?.personal?.name?.split(' ')[0] || 'Patient'}</span>
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-1">
-              You have <span className="font-semibold text-slate-900 dark:text-white">{stats?.linkedDoctors || 0} active doctors</span> and <span className="font-semibold text-slate-900 dark:text-white">{stats?.totalDocuments || 0} documents</span>.
+              You have <span className="font-semibold text-slate-900 dark:text-white">{stats?.linkedDoctors || 0} active doctors</span> and <span className="font-semibold text-slate-900 dark:text-white">{profile?.documentStats?.totalDocuments || 0} documents</span>.
             </p>
           </div>
           <Button className="bg-[#0277BD] hover:bg-[#015f96] text-white shadow-lg shadow-blue-200/50 dark:shadow-none">
@@ -241,25 +241,28 @@ const Overview = () => {
             <div className="text-left mb-6">
               <h3 className="font-bold text-lg text-slate-900 dark:text-white">My Health</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                {profile?.patientProfile?.age ? `${profile.patientProfile.age} Years` : 'Age N/A'} • {profile?.patientProfile?.gender || 'Gender N/A'}
+                {/* Age calculation from DOB if available, else N/A */}
+                {profile?.medical?.dob 
+                  ? `${new Date().getFullYear() - new Date(profile.medical.dob).getFullYear()} Years` 
+                  : 'Age N/A'}
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-red-900/30">
                 <div className="text-[10px] text-red-500 dark:text-red-400 uppercase font-bold mb-1">Blood</div>
-                <div className="font-bold text-slate-900 dark:text-white text-lg">{profile?.patientProfile?.bloodGroup || 'N/A'}</div>
+                <div className="font-bold text-slate-900 dark:text-white text-lg">{profile?.medical?.bloodGroup || 'N/A'}</div>
               </div>
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30">
                 <div className="text-[10px] text-blue-500 dark:text-blue-400 uppercase font-bold mb-1">Height</div>
                 <div className="font-bold text-slate-900 dark:text-white text-lg">
-                  {profile?.patientProfile?.height || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">cm</span>
+                  {profile?.medical?.heightCm || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">cm</span>
                 </div>
               </div>
               <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
                 <div className="text-[10px] text-emerald-500 dark:text-emerald-400 uppercase font-bold mb-1">Weight</div>
                 <div className="font-bold text-slate-900 dark:text-white text-lg">
-                  {profile?.patientProfile?.weight || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">kg</span>
+                  {profile?.medical?.weightKg || 'N/A'}<span className="text-[10px] text-slate-500 ml-0.5">kg</span>
                 </div>
               </div>
             </div>

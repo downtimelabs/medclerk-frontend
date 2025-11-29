@@ -49,7 +49,7 @@ export const useDocumentStore = create<DocumentState>((set) => ({
   queryDocuments: async (query: string, documentIds?: string[]) => {
     set({ loading: true, error: null, ragAnswer: null, ragSources: [] });
     try {
-      const response = await runMultiRagQuery({ query, documentIds });
+      const response = await runMultiRagQuery({ question: query, documentIds });
       set({
         ragAnswer: response.answer,
         ragSources: response.sources,

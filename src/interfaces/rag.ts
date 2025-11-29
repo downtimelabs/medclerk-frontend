@@ -14,21 +14,19 @@ export interface PatientDocumentDetails extends PatientDocument {}
 
 // Multi-document RAG request
 export interface RagMultiQueryRequest {
-  query: string;
+  question: string;
   documentIds?: string[]; // optional — backend supports querying all uploaded docs if not provided
 }
 
 // Multi-document RAG response
 export interface RagQueryResponse {
+  success: boolean;
   answer: string;
+  error: string | null;
+  processing_time: number;
   sources: Array<{
-    documentId: string;
-    page: number | null;
-    content: string;
-    confidence: number;
+    relevance_score: number;
+    source_name: string;
+    text_snippet: string;
   }>;
-  meta: {
-    model: string;
-    durationMs: number;
-  };
 }

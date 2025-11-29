@@ -1,44 +1,78 @@
 export interface PatientHealthProfile {
-  age: number | null;
-  gender: "MALE" | "FEMALE" | "OTHER" | null;
+  dob?: string;
   bloodGroup: string | null;
-  height: number | null;
-  weight: number | null;
-  knownConditions: string[];
-  // Added properties
-  dateOfBirth?: string;
-  allergies?: string[];
-  chronicConditions?: string[];
+  heightCm: number | null;
+  weightKg: number | null;
+  allergies: string | null;
+  chronicConditions: string[];
   emergencyContact?: {
       name: string;
-      phoneNumber: string;
+      phone: string;
       email?: string;
-      relation?: string;
   };
 }
 
 export interface PatientProfile {
-  id: string;
-  name: string | null;
-  email: string;
-  role: "PATIENT";
-  patientProfile: PatientHealthProfile;
-  // Added properties
-  phoneNumber?: string;
-  avatar?: string;
-  address?: {
-      country: string;
-      state: string;
+  personal: {
+    id: string;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    role: "PATIENT";
+    createdAt: string;
+    updatedAt: string;
+    phoneNumber?: string;
+    avatarUrl?: string;
+    country?: string;
+    state?: string;
+  };
+  medical: {
+    bloodGroup: string | null;
+    chronicConditions: string[];
+    profileCreatedAt: string;
+    profileUpdatedAt: string;
+    dob?: string;
+    heightCm?: number;
+    weightKg?: number;
+    allergies?: string;
+    emergencyContact?: {
+      name: string;
+      phone: string;
+      email?: string;
+    };
+  };
+  careTeam: {
+    doctors: any[];
+    caregivers: any[];
+  };
+  documentStats: {
+    totalDocuments: number;
+    documentsByType: Record<string, number>;
+    recentUploads: number;
+    totalFileSize: number;
   };
 }
 
-export interface UpdatePatientProfilePayload {
-  age?: number | null;
-  gender?: "MALE" | "FEMALE" | "OTHER" | null;
-  bloodGroup?: string | null;
-  height?: number | null;
-  weight?: number | null;
-  knownConditions?: string[];
+export interface PatientPersonalUpdatePayload {
+  name?: string;
+  phoneNumber?: string;
+  country?: string;
+  state?: string;
+  avatarUrl?: string;
+}
+
+export interface PatientMedicalUpdatePayload {
+  dob?: string; // ISO datetime string
+  bloodGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  heightCm?: number;
+  weightKg?: number;
+  allergies?: string;
+  chronicConditions?: string[];
+  emergencyContact?: {
+    name?: string;
+    phone?: string;
+    email?: string;
+  };
 }
 
 export interface PatientStats {

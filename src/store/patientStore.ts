@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PatientProfile, PatientStats, UpdatePatientProfilePayload } from '../interfaces/patient';
+import type { PatientProfile, PatientStats, PatientPersonalUpdatePayload, PatientMedicalUpdatePayload } from '../interfaces/patient';
 import type { LinkedDoctor, PatientDoctorRequest } from '../interfaces/linking';
 import type { PatientDocument } from '../interfaces/upload';
 import {
@@ -23,7 +23,8 @@ interface PatientState {
   lastFetched: number;
 
   fetchProfile: () => Promise<void>;
-  updatePatientProfile: (payload: UpdatePatientProfilePayload) => Promise<void>;
+  updatePersonalProfile: (payload: PatientPersonalUpdatePayload) => Promise<void>;
+  updateMedicalProfile: (payload: PatientMedicalUpdatePayload) => Promise<void>;
   fetchStats: () => Promise<void>;
   fetchActiveDoctors: () => Promise<void>;
   fetchPendingRequests: () => Promise<void>;
@@ -31,7 +32,7 @@ interface PatientState {
   reset: () => void;
 }
 
-export const usePatientStore = create<PatientState>((set, get) => ({
+export const usePatientStore = create<PatientState>((set) => ({
   profile: null,
   stats: null,
   activeDoctors: [],
@@ -42,9 +43,9 @@ export const usePatientStore = create<PatientState>((set, get) => ({
   lastFetched: 0,
 
   fetchProfile: async () => {
-    const { lastFetched, profile } = get();
     const now = Date.now();
-    if (profile && now - lastFetched < 5 * 60 * 1000) return; // 5 mins cache
+    // if (profile && now - lastFetched < 5 * 60 * 1000) return; // 5 mins cache
+    console.log('Fetching patient profile...');
 
     set({ loading: true, error: null });
     try {
@@ -56,25 +57,31 @@ export const usePatientStore = create<PatientState>((set, get) => ({
     }
   },
 
-  updatePatientProfile: async (payload) => {
+  updatePersonalProfile: async (payload) => {
+    console.log('Updating personal profile:', payload);
     set({ loading: true, error: null });
     try {
-      // Determine if it's personal or medical update based on payload keys
-      // This is a bit of a hack to keep the store interface simple for now
-      const isMedical = 'bloodGroup' in payload || 'height' in payload || 'weight' in payload || 'allergies' in payload;
-      
-      if (isMedical) {
-         await updatePatientMedical(payload);
-      } else {
-         await updatePatientPersonal(payload);
-      }
-      
+      await updatePatientPersonal(payload);
       // Refetch profile to get updated state
       const profile = await getPatientProfile();
       set({ profile, loading: false, lastFetched: Date.now() });
     } catch (error) {
-      console.error('Failed to update patient profile:', error);
-      set({ error: 'Failed to update patient profile', loading: false });
+      console.error('Failed to update personal profile:', error);
+      set({ error: 'Failed to update personal profile', loading: false });
+    }
+  },
+
+  updateMedicalProfile: async (payload) => {
+    console.log('Updating medical profile:', payload);
+    set({ loading: true, error: null });
+    try {
+      await updatePatientMedical(payload);
+      // Refetch profile to get updated state
+      const profile = await getPatientProfile();
+      set({ profile, loading: false, lastFetched: Date.now() });
+    } catch (error) {
+      console.error('Failed to update medical profile:', error);
+      set({ error: 'Failed to update medical profile', loading: false });
     }
   },
 

@@ -17,6 +17,6 @@ export async function getPatientDocument(documentId: string): Promise<PatientDoc
 }
 
 export async function runMultiRagQuery(payload: RagMultiQueryRequest): Promise<RagQueryResponse> {
-  const response = await api.post<RagQueryResponse>('/patient/documents/query', payload);
-  return response.data;
+  const response = await api.post<{ data: RagQueryResponse }>('/patient/documents/query', payload);
+  return response.data.data;
 }

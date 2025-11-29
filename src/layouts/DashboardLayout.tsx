@@ -13,14 +13,21 @@ import {
   Bell,
   FileText,
   HelpCircle,
+  User,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePatientStore } from '../store/patientStore';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const { profile, fetchProfile } = usePatientStore();
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   // Handle Dark Mode
   useEffect(() => {
@@ -193,17 +200,23 @@ const DashboardLayout = () => {
             
             <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
             
-            <div 
-              className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-xl transition-colors"
-              onClick={() => navigate('/patient/settings')}
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100&h=100" 
-                alt="Profile" 
-                className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-600"
-              />
+              <div 
+                className="flex items-center gap-3 pl-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-xl transition-colors"
+                onClick={() => navigate('/patient/settings')}
+              >
+                {profile?.personal?.avatarUrl ? (
+                  <img 
+                    src={profile.personal.avatarUrl} 
+                    alt="Profile" 
+                    className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-600"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-600">
+                    <User size={20} className="text-slate-400" />
+                  </div>
+                )}
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">John Doe</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white leading-none">{profile?.personal?.name || 'Patient'}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Patient Account</p>
               </div>
             </div>

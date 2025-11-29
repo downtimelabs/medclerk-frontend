@@ -7,17 +7,14 @@ import type { LinkedDoctor, PatientDoctorRequest } from '../interfaces/linking';
 import type { PatientDocument } from '../interfaces/upload';
 
 export async function getPatientProfile(): Promise<PatientProfile> {
-  const response = await api.get<{ data: any }>('/patient/details');
-  // Map backend response to frontend interface if needed, or assume it matches
-  // The backend returns { data: { personalInfo: ..., medicalInfo: ... } }
-  // We might need to adapt this to match PatientProfile interface
-  return response.data as any; 
+  const response = await api.get<{ data: PatientProfile }>('/patient/details');
+  return response.data.data; 
 }
 
 export async function updatePatientPersonal(
   payload: any
-): Promise<{ message: string; profile: PatientProfile }> {
-  const response = await api.patch<{ message: string; profile: PatientProfile }>(
+): Promise<{ message: string; data: any }> {
+  const response = await api.patch<{ message: string; data: any }>(
     '/patient/personal',
     payload
   );
@@ -26,8 +23,8 @@ export async function updatePatientPersonal(
 
 export async function updatePatientMedical(
   payload: any
-): Promise<{ message: string; profile: PatientProfile }> {
-  const response = await api.patch<{ message: string; profile: PatientProfile }>(
+): Promise<{ message: string; data: any }> {
+  const response = await api.patch<{ message: string; data: any }>(
     '/patient/medical',
     payload
   );

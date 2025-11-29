@@ -10,7 +10,7 @@ import { useOnFocus } from '../../hooks/useRefresh';
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'medical'>('profile');
   
-  const { profile, loading, fetchProfile, updatePatientProfile } = usePatientStore();
+  const { profile, loading, fetchProfile, updatePersonalProfile, updateMedicalProfile } = usePatientStore();
 
   // Profile Form State
   const [profileData, setProfileData] = useState({
@@ -46,23 +46,23 @@ const Settings = () => {
   useEffect(() => {
     if (profile) {
       setProfileData({
-        name: profile.name || '',
-        phoneNumber: profile.phoneNumber || '',
-        country: profile.address?.country || '',
-        state: profile.address?.state || '',
-        avatarUrl: profile.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+        name: profile.personal.name || '',
+        phoneNumber: profile.personal.phoneNumber || '',
+        country: profile.personal.country || '',
+        state: profile.personal.state || '',
+        avatarUrl: profile.personal.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
       });
 
       setMedicalData({
-        dob: profile.patientProfile?.dateOfBirth ? new Date(profile.patientProfile.dateOfBirth).toISOString().split('T')[0] : '',
-        bloodGroup: profile.patientProfile?.bloodGroup || '',
-        heightCm: profile.patientProfile?.height?.toString() || '',
-        weightKg: profile.patientProfile?.weight?.toString() || '',
-        allergies: profile.patientProfile?.allergies?.join(', ') || '',
-        chronicConditions: profile.patientProfile?.chronicConditions?.join(', ') || '',
-        emergencyContactName: profile.patientProfile?.emergencyContact?.name || '',
-        emergencyContactPhone: profile.patientProfile?.emergencyContact?.phoneNumber || '',
-        emergencyContactEmail: profile.patientProfile?.emergencyContact?.email || '' // Assuming email exists in backend or we map it
+        dob: profile.medical.dob ? new Date(profile.medical.dob).toISOString().split('T')[0] : '',
+        bloodGroup: profile.medical.bloodGroup || '',
+        heightCm: profile.medical.heightCm?.toString() || '',
+        weightKg: profile.medical.weightKg?.toString() || '',
+        allergies: profile.medical.allergies || '',
+        chronicConditions: profile.medical.chronicConditions?.join(', ') || '',
+        emergencyContactName: profile.medical.emergencyContact?.name || '',
+        emergencyContactPhone: profile.medical.emergencyContact?.phone || '',
+        emergencyContactEmail: profile.medical.emergencyContact?.email || ''
       });
     }
   }, [profile]);
@@ -79,35 +79,35 @@ const Settings = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, we would update the user profile endpoint
-    // For now, we'll just log it as the updatePatientProfile is for medical info mostly in the current store structure
-    // or we can assume updatePatientProfile handles basic info too if backend supports it.
-    // Based on previous context, updatePatientProfile updates PatientHealthProfile.
-    // We might need a separate endpoint for basic user info (name, phone) if they are in AuthUser table.
-    // For this integration, I'll assume we can only update medical info via updatePatientProfile for now, 
-    // or we'd need to extend the API.
-    console.log('Saving Profile:', profileData);
-    alert("Profile update not fully implemented in backend yet.");
+    console.log('Submitting profile form:', profileData);
+    await updatePersonalProfile({
+      name: profileData.name,
+      phoneNumber: profileData.phoneNumber,
+      country: profileData.country,
+      state: profileData.state,
+      avatarUrl: profileData.avatarUrl
+    });
   };
 
   const handleSaveMedical = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Submitting medical form:', medicalData);
     
     const payload = {
-      dateOfBirth: medicalData.dob ? new Date(medicalData.dob).toISOString() : undefined,
-      bloodGroup: medicalData.bloodGroup,
-      height: medicalData.heightCm ? parseFloat(medicalData.heightCm) : undefined,
-      weight: medicalData.weightKg ? parseFloat(medicalData.weightKg) : undefined,
-      allergies: medicalData.allergies.split(',').map(s => s.trim()).filter(Boolean),
+      dob: medicalData.dob ? new Date(medicalData.dob).toISOString() : undefined,
+      bloodGroup: medicalData.bloodGroup as any,
+      heightCm: medicalData.heightCm ? parseFloat(medicalData.heightCm) : undefined,
+      weightKg: medicalData.weightKg ? parseFloat(medicalData.weightKg) : undefined,
+      allergies: medicalData.allergies,
       chronicConditions: medicalData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean),
       emergencyContact: {
         name: medicalData.emergencyContactName,
-        phoneNumber: medicalData.emergencyContactPhone,
-        relation: 'Family' // Defaulting for now
+        phone: medicalData.emergencyContactPhone,
+        email: medicalData.emergencyContactEmail
       }
     };
 
-    await updatePatientProfile(payload);
+    await updateMedicalProfile(payload);
   };
 
   if (loading && !profile) {
