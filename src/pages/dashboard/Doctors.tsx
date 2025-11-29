@@ -9,15 +9,21 @@ import DoctorProfileModal from '../../components/dashboard/DoctorProfileModal';
 
 // --- Components ---
 
-const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () => void }) => (
+const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () => void }) => {
+  // Debug log
+  // console.log('Pending Request Item:', request);
+  const doctorName = request.doctor?.name || request.doctorName || request.name || 'Unknown Doctor';
+  const specialization = request.doctor?.specialization || request.doctorProfile?.specialization || 'Specialist';
+
+  return (
   <div className="flex items-center justify-between p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
     <div className="flex items-center gap-3">
       <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
-        {request.doctor?.name?.charAt(0) || 'D'}
+        {doctorName.charAt(0)}
       </div>
       <div>
-        <h4 className="font-bold text-slate-800 text-sm">{request.doctor?.name || 'Unknown Doctor'}</h4>
-        <div className="text-xs text-slate-600">{request.doctor?.specialization || 'Specialist'}</div>
+        <h4 className="font-bold text-slate-800 text-sm">{doctorName}</h4>
+        <div className="text-xs text-slate-600">{specialization}</div>
         <div className="text-[10px] text-[#0277BD] font-medium mt-0.5">
             {new Date(request.createdAt).toLocaleDateString()}
         </div>
@@ -33,21 +39,29 @@ const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () 
       </Button>
     </div>
   </div>
-);
+  );
+};
 
-const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick: () => void, onRevoke: (e: any) => void }) => (
+const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick: () => void, onRevoke: (e: any) => void }) => {
+  // Debug log
+  // console.log('Linked Doctor Card:', doctor);
+  const doctorName = doctor.name || doctor.doctor?.name || doctor.doctorName || 'Unknown Doctor';
+  const specialization = doctor.specialization || doctor.doctor?.specialization || doctor.doctorProfile?.specialization || 'Specialist';
+  const clinicName = doctor.clinicName || doctor.doctor?.clinicName || doctor.doctorProfile?.clinicName || 'Clinic';
+
+  return (
   <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD]">
     <div className="flex items-center gap-4">
       <div className="relative">
         <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-2xl border-2 border-slate-100 group-hover:border-[#0277BD] transition-colors">
-            {doctor.name?.charAt(0) || 'D'}
+            {doctorName.charAt(0)}
         </div>
         <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-slate-900 truncate">{doctor.name}</h3>
-        <p className="text-sm text-[#0277BD] font-medium truncate">{doctor.specialization || 'Specialist'}</p>
-        <p className="text-xs text-slate-500 truncate">{doctor.clinicName || 'Clinic'}</p>
+        <h3 className="font-bold text-slate-900 truncate">{doctorName}</h3>
+        <p className="text-sm text-[#0277BD] font-medium truncate">{specialization}</p>
+        <p className="text-xs text-slate-500 truncate">{clinicName}</p>
       </div>
       <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD]">
         <ChevronRight size={20} />
@@ -71,7 +85,8 @@ const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick:
       </div>
     </div>
   </Card>
-);
+  );
+};
 
 const DoctorResultCard = ({ doctor, onClick, onConnect }: { doctor: any, onClick: () => void, onConnect: (e: any) => void }) => (
   <Card onClick={onClick} className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
