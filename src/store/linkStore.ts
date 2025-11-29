@@ -14,6 +14,8 @@ import {
   approvePatientRequest,
   rejectPatientRequest,
   revokePatientLink,
+  cancelLinkRequest,
+  revokeDoctorLink,
 } from '../api/linking';
 
 interface LinkState {
@@ -29,6 +31,8 @@ interface LinkState {
   fetchDoctorPendingRequests: () => Promise<void>;
   discoverDoctors: () => Promise<void>;
   sendDoctorRequest: (doctorId: string) => Promise<void>;
+  cancelRequest: (linkId: string) => Promise<void>;
+  revokeLink: (linkId: string) => Promise<void>;
   approvePatient: (patientId: string) => Promise<void>;
   rejectPatient: (patientId: string) => Promise<void>;
   revokePatient: (patientId: string) => Promise<void>;
@@ -47,21 +51,7 @@ export const useLinkStore = create<LinkState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const activeDoctors = await getActiveDoctorsForPatient();
-      // Map to include flattened properties if needed, or backend should return them
-      // For now, assuming backend returns nested doctor object, we map it manually if needed
-      // But let's assume the API returns what we need or we fix the API later.
-      // To fix the build, we'll cast or map.
-      const mappedDoctors = activeDoctors.map((d: any) => ({
-        ...d,
-        doctorName: d.doctor?.name || 'Unknown Doctor',
-        doctorProfile: {
-            specialization: d.doctor?.specialization || 'General',
-            clinicName: 'Clinic', // Mock
-            clinicAddress: 'Address', // Mock
-            experienceYears: 5 // Mock
-        }
-      }));
-      set({ activeDoctors: mappedDoctors, loading: false });
+      set({ activeDoctors, loading: false });
     } catch (error) {
       console.error('Failed to fetch active doctors:', error);
       set({ error: 'Failed to fetch active doctors', loading: false });
@@ -72,14 +62,7 @@ export const useLinkStore = create<LinkState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const pendingRequests = await getPatientPendingDoctorRequests();
-      const mappedRequests = pendingRequests.map((r: any) => ({
-          ...r,
-          doctorName: r.doctor?.name || 'Unknown Doctor',
-          doctorProfile: {
-              specialization: r.doctor?.specialization || 'General'
-          }
-      }));
-      set({ pendingRequests: mappedRequests, loading: false });
+      set({ pendingRequests, loading: false });
     } catch (error) {
       console.error('Failed to fetch pending requests:', error);
       set({ error: 'Failed to fetch pending requests', loading: false });
@@ -110,17 +93,6 @@ export const useLinkStore = create<LinkState>((set, get) => ({
 
   sendDoctorRequest: async (doctorId: string) => {
     set({ loading: true, error: null });
-    // Optimistic update: Add to pendingRequests immediately (mocking the request object)
-    const previousPending = get().pendingRequests;
-    const optimisticRequest: any = {
-        id: 'temp-' + Date.now(),
-        doctor: { id: doctorId, name: 'Loading...', specialization: null, avatarUrl: null },
-        doctorName: 'Loading...',
-        status: 'PENDING',
-        createdAt: new Date().toISOString()
-    };
-    set({ pendingRequests: [...previousPending, optimisticRequest] });
-
     try {
       await requestDoctorLink({ doctorId });
       // Re-fetch to get actual data
@@ -128,8 +100,37 @@ export const useLinkStore = create<LinkState>((set, get) => ({
       set({ loading: false });
     } catch (error) {
       console.error('Failed to send doctor request:', error);
-      // Rollback
-      set({ pendingRequests: previousPending, error: 'Failed to send doctor request', loading: false });
+      set({ error: 'Failed to send doctor request', loading: false });
+    }
+  },
+
+  cancelRequest: async (linkId: string) => {
+    set({ loading: true, error: null });
+    try {
+      await cancelLinkRequest(linkId);
+      // Remove from local state
+      set((state) => ({
+        pendingRequests: state.pendingRequests.filter(req => req.id !== linkId)
+      }));
+      set({ loading: false });
+    } catch (error) {
+      console.error('Failed to cancel request:', error);
+      set({ error: 'Failed to cancel request', loading: false });
+    }
+  },
+
+  revokeLink: async (linkId: string) => {
+    set({ loading: true, error: null });
+    try {
+      await revokeDoctorLink(linkId);
+      // Remove from local state
+      set((state) => ({
+        activeDoctors: state.activeDoctors.filter(doc => doc.linkId !== linkId)
+      }));
+      set({ loading: false });
+    } catch (error) {
+      console.error('Failed to revoke link:', error);
+      set({ error: 'Failed to revoke link', loading: false });
     }
   },
 

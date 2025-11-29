@@ -1,54 +1,53 @@
 import api from '../lib/axios';
 import type {
-  DoctorInfo,
   LinkedDoctor,
   PatientDoctorRequest,
   DoctorPatientRequest,
   RequestDoctorLinkPayload,
 } from '../interfaces/linking';
 
-// PATIENT SIDE
-
-export async function requestDoctorLink(payload: RequestDoctorLinkPayload): Promise<{ message: string }> {
-  const response = await api.post<{ message: string }>('/patient/doctor/request', payload);
-  return response.data;
-}
-
-export async function getPatientPendingDoctorRequests(): Promise<PatientDoctorRequest[]> {
-  const response = await api.get<PatientDoctorRequest[]>('/patient/doctor/requests');
-  return response.data;
-}
+// --- Patient Side APIs ---
 
 export async function getActiveDoctorsForPatient(): Promise<LinkedDoctor[]> {
-  const response = await api.get<LinkedDoctor[]>('/patient/doctors/active');
-  return response.data;
-}
-
-export async function discoverDoctors(search?: string): Promise<DoctorInfo[]> {
-  const response = await api.get<{ data: { doctors: DoctorInfo[] } }>('/doctors', {
-    params: { name: search }, // Backend uses 'name' for search
-  });
+  const response = await api.get<{ data: { doctors: LinkedDoctor[] } }>('/patient/care-team');
   return response.data.data.doctors;
 }
 
-// DOCTOR SIDE
+export async function requestDoctorLink(payload: RequestDoctorLinkPayload): Promise<PatientDoctorRequest> {
+  const response = await api.post<{ data: PatientDoctorRequest }>('/patient/doctors/link', payload);
+  return response.data.data;
+}
+
+export async function getPatientPendingDoctorRequests(): Promise<PatientDoctorRequest[]> {
+  const response = await api.get<{ data: { requests: PatientDoctorRequest[] } }>('/patient/doctors/requests/pending');
+  return response.data.data.requests;
+}
+
+export async function cancelLinkRequest(linkId: string): Promise<void> {
+  await api.delete(`/patient/doctors/requests/${linkId}`);
+}
+
+export async function revokeDoctorLink(linkId: string): Promise<void> {
+  await api.delete(`/patient/doctors/links/${linkId}`);
+}
+
+// --- Doctor Side APIs (Keeping existing placeholders or updates if needed) ---
 
 export async function getDoctorPatientRequests(): Promise<DoctorPatientRequest[]> {
-  const response = await api.get<DoctorPatientRequest[]>('/doctor/patients/requests');
+  // Assuming a similar structure for doctor side, but focusing on patient side for now
+  // This might need update if doctor side API changes
+  const response = await api.get<DoctorPatientRequest[]>('/doctor/patient/requests'); 
   return response.data;
 }
 
-export async function approvePatientRequest(patientId: string): Promise<{ message: string }> {
-  const response = await api.post<{ message: string }>(`/doctor/patients/${patientId}/approve`);
-  return response.data;
+export async function approvePatientRequest(patientId: string): Promise<void> {
+   await api.post(`/doctor/patient/requests/${patientId}/approve`);
 }
 
-export async function rejectPatientRequest(patientId: string): Promise<{ message: string }> {
-  const response = await api.post<{ message: string }>(`/doctor/patients/${patientId}/reject`);
-  return response.data;
+export async function rejectPatientRequest(patientId: string): Promise<void> {
+   await api.post(`/doctor/patient/requests/${patientId}/reject`);
 }
 
-export async function revokePatientLink(patientId: string): Promise<{ message: string }> {
-  const response = await api.post<{ message: string }>(`/doctor/patients/${patientId}/revoke`);
-  return response.data;
+export async function revokePatientLink(patientId: string): Promise<void> {
+   await api.delete(`/doctor/patients/${patientId}/revoke`);
 }

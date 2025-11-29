@@ -8,31 +8,32 @@ export interface DoctorInfo {
 
 // Active linked doctor
 export interface LinkedDoctor {
-  id: string;
-  doctorId: string;
-  doctor: DoctorInfo;
-  // Flattened properties for easier access in UI
-  doctorName: string;
-  doctorProfile?: {
-    specialization: string;
-    clinicName?: string;
-    clinicAddress?: string;
-    experienceYears?: number;
-  };
+  id: string; // Doctor ID
+  linkId: string;
+  name: string;
+  email: string;
+  specialization: string;
+  licenseNumber?: string;
+  clinicName?: string;
+  yearsOfExperience?: number;
   status: "ACTIVE";
+  linkedAt: string;
 }
 
 // Pending request (patient → doctor)
+// Pending request (patient → doctor)
 export interface PatientDoctorRequest {
-  id: string;
-  doctor: DoctorInfo;
-  // Flattened properties
-  doctorName: string;
-  doctorProfile?: {
-    specialization: string;
-  };
+  id: string; // Link ID
+  patientId: string;
+  doctorId: string;
   status: "PENDING";
   createdAt: string;
+  doctor: {
+    name: string;
+    email: string;
+    specialization: string;
+    clinicName?: string;
+  };
 }
 
 // Pending request (doctor → patient)

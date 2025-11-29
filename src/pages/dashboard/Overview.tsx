@@ -7,7 +7,6 @@ import {
   Settings, 
   ChevronRight, 
   Star, 
-  Clock, 
   MapPin,
   Plus,
   Loader2
@@ -106,19 +105,19 @@ const Overview = () => {
               {activeDoctors.map((doctor) => (
                 <Card key={doctor.id} className="min-w-[280px] p-4 flex items-center gap-4 hover:shadow-md transition-all cursor-pointer group border-slate-200 dark:border-slate-700">
                   <div className="relative">
-                    <div className="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xl border-2 border-slate-100 dark:border-slate-600 group-hover:border-[#0277BD] transition-colors">
-                      {doctor.doctorName.charAt(0)}
+                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-sm border-2 border-slate-100 dark:border-slate-600 group-hover:border-[#0277BD] transition-colors">
+                      {doctor.name?.charAt(0) || 'D'}
                     </div>
                     <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">{doctor.doctorName}</h3>
-                    <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium truncate">{doctor.doctorProfile?.specialization || 'General'}</p>
-                    <div className="flex items-center gap-1 mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                      <Clock size={10} />
-                      <span className="truncate">{doctor.doctorProfile?.clinicName || 'Clinic'}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate">{doctor.name}</h3>
+                      <p className="text-xs text-[#0277BD] dark:text-blue-400 font-medium truncate">{doctor.specialization || 'General'}</p>
+                      <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <MapPin size={10} />
+                        <span className="truncate">{doctor.clinicName || 'Clinic'}</span>
+                      </div>
                     </div>
-                  </div>
                 </Card>
               ))}
               <Card className="min-w-[100px] flex flex-col items-center justify-center gap-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-[#0277BD] dark:hover:border-blue-400 cursor-pointer transition-all" onClick={() => navigate('/patient/doctors')}>

@@ -9,41 +9,45 @@ import DoctorProfileModal from '../../components/dashboard/DoctorProfileModal';
 
 // --- Components ---
 
-const PendingRequestItem = ({ request }: { request: any }) => (
+const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () => void }) => (
   <div className="flex items-center justify-between p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
     <div className="flex items-center gap-3">
       <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
-        {request.doctorName.charAt(0)}
+        {request.doctor?.name?.charAt(0) || 'D'}
       </div>
       <div>
-        <h4 className="font-bold text-slate-800 text-sm">{request.doctorName}</h4>
-        <div className="text-xs text-slate-600">{request.doctorProfile?.specialization || 'Specialist'}</div>
+        <h4 className="font-bold text-slate-800 text-sm">{request.doctor?.name || 'Unknown Doctor'}</h4>
+        <div className="text-xs text-slate-600">{request.doctor?.specialization || 'Specialist'}</div>
         <div className="text-[10px] text-[#0277BD] font-medium mt-0.5">
             {new Date(request.createdAt).toLocaleDateString()}
         </div>
       </div>
     </div>
     <div className="flex gap-2">
-      <Button variant="outline" className="h-8 text-xs px-3 border-slate-200 hover:bg-white text-slate-500">
-        Pending
+      <Button 
+        variant="outline" 
+        className="h-8 text-xs px-3 border-red-200 hover:bg-red-50 text-red-500 hover:border-red-300"
+        onClick={onCancel}
+      >
+        Cancel
       </Button>
     </div>
   </div>
 );
 
-const LinkedDoctorCard = ({ doctor, onClick }: { doctor: any, onClick: () => void }) => (
+const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick: () => void, onRevoke: (e: any) => void }) => (
   <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD]">
     <div className="flex items-center gap-4">
       <div className="relative">
         <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-2xl border-2 border-slate-100 group-hover:border-[#0277BD] transition-colors">
-            {doctor.doctorName.charAt(0)}
+            {doctor.name?.charAt(0) || 'D'}
         </div>
         <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-slate-900 truncate">{doctor.doctorName}</h3>
-        <p className="text-sm text-[#0277BD] font-medium truncate">{doctor.doctorProfile?.specialization || 'Specialist'}</p>
-        <p className="text-xs text-slate-500 truncate">{doctor.doctorProfile?.clinicName || 'Clinic'}</p>
+        <h3 className="font-bold text-slate-900 truncate">{doctor.name}</h3>
+        <p className="text-sm text-[#0277BD] font-medium truncate">{doctor.specialization || 'Specialist'}</p>
+        <p className="text-xs text-slate-500 truncate">{doctor.clinicName || 'Clinic'}</p>
       </div>
       <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD]">
         <ChevronRight size={20} />
@@ -54,9 +58,17 @@ const LinkedDoctorCard = ({ doctor, onClick }: { doctor: any, onClick: () => voi
         <Clock size={12} />
         Connected
       </div>
-      <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium text-[10px] uppercase tracking-wide">
-        Active
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium text-[10px] uppercase tracking-wide">
+          Active
+        </span>
+        <button 
+            onClick={onRevoke}
+            className="text-red-400 hover:text-red-600 hover:underline"
+        >
+            Revoke
+        </button>
+      </div>
     </div>
   </Card>
 );
@@ -127,7 +139,9 @@ const Doctors = () => {
     fetchActiveDoctors, 
     fetchPendingDoctorRequests, 
     discoverDoctors,
-    sendDoctorRequest
+    sendDoctorRequest,
+    cancelRequest,
+    revokeLink
   } = useLinkStore();
 
   useEffect(() => {
@@ -145,9 +159,19 @@ const Doctors = () => {
   const handleConnect = async (e: any, doctorId: string) => {
       e.stopPropagation();
       await sendDoctorRequest(doctorId);
-      // Refresh lists
-      fetchPendingDoctorRequests();
-      discoverDoctors();
+  };
+
+  const handleCancelRequest = async (linkId: string) => {
+      if (confirm('Are you sure you want to cancel this request?')) {
+          await cancelRequest(linkId);
+      }
+  };
+
+  const handleRevokeLink = async (e: any, linkId: string) => {
+      e.stopPropagation();
+      if (confirm('Are you sure you want to remove this doctor from your care team?')) {
+          await revokeLink(linkId);
+      }
   };
 
   const popularSpecializations = [
@@ -217,7 +241,11 @@ const Doctors = () => {
                     <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Pending Requests</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       {pendingRequests.map(req => (
-                        <PendingRequestItem key={req.id} request={req} />
+                        <PendingRequestItem 
+                            key={req.id} 
+                            request={req} 
+                            onCancel={() => handleCancelRequest(req.id)}
+                        />
                       ))}
                     </div>
                   </section>
@@ -241,6 +269,7 @@ const Doctors = () => {
                             key={doctor.id} 
                             doctor={doctor} 
                             onClick={() => setSelectedDoctor(doctor)}
+                            onRevoke={(e) => handleRevokeLink(e, doctor.linkId)}
                         />
                         ))}
                         
