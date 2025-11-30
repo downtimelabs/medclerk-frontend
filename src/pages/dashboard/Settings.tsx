@@ -4,14 +4,15 @@ import { Save, User, Activity, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { usePatientStore } from '../../store/patientStore';
+import { getPatientProfile, updatePatientPersonal, updatePatientMedical } from '../../api/patient';
 import { useOnFocus } from '../../hooks/useRefresh';
+import type { PatientProfile } from '../../interfaces/patient';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'medical'>('profile');
+  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   
-  const { profile, loading, fetchProfile, updatePersonalProfile, updateMedicalProfile } = usePatientStore();
-
   // Profile Form State
   const [profileData, setProfileData] = useState({
     name: '',
@@ -34,15 +35,27 @@ const Settings = () => {
     emergencyContactEmail: ''
   });
 
+  const fetchAndSetProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await getPatientProfile();
+      setProfile(data);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchProfile();
+    fetchAndSetProfile();
   }, []);
 
   useOnFocus(() => {
-    fetchProfile();
+    fetchAndSetProfile();
   });
 
-  // Sync store data to local state
+  // Sync profile data to local state
   useEffect(() => {
     if (profile) {
       setProfileData({
@@ -79,35 +92,49 @@ const Settings = () => {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting profile form:', profileData);
-    await updatePersonalProfile({
-      name: profileData.name,
-      phoneNumber: profileData.phoneNumber,
-      country: profileData.country,
-      state: profileData.state,
-      avatarUrl: profileData.avatarUrl
-    });
+    try {
+      setLoading(true);
+      await updatePatientPersonal({
+        name: profileData.name,
+        phoneNumber: profileData.phoneNumber,
+        country: profileData.country,
+        state: profileData.state,
+        avatarUrl: profileData.avatarUrl
+      });
+      await fetchAndSetProfile();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveMedical = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitting medical form:', medicalData);
     
-    const payload = {
-      dob: medicalData.dob ? new Date(medicalData.dob).toISOString() : undefined,
-      bloodGroup: medicalData.bloodGroup as any,
-      heightCm: medicalData.heightCm ? parseFloat(medicalData.heightCm) : undefined,
-      weightKg: medicalData.weightKg ? parseFloat(medicalData.weightKg) : undefined,
-      allergies: medicalData.allergies,
-      chronicConditions: medicalData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean),
-      emergencyContact: {
-        name: medicalData.emergencyContactName,
-        phone: medicalData.emergencyContactPhone,
-        email: medicalData.emergencyContactEmail
-      }
-    };
+    try {
+      setLoading(true);
+      const payload = {
+        dob: medicalData.dob ? new Date(medicalData.dob).toISOString() : undefined,
+        bloodGroup: medicalData.bloodGroup as any,
+        heightCm: medicalData.heightCm ? parseFloat(medicalData.heightCm) : undefined,
+        weightKg: medicalData.weightKg ? parseFloat(medicalData.weightKg) : undefined,
+        allergies: medicalData.allergies,
+        chronicConditions: medicalData.chronicConditions.split(',').map(s => s.trim()).filter(Boolean),
+        emergencyContact: {
+          name: medicalData.emergencyContactName,
+          phone: medicalData.emergencyContactPhone,
+          email: medicalData.emergencyContactEmail
+        }
+      };
 
-    await updateMedicalProfile(payload);
+      await updatePatientMedical(payload);
+      await fetchAndSetProfile();
+    } catch (error) {
+      console.error('Failed to update medical info:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading && !profile) {

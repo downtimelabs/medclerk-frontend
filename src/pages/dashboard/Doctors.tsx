@@ -3,9 +3,11 @@ import { Search, MapPin, Star, Stethoscope, Filter, Clock, ChevronRight, UserPlu
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLinkStore } from '../../store/linkStore';
+import { getActiveDoctorsForPatient, getPatientPendingDoctorRequests, requestDoctorLink, cancelLinkRequest, revokeDoctorLink } from '../../api/linking';
+import { discoverDoctors } from '../../api/patient';
 import { useOnFocus } from '../../hooks/useRefresh';
 import DoctorProfileModal from '../../components/dashboard/DoctorProfileModal';
+import type { LinkedDoctor, PatientDoctorRequest } from '../../interfaces/linking';
 
 // --- Components ---
 
@@ -145,48 +147,68 @@ const Doctors = () => {
   const [activeTab, setActiveTab] = useState<'my-doctors' | 'find-doctors'>('my-doctors');
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
-  
-  const { 
-    activeDoctors, 
-    pendingRequests, 
-    discoverableDoctors, 
-    loading, 
-    fetchActiveDoctors, 
-    fetchPendingDoctorRequests, 
-    discoverDoctors,
-    sendDoctorRequest,
-    cancelRequest,
-    revokeLink
-  } = useLinkStore();
+  const [activeDoctors, setActiveDoctors] = useState<LinkedDoctor[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PatientDoctorRequest[]>([]);
+  const [discoverableDoctors, setDiscoverableDoctors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      const [active, pending, discoverable] = await Promise.all([
+        getActiveDoctorsForPatient(),
+        getPatientPendingDoctorRequests(),
+        discoverDoctors()
+      ]);
+      setActiveDoctors(active);
+      setPendingRequests(pending);
+      setDiscoverableDoctors(discoverable);
+    } catch (error) {
+      console.error('Failed to fetch doctors:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchActiveDoctors();
-    fetchPendingDoctorRequests();
-    discoverDoctors();
+    fetchAllData();
   }, []);
 
   useOnFocus(() => {
-    fetchActiveDoctors();
-    fetchPendingDoctorRequests();
-    discoverDoctors();
+    fetchAllData();
   });
 
   const handleConnect = async (e: any, doctorId: string) => {
-      e.stopPropagation();
-      await sendDoctorRequest(doctorId);
+    e.stopPropagation();
+    try {
+      await requestDoctorLink({ doctorId });
+      await fetchAllData();
+    } catch (error) {
+      console.error('Failed to send request:', error);
+    }
   };
 
   const handleCancelRequest = async (linkId: string) => {
-      if (confirm('Are you sure you want to cancel this request?')) {
-          await cancelRequest(linkId);
+    if (confirm('Are you sure you want to cancel this request?')) {
+      try {
+        await cancelLinkRequest(linkId);
+        await fetchAllData();
+      } catch (error) {
+        console.error('Failed to cancel request:', error);
       }
+    }
   };
 
   const handleRevokeLink = async (e: any, linkId: string) => {
-      e.stopPropagation();
-      if (confirm('Are you sure you want to remove this doctor from your care team?')) {
-          await revokeLink(linkId);
+    e.stopPropagation();
+    if (confirm('Are you sure you want to remove this doctor from your care team?')) {
+      try {
+        await revokeDoctorLink(linkId);
+        await fetchAllData();
+      } catch (error) {
+        console.error('Failed to revoke link:', error);
       }
+    }
   };
 
   const popularSpecializations = [

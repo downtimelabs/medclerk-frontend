@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { useUploadStore } from '../../store/uploadStore';
+import { getPresignedUrl, confirmDocumentUpload } from '../../api/upload';
 
 interface UploadBoxProps {
   onUploadComplete?: () => void;
@@ -10,8 +10,9 @@ interface UploadBoxProps {
 const UploadBox = ({ onUploadComplete }: UploadBoxProps) => {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { uploadDocument, uploading, error } = useUploadStore();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -42,11 +43,46 @@ const UploadBox = ({ onUploadComplete }: UploadBoxProps) => {
   const handleUpload = async () => {
     if (!selectedFile) return;
     
-    await uploadDocument(selectedFile);
-    
-    if (!useUploadStore.getState().error) {
+    try {
+      setUploading(true);
+      setError(null);
+
+      // Get presigned URL
+      const presignData = await getPresignedUrl(
+        selectedFile.name,
+        selectedFile.type,
+        selectedFile.size
+      );
+
+      // Upload to S3
+      const uploadResponse = await fetch(presignData.presignedUrl, {
+        method: 'PUT',
+        body: selectedFile,
+        headers: {
+          'Content-Type': selectedFile.type,
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to S3');
+      }
+
+      // Confirm upload with backend
+      await confirmDocumentUpload({
+        key: presignData.key,
+        title: selectedFile.name,
+        type: 'OTHER',
+        mimeType: selectedFile.type,
+        fileSize: selectedFile.size,
+      });
+
       setSelectedFile(null);
       if (onUploadComplete) onUploadComplete();
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
     }
   };
 

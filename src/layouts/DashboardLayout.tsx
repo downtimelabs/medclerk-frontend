@@ -16,16 +16,27 @@ import {
   User,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePatientStore } from '../store/patientStore';
+import { useAuthStore } from '../store/authStore';
+import { getPatientProfile } from '../api/patient';
+import type { PatientProfile } from '../interfaces/patient';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const { profile, fetchProfile } = usePatientStore();
+  const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await getPatientProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      }
+    };
     fetchProfile();
   }, []);
 
@@ -159,7 +170,7 @@ const DashboardLayout = () => {
             </button>
           </div>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={() => logout()}
             className="flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors px-2"
           >
             <LogOut size={20} />

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import GetStarted from './pages/GetStarted';
 import Login from './pages/Login';
@@ -29,24 +30,28 @@ function App() {
         <Route path="/signup/doctor" element={<DoctorSignup />} />
 
         {/* Doctor Dashboard Routes */}
-        <Route path="/doctor" element={<DoctorLayout />}>
-          <Route index element={<Navigate to="/doctor/dashboard" replace />} />
-          <Route path="dashboard" element={<DoctorDashboard />} />
-          <Route path="patients" element={<DoctorPatients />} />
-          <Route path="patients/:id" element={<DoctorPatientDetails />} />
-          <Route path="settings" element={<DoctorSettings />} />
+        <Route element={<ProtectedRoute allowedRoles={['DOCTOR']} />}>
+          <Route path="/doctor" element={<DoctorLayout />}>
+            <Route index element={<Navigate to="/doctor/dashboard" replace />} />
+            <Route path="dashboard" element={<DoctorDashboard />} />
+            <Route path="patients" element={<DoctorPatients />} />
+            <Route path="patients/:id" element={<DoctorPatientDetails />} />
+            <Route path="settings" element={<DoctorSettings />} />
+          </Route>
         </Route>
         
         {/* Patient Dashboard Routes */}
-        <Route path="/patient" element={<DashboardLayout />}>
-          <Route index element={<Navigate to="/patient/dashboard" replace />} />
-          <Route path="dashboard" element={<Overview />} />
-          <Route path="doctors" element={<Doctors />} />
-          <Route path="documents" element={<Documents />} />
-          <Route path="documents/:category" element={<DocumentCategory />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="help" element={<Help />} />
+        <Route element={<ProtectedRoute allowedRoles={['PATIENT']} />}>
+          <Route path="/patient" element={<DashboardLayout />}>
+            <Route index element={<Navigate to="/patient/dashboard" replace />} />
+            <Route path="dashboard" element={<Overview />} />
+            <Route path="doctors" element={<Doctors />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="documents/:category" element={<DocumentCategory />} />
+            <Route path="chat" element={<Chat />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="help" element={<Help />} />
+          </Route>
         </Route>
       </Routes>
     </Router>

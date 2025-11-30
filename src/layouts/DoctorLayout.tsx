@@ -14,6 +14,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDoctorProfile } from '../api/doctor';
 import type { CompleteDoctorProfile } from '../interfaces/doctor';
+import { useAuthStore } from '../store/authStore';
 
 const DoctorLayout = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const DoctorLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [profile, setProfile] = useState<CompleteDoctorProfile | null>(null);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -157,7 +159,7 @@ const DoctorLayout = () => {
             </button>
           </div>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={() => logout()}
             className="flex items-center gap-3 text-sm font-medium text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors px-2"
           >
             <LogOut size={20} />

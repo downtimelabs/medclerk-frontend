@@ -80,3 +80,10 @@ export interface PatientStats {
   linkedDoctors: number;
   pendingRequests: number;
 }
+
+export interface DocumentStats {
+  totalDocuments: number;
+  documentsByType: Record<string, number>;
+  recentUploads: number;
+  totalFileSize: number;
+}

@@ -28,6 +28,14 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email, password) => {
         try {
+          // Clear any previous state first
+          set({
+            user: null,
+            accessToken: null,
+            refreshToken: null,
+            authenticated: false,
+          });
+          
           const response = await loginApi({ email, password });
           set({
             user: response.user,
@@ -72,13 +80,19 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error('Logout failed:', error);
         } finally {
+          // Clear the state first
           set({
             user: null,
             accessToken: null,
             refreshToken: null,
             authenticated: false,
           });
-          localStorage.removeItem('auth-storage');
+          
+          // Clear ALL localStorage items related to auth
+          localStorage.clear();
+          
+          // Force a full page reload to /login
+          window.location.replace('/login');
         }
       },
 

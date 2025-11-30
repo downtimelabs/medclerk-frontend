@@ -14,9 +14,10 @@ import {
   Loader2
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { useUploadStore } from '../../store/uploadStore';
+import { fetchPatientDocuments, getFileUrl } from '../../api/upload';
 import { useOnFocus } from '../../hooks/useRefresh';
 import UploadBox from '../../components/documents/UploadBox';
+import type { PatientDocument } from '../../interfaces/upload';
 
 // Simple Modal for Upload
 const UploadModal = ({ isOpen, onClose, onUploadComplete }: { isOpen: boolean; onClose: () => void; onUploadComplete: () => void }) => {
@@ -38,15 +39,28 @@ const Documents = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [documents, setDocuments] = useState<PatientDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewingKey, setViewingKey] = useState<string | null>(null);
 
-  const { documents, loading, fetchDocuments, viewDocument, viewingKey } = useUploadStore();
+  const loadDocuments = async () => {
+    try {
+      setLoading(true);
+      const docs = await fetchPatientDocuments();
+      setDocuments(docs.documents);
+    } catch (error) {
+      console.error('Failed to fetch documents:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchDocuments();
+    loadDocuments();
   }, []);
 
   useOnFocus(() => {
-    fetchDocuments();
+    loadDocuments();
   });
 
   const toggleMenu = (e: React.MouseEvent, id: string) => {
@@ -54,8 +68,16 @@ const Documents = () => {
     setActiveMenu(activeMenu === id ? null : id);
   };
 
-  const handleFileClick = (file: any) => {
-    viewDocument(file.objectKey);
+  const handleFileClick = async (file: any) => {
+    try {
+      setViewingKey(file.objectKey);
+      const url = await getFileUrl(file.objectKey);
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Failed to view document:', error);
+    } finally {
+      setViewingKey(null);
+    }
   };
 
   // Derived stats
@@ -80,7 +102,7 @@ const Documents = () => {
       <UploadModal 
         isOpen={isUploadModalOpen} 
         onClose={() => setIsUploadModalOpen(false)} 
-        onUploadComplete={() => fetchDocuments()}
+        onUploadComplete={() => loadDocuments()}
       />
 
       {/* Header */}
@@ -222,7 +244,7 @@ const Documents = () => {
                             className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
-                              viewDocument(file.objectKey);
+                              handleFileClick(file);
                             }}
                             disabled={viewingKey === file.objectKey}
                           >

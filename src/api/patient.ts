@@ -1,7 +1,7 @@
 import api from '../lib/axios';
 import type {
   PatientProfile,
-  PatientStats,
+  DocumentStats,
 } from '../interfaces/patient';
 import type { LinkedDoctor, PatientDoctorRequest } from '../interfaces/linking';
 import type { PatientDocument } from '../interfaces/upload';
@@ -31,9 +31,9 @@ export async function updatePatientMedical(
   return response.data;
 }
 
-export async function getPatientStats(): Promise<PatientStats> {
-  const response = await api.get<PatientStats>('/patient/stats');
-  return response.data;
+export async function getPatientDocumentStats(): Promise<DocumentStats> {
+  const response = await api.get<{ statusCode: number; message: string; data: DocumentStats }>('/patient/documents/stats');
+  return response.data.data;
 }
 
 export async function getPatientActiveDoctors(): Promise<LinkedDoctor[]> {
@@ -49,4 +49,10 @@ export async function getPatientPendingDoctorRequests(): Promise<PatientDoctorRe
 export async function getPatientDocuments(): Promise<PatientDocument[]> {
   const response = await api.get<PatientDocument[]>('/patient/documents');
   return response.data;
+}
+
+export async function discoverDoctors(): Promise<any[]> {
+  // TODO: Replace with actual endpoint when available
+  // For now returning empty array
+  return [];
 }
