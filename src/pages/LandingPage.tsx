@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   FileText, 
   Activity, 
@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { useAuthStore } from '../store/authStore';
 
 // --- Sections ---
 
@@ -439,6 +440,20 @@ const Footer = () => {
 };
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const { authenticated, user } = useAuthStore();
+
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (authenticated && user) {
+      if (user.role === 'DOCTOR') {
+        navigate('/doctor/dashboard');
+      } else if (user.role === 'PATIENT') {
+        navigate('/patient/dashboard');
+      }
+    }
+  }, [authenticated, user, navigate]);
+
   return (
     <div className="font-sans antialiased text-slate-900 bg-white min-h-screen selection:bg-[#0277BD] selection:text-white">
       <Navbar />

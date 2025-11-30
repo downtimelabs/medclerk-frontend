@@ -78,9 +78,12 @@ export const useAuthStore = create<AuthState>()(
             await logoutApi({ refreshToken });
           }
         } catch (error) {
-          console.error('Logout failed:', error);
+          console.error('Logout API failed:', error);
         } finally {
-          // Clear the state first
+          // Clear all localStorage items
+          localStorage.clear();
+          
+          // Reset all state
           set({
             user: null,
             accessToken: null,
@@ -88,11 +91,8 @@ export const useAuthStore = create<AuthState>()(
             authenticated: false,
           });
           
-          // Clear ALL localStorage items related to auth
-          localStorage.clear();
-          
-          // Force a full page reload to /login
-          window.location.replace('/login');
+          // Force hard reload to landing page
+          window.location.href = '/';
         }
       },
 
