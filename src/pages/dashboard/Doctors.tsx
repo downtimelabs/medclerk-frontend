@@ -4,7 +4,7 @@ import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getActiveDoctorsForPatient, getPatientPendingDoctorRequests, requestDoctorLink, cancelLinkRequest, revokeDoctorLink } from '../../api/linking';
-import { discoverDoctors } from '../../api/patient';
+import { searchDoctors } from '../../api/discovery';
 import { useOnFocus } from '../../hooks/useRefresh';
 import DoctorProfileModal from '../../components/dashboard/DoctorProfileModal';
 import type { LinkedDoctor, PatientDoctorRequest } from '../../interfaces/linking';
@@ -18,29 +18,29 @@ const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () 
   const specialization = request.doctor?.specialization || request.doctorProfile?.specialization || 'Specialist';
 
   return (
-  <div className="flex items-center justify-between p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
-    <div className="flex items-center gap-3">
-      <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
-        {doctorName.charAt(0)}
-      </div>
-      <div>
-        <h4 className="font-bold text-slate-800 text-sm">{doctorName}</h4>
-        <div className="text-xs text-slate-600">{specialization}</div>
-        <div className="text-[10px] text-[#0277BD] font-medium mt-0.5">
+    <div className="flex items-center justify-between p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
+          {doctorName.charAt(0)}
+        </div>
+        <div>
+          <h4 className="font-bold text-slate-800 text-sm">{doctorName}</h4>
+          <div className="text-xs text-slate-600">{specialization}</div>
+          <div className="text-[10px] text-[#0277BD] font-medium mt-0.5">
             {new Date(request.createdAt).toLocaleDateString()}
+          </div>
         </div>
       </div>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          className="h-8 text-xs px-3 border-red-200 hover:bg-red-50 text-red-500 hover:border-red-300"
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+      </div>
     </div>
-    <div className="flex gap-2">
-      <Button 
-        variant="outline" 
-        className="h-8 text-xs px-3 border-red-200 hover:bg-red-50 text-red-500 hover:border-red-300"
-        onClick={onCancel}
-      >
-        Cancel
-      </Button>
-    </div>
-  </div>
   );
 };
 
@@ -52,50 +52,50 @@ const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick:
   const clinicName = doctor.clinicName || doctor.doctor?.clinicName || doctor.doctorProfile?.clinicName || 'Clinic';
 
   return (
-  <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD]">
-    <div className="flex items-center gap-4">
-      <div className="relative">
-        <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-2xl border-2 border-slate-100 group-hover:border-[#0277BD] transition-colors">
+    <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD]">
+      <div className="flex items-center gap-4">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-2xl border-2 border-slate-100 group-hover:border-[#0277BD] transition-colors">
             {doctorName.charAt(0)}
+          </div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
         </div>
-        <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-slate-900 truncate">{doctorName}</h3>
+          <p className="text-sm text-[#0277BD] font-medium truncate">{specialization}</p>
+          <p className="text-xs text-slate-500 truncate">{clinicName}</p>
+        </div>
+        <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD]">
+          <ChevronRight size={20} />
+        </Button>
       </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-slate-900 truncate">{doctorName}</h3>
-        <p className="text-sm text-[#0277BD] font-medium truncate">{specialization}</p>
-        <p className="text-xs text-slate-500 truncate">{clinicName}</p>
-      </div>
-      <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD]">
-        <ChevronRight size={20} />
-      </Button>
-    </div>
-    <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-      <div className="flex items-center gap-1">
-        <Clock size={12} />
-        Connected
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium text-[10px] uppercase tracking-wide">
-          Active
-        </span>
-        <button 
+      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <div className="flex items-center gap-1">
+          <Clock size={12} />
+          Connected
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium text-[10px] uppercase tracking-wide">
+            Active
+          </span>
+          <button
             onClick={onRevoke}
             className="text-red-400 hover:text-red-600 hover:underline"
-        >
+          >
             Revoke
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
-  </Card>
+    </Card>
   );
 };
 
-const DoctorResultCard = ({ doctor, onClick, onConnect }: { doctor: any, onClick: () => void, onConnect: (e: any) => void }) => (
+const DoctorResultCard = ({ doctor, onClick, onConnect, isConnecting, isPending }: { doctor: any, onClick: () => void, onConnect: (e: any) => void, isConnecting: boolean, isPending: boolean }) => (
   <Card onClick={onClick} className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
     <div className="p-5">
       <div className="flex gap-4">
         <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-3xl shadow-sm">
-            {doctor.name.charAt(0)}
+          {doctor.name.charAt(0)}
         </div>
         <div className="flex-1">
           <div className="flex justify-between items-start">
@@ -107,37 +107,59 @@ const DoctorResultCard = ({ doctor, onClick, onConnect }: { doctor: any, onClick
               </div>
             </div>
             <div className="flex flex-col items-end">
-               <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
+              <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
                 <Star size={12} className="text-yellow-500 fill-yellow-500" />
                 <span className="font-bold text-slate-900">4.8</span>
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
             <MapPin size={12} />
             {doctor.profile?.clinicAddress?.street || doctor.profile?.clinicAddress?.city || 'Location N/A'}
           </div>
-          
+
           <div className="mt-3 flex flex-wrap gap-2">
-             <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
-                {doctor.profile?.yearsOfExperience || 0} Years Exp
-             </span>
+            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
+              {doctor.profile?.yearsOfExperience || 0} Years Exp
+            </span>
           </div>
         </div>
       </div>
 
       <div className="flex gap-3 mt-5 pt-4 border-t border-slate-100">
-        <Button variant="outline" className="flex-1 h-10 text-sm hover:border-[#0277BD] hover:text-[#0277BD]">
+        <Button
+          variant="outline"
+          className="flex-1 h-10 text-sm hover:border-[#0277BD] hover:text-[#0277BD]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+        >
           View Profile
         </Button>
-        <Button 
+        {isPending ? (
+          <Button
+            disabled
+            className="flex-1 h-10 text-sm bg-slate-100 text-slate-500 border-none cursor-not-allowed"
+          >
+            <Clock size={16} className="mr-2" />
+            Pending
+          </Button>
+        ) : (
+          <Button
             onClick={onConnect}
-            className="flex-1 h-10 text-sm bg-[#0277BD] hover:bg-[#015f96] text-white border-none shadow-md shadow-blue-200"
-        >
-          <UserPlus size={16} className="mr-2" />
-          Connect
-        </Button>
+            disabled={isConnecting}
+            className="flex-1 h-10 text-sm bg-[#0277BD] hover:bg-[#015f96] text-white border-none shadow-md shadow-blue-200 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isConnecting ? (
+              <Loader2 className="animate-spin mr-2" size={16} />
+            ) : (
+              <UserPlus size={16} className="mr-2" />
+            )}
+            {isConnecting ? 'Connecting...' : 'Connect'}
+          </Button>
+        )}
       </div>
     </div>
   </Card>
@@ -151,6 +173,7 @@ const Doctors = () => {
   const [pendingRequests, setPendingRequests] = useState<PatientDoctorRequest[]>([]);
   const [discoverableDoctors, setDiscoverableDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connectingId, setConnectingId] = useState<string | null>(null);
 
   const fetchAllData = async () => {
     try {
@@ -158,11 +181,11 @@ const Doctors = () => {
       const [active, pending, discoverable] = await Promise.all([
         getActiveDoctorsForPatient(),
         getPatientPendingDoctorRequests(),
-        discoverDoctors()
+        searchDoctors({})
       ]);
       setActiveDoctors(active);
       setPendingRequests(pending);
-      setDiscoverableDoctors(discoverable);
+      setDiscoverableDoctors(discoverable.doctors);
     } catch (error) {
       console.error('Failed to fetch doctors:', error);
     } finally {
@@ -172,6 +195,16 @@ const Doctors = () => {
 
   useEffect(() => {
     fetchAllData();
+
+    // Poll for updates every 5 minutes
+    const interval = setInterval(() => {
+      // Silent update (don't set loading to true)
+      getActiveDoctorsForPatient().then(setActiveDoctors);
+      getPatientPendingDoctorRequests().then(setPendingRequests);
+      searchDoctors({}).then(res => setDiscoverableDoctors(res.doctors));
+    }, 300000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useOnFocus(() => {
@@ -181,10 +214,16 @@ const Doctors = () => {
   const handleConnect = async (e: any, doctorId: string) => {
     e.stopPropagation();
     try {
+      setConnectingId(doctorId);
       await requestDoctorLink({ doctorId });
       await fetchAllData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to send request:', error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+      }
+      setConnectingId(null);
     }
   };
 
@@ -216,7 +255,7 @@ const Doctors = () => {
   ];
 
   // Filter discoverable doctors
-  const filteredDoctors = discoverableDoctors.filter(doc => 
+  const filteredDoctors = discoverableDoctors.filter(doc =>
     doc.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.profile?.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -235,11 +274,10 @@ const Doctors = () => {
           <nav className="flex gap-4 px-6">
             <button
               onClick={() => setActiveTab('my-doctors')}
-              className={`py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'my-doctors'
-                  ? 'border-[#0277BD] text-[#0277BD]'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
+              className={`py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'my-doctors'
+                ? 'border-[#0277BD] text-[#0277BD]'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Users size={16} />
@@ -248,11 +286,10 @@ const Doctors = () => {
             </button>
             <button
               onClick={() => setActiveTab('find-doctors')}
-              className={`py-4 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'find-doctors'
-                  ? 'border-[#0277BD] text-[#0277BD]'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
-              }`}
+              className={`py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'find-doctors'
+                ? 'border-[#0277BD] text-[#0277BD]'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <Search size={16} />
@@ -265,7 +302,7 @@ const Doctors = () => {
         <div className="p-6">
           <AnimatePresence mode="wait">
             {activeTab === 'my-doctors' ? (
-              <motion.div 
+              <motion.div
                 key="my-doctors"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -278,10 +315,10 @@ const Doctors = () => {
                     <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Pending Requests</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       {pendingRequests.map(req => (
-                        <PendingRequestItem 
-                            key={req.id} 
-                            request={req} 
-                            onCancel={() => handleCancelRequest(req.id)}
+                        <PendingRequestItem
+                          key={req.id}
+                          request={req}
+                          onCancel={() => handleCancelRequest(req.id)}
                         />
                       ))}
                     </div>
@@ -294,38 +331,38 @@ const Doctors = () => {
                     <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Connected Doctors</h3>
                     <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{activeDoctors.length} Total</span>
                   </div>
-                  
+
                   {loading && activeDoctors.length === 0 ? (
-                      <div className="flex justify-center py-8">
-                          <Loader2 className="animate-spin text-[#0277BD]" />
-                      </div>
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="animate-spin text-[#0277BD]" />
+                    </div>
                   ) : (
                     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {activeDoctors.map(doctor => (
-                        <LinkedDoctorCard 
-                            key={doctor.id} 
-                            doctor={doctor} 
-                            onClick={() => setSelectedDoctor(doctor)}
-                            onRevoke={(e) => handleRevokeLink(e, doctor.linkId)}
+                      {activeDoctors.map(doctor => (
+                        <LinkedDoctorCard
+                          key={doctor.id}
+                          doctor={doctor}
+                          onClick={() => setSelectedDoctor(doctor)}
+                          onRevoke={(e) => handleRevokeLink(e, doctor.linkId)}
                         />
-                        ))}
-                        
-                        {/* Add New Placeholder */}
-                        <div 
+                      ))}
+
+                      {/* Add New Placeholder */}
+                      <div
                         onClick={() => setActiveTab('find-doctors')}
                         className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 hover:border-[#0277BD] hover:text-[#0277BD] hover:bg-blue-50 transition-all cursor-pointer min-h-[160px]"
-                        >
+                      >
                         <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-white">
-                            <UserPlus size={24} />
+                          <UserPlus size={24} />
                         </div>
                         <span className="font-medium">Connect New Doctor</span>
-                        </div>
+                      </div>
                     </div>
                   )}
                 </section>
               </motion.div>
             ) : (
-              <motion.div 
+              <motion.div
                 key="find-doctors"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -336,7 +373,7 @@ const Doctors = () => {
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <input 
+                    <input
                       type="text"
                       placeholder="Search by name, clinic, or condition..."
                       className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] transition-all"
@@ -346,8 +383,8 @@ const Doctors = () => {
                   </div>
                   <div className="flex gap-2">
                     <div className="relative w-full md:w-48">
-                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                       <input 
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <input
                         type="text"
                         placeholder="Location"
                         className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] transition-all"
@@ -362,7 +399,7 @@ const Doctors = () => {
                 {/* Popular Specializations Chips */}
                 <div className="flex flex-wrap gap-2">
                   {popularSpecializations.map((spec, i) => (
-                    <button 
+                    <button
                       key={i}
                       className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:border-[#0277BD] hover:text-[#0277BD] transition-colors"
                     >
@@ -373,14 +410,19 @@ const Doctors = () => {
 
                 {/* Results */}
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredDoctors.map(doctor => (
-                    <DoctorResultCard 
-                      key={doctor.id} 
-                      doctor={doctor} 
-                      onClick={() => setSelectedDoctor(doctor)}
-                      onConnect={(e) => handleConnect(e, doctor.id)}
-                    />
-                  ))}
+                  {filteredDoctors.map(doctor => {
+                    const isPending = pendingRequests.some(req => req.doctorId === doctor.id);
+                    return (
+                      <DoctorResultCard
+                        key={doctor.id}
+                        doctor={doctor}
+                        onClick={() => setSelectedDoctor(doctor)}
+                        onConnect={(e) => handleConnect(e, doctor.id)}
+                        isConnecting={connectingId === doctor.id}
+                        isPending={isPending}
+                      />
+                    )
+                  })}
                 </div>
               </motion.div>
             )}
@@ -388,10 +430,10 @@ const Doctors = () => {
         </div>
       </div>
 
-      <DoctorProfileModal 
-        doctor={selectedDoctor} 
-        isOpen={!!selectedDoctor} 
-        onClose={() => setSelectedDoctor(null)} 
+      <DoctorProfileModal
+        doctor={selectedDoctor}
+        isOpen={!!selectedDoctor}
+        onClose={() => setSelectedDoctor(null)}
       />
     </div>
   );
