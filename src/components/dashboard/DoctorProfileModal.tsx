@@ -1,27 +1,28 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, Clock, Star, Award, Phone, Mail } from 'lucide-react';
 
-interface Doctor {
-  id: number;
-  name: string;
-  specialization: string;
-  clinic: string;
-  image: string;
-  address?: string;
-  rating?: number;
-  reviews?: number;
-  experience?: string;
-  about?: string;
-}
-
 interface DoctorProfileModalProps {
-  doctor: Doctor | null;
+  doctor: any;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps) => {
   if (!doctor) return null;
+
+  // Normalize data from different API responses (LinkedDoctor vs PublicDoctorProfile)
+  const normalizedDoctor = {
+    name: doctor.name || 'Unknown Doctor',
+    specialization: doctor.specialization || doctor.profile?.specialization || 'General Physician',
+    clinic: doctor.clinic || doctor.clinicName || doctor.profile?.clinicName || 'Private Clinic',
+    image: doctor.image || doctor.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.name || 'D')}&background=0D8ABC&color=fff`,
+    address: doctor.address ? (typeof doctor.address === 'string' ? doctor.address : doctor.address.city) :
+      (doctor.profile?.clinicAddress?.street || doctor.profile?.clinicAddress?.city || ''),
+    rating: doctor.rating || 4.8, // Placeholder as API might not return it yet
+    reviews: doctor.reviews || 124,
+    experience: doctor.experience || (doctor.yearsOfExperience ? `${doctor.yearsOfExperience} Years` : null) || (doctor.profile?.yearsOfExperience ? `${doctor.profile.yearsOfExperience} Years` : '5+ Years'),
+    about: doctor.about
+  };
 
   return (
     <AnimatePresence>
@@ -55,9 +56,9 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
               <div className="h-24 bg-gradient-to-r from-blue-500 to-[#0277BD] relative">
                 <div className="absolute -bottom-10 left-6">
                   <img
-                    src={doctor.image}
-                    alt={doctor.name}
-                    className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md"
+                    src={normalizedDoctor.image}
+                    alt={normalizedDoctor.name}
+                    className="w-20 h-20 rounded-full border-4 border-white object-cover shadow-md bg-white"
                   />
                 </div>
               </div>
@@ -66,46 +67,32 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
                 {/* Basic Info */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900">{doctor.name}</h2>
-                    <p className="text-[#0277BD] font-medium">{doctor.specialization}</p>
+                    <h2 className="text-2xl font-bold text-slate-900">{normalizedDoctor.name}</h2>
+                    <p className="text-[#0277BD] font-medium">{normalizedDoctor.specialization}</p>
                     <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
                       <MapPin size={14} />
-                      {doctor.clinic} {doctor.address ? `• ${doctor.address}` : ''}
+                      {normalizedDoctor.clinic} {normalizedDoctor.address ? `• ${normalizedDoctor.address}` : ''}
                     </div>
                   </div>
-                  {doctor.rating && (
+                  {normalizedDoctor.rating && (
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-lg border border-yellow-100">
                         <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                        <span className="font-bold text-slate-900">{doctor.rating}</span>
+                        <span className="font-bold text-slate-900">{normalizedDoctor.rating}</span>
                       </div>
-                      <span className="text-xs text-slate-400 mt-1">{doctor.reviews} reviews</span>
+                      <span className="text-xs text-slate-400 mt-1">{normalizedDoctor.reviews} reviews</span>
                     </div>
                   )}
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-1 gap-3 mb-4">
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
                     <div className="flex justify-center mb-2 text-[#0277BD]">
                       <Award size={20} />
                     </div>
-                    <div className="font-bold text-slate-900">{doctor.experience || '10+ Years'}</div>
+                    <div className="font-bold text-slate-900">{normalizedDoctor.experience}</div>
                     <div className="text-xs text-slate-500">Experience</div>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
-                    <div className="flex justify-center mb-2 text-[#0277BD]">
-                      <Clock size={20} />
-                    </div>
-                    <div className="font-bold text-slate-900">15 min</div>
-                    <div className="text-xs text-slate-500">Wait Time</div>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-center">
-                    <div className="flex justify-center mb-2 text-[#0277BD]">
-                      <Star size={20} />
-                    </div>
-                    <div className="font-bold text-slate-900">4.9/5</div>
-                    <div className="text-xs text-slate-500">Rating</div>
                   </div>
                 </div>
 
@@ -113,8 +100,8 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
                 <div className="mb-4">
                   <h3 className="text-lg font-semibold text-slate-900 mb-3">About</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    {doctor.about || 
-                      `${doctor.name} is a highly skilled ${doctor.specialization} with over ${doctor.experience || '10 years'} of experience. 
+                    {normalizedDoctor.about ||
+                      `${normalizedDoctor.name} is a highly skilled ${normalizedDoctor.specialization} with over ${normalizedDoctor.experience} of experience. 
                       Dedicated to providing comprehensive care and building long-lasting relationships with patients. 
                       Specializes in preventive care, diagnosis, and treatment of various conditions.`}
                   </p>
@@ -133,7 +120,7 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
                     <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-[#0277BD]">
                       <Mail size={14} />
                     </div>
-                    <span>contact@{doctor.clinic.toLowerCase().replace(/\s/g, '')}.com</span>
+                    <span>contact@{normalizedDoctor.clinic.toLowerCase().replace(/[^a-z0-9]/g, '')}.com</span>
                   </div>
                 </div>
 

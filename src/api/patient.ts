@@ -8,7 +8,7 @@ import type { PatientDocument } from '../interfaces/upload';
 
 export async function getPatientProfile(): Promise<PatientProfile> {
   const response = await api.get<{ data: PatientProfile }>('/patient/details');
-  return response.data.data; 
+  return response.data.data;
 }
 
 export async function updatePatientPersonal(
@@ -51,8 +51,4 @@ export async function getPatientDocuments(): Promise<PatientDocument[]> {
   return response.data;
 }
 
-export async function discoverDoctors(): Promise<any[]> {
-  // TODO: Replace with actual endpoint when available
-  // For now returning empty array
-  return [];
-}
+
