@@ -10,9 +10,10 @@ interface DoctorProfileModalProps {
   doctor: any;
   isOpen: boolean;
   onClose: () => void;
+  isConnected?: boolean;
 }
 
-const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps) => {
+const DoctorProfileModal = ({ doctor, isOpen, onClose, isConnected = false }: DoctorProfileModalProps) => {
   if (!doctor) return null;
 
   // Normalize data from different API responses (LinkedDoctor vs PublicDoctorProfile)
@@ -43,12 +44,16 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
 
       const fetchData = async () => {
         try {
-          const [statsData, myRatingData] = await Promise.all([
-            getRatingStats(normalizedDoctor.id),
-            getMyRating(normalizedDoctor.id).catch(() => null) // Ignore error if not logged in or other issue
-          ]);
+          const promises: Promise<any>[] = [getRatingStats(normalizedDoctor.id)];
+          // Only fetch my rating if we are connected, otherwise we can't have rated them
+          if (isConnected) {
+            promises.push(getMyRating(normalizedDoctor.id).catch(() => null));
+          }
+
+          const [statsData, myRatingData] = await Promise.all(promises);
+
           setStats(statsData);
-          setMyRating(myRatingData);
+          if (myRatingData) setMyRating(myRatingData);
         } catch (error) {
           console.error('Failed to fetch rating data:', error);
         }
@@ -56,13 +61,18 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
 
       fetchData();
     }
-  }, [isOpen, normalizedDoctor.id]);
+  }, [isOpen, normalizedDoctor.id, isConnected]);
 
   const handleRatingSuccess = () => {
     // Refresh data after successful rating
     if (normalizedDoctor.id) {
-      getRatingStats(normalizedDoctor.id).then(setStats);
-      getMyRating(normalizedDoctor.id).then(setMyRating);
+      getRatingStats(normalizedDoctor.id)
+        .then(setStats)
+        .catch(err => console.error('Failed to refresh stats:', err));
+
+      getMyRating(normalizedDoctor.id)
+        .then(setMyRating)
+        .catch(err => console.error('Failed to refresh my rating:', err));
     }
   };
 
@@ -114,8 +124,8 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
                       <p className="text-[#0277BD] font-medium">{normalizedDoctor.specialization}</p>
                       {stats && stats.totalReviews > 0 && (
                         <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100">
-                          <StarRating rating={stats.averageRating} size={12} readOnly />
-                          <span className="text-xs font-bold text-slate-700">{stats.averageRating.toFixed(1)}</span>
+                          <StarRating rating={Number(stats.averageRating || 0)} size={12} />
+                          <span className="text-xs font-bold text-slate-700">{stats.averageRating?.toFixed(1)}</span>
                           <span className="text-xs text-slate-400">({stats.totalReviews})</span>
                         </div>
                       )}
@@ -165,29 +175,31 @@ const DoctorProfileModal = ({ doctor, isOpen, onClose }: DoctorProfileModalProps
 
               </div>
 
-              {/* Rating Action */}
-              <div className="mt-6 pt-4 border-t border-slate-100">
-                {myRating ? (
-                  <div className="flex flex-col gap-1">
-                    <span className="text-sm font-medium text-slate-700">Your Rating</span>
-                    <div className="flex items-center gap-2">
-                      <StarRating rating={myRating.rating} size={16} readOnly />
-                      <span className="text-sm text-slate-500">
-                        {myRating.rating}/5
-                        {myRating.comment && ' • "' + myRating.comment + '"'}
-                      </span>
+              {/* Rating Action - Only if connected */}
+              {isConnected && (
+                <div className="mt-6 pt-4 border-t border-slate-100 px-6 pb-6">
+                  {myRating ? (
+                    <div className="flex flex-col gap-1">
+                      <span className="text-sm font-medium text-slate-700">Your Rating</span>
+                      <div className="flex items-center gap-2">
+                        <StarRating rating={Number(myRating.rating)} size={16} />
+                        <span className="text-sm text-slate-500">
+                          {myRating.rating}/5
+                          {myRating.comment && ' • "' + myRating.comment + '"'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsRateModalOpen(true)}
-                    className="w-full justify-center"
-                  >
-                    Rate Doctor
-                  </Button>
-                )}
-              </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsRateModalOpen(true)}
+                      className="w-full justify-center"
+                    >
+                      Rate Doctor
+                    </Button>
+                  )}
+                </div>
+              )}
 
             </motion.div>
           </motion.div>

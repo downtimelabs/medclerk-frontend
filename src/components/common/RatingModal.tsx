@@ -38,7 +38,19 @@ const RatingModal = ({ isOpen, onClose, targetName, targetId, onSuccess }: Ratin
             setComment('');
         } catch (err: any) {
             console.error('Failed to submit rating:', err);
-            setError(err.response?.data?.error || 'Failed to submit rating');
+            let errorMessage = 'Failed to submit rating';
+            if (err.response?.data?.error) {
+                errorMessage = typeof err.response.data.error === 'string'
+                    ? err.response.data.error
+                    : JSON.stringify(err.response.data.error);
+            } else if (err.response?.data?.message) {
+                errorMessage = typeof err.response.data.message === 'string'
+                    ? err.response.data.message
+                    : JSON.stringify(err.response.data.message);
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }

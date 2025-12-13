@@ -433,6 +433,7 @@ const Doctors = () => {
         doctor={selectedDoctor}
         isOpen={!!selectedDoctor}
         onClose={() => setSelectedDoctor(null)}
+        isConnected={activeDoctors.some(doc => doc.id === selectedDoctor?.id)}
       />
     </div>
   );
