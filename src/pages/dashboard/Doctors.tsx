@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Star, Stethoscope, Filter, Clock, ChevronRight, UserPlus, Users, Loader2 } from 'lucide-react';
+import { Search, MapPin, Stethoscope, Filter, Clock, ChevronRight, UserPlus, Users, Loader2 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -107,9 +107,8 @@ const DoctorResultCard = ({ doctor, onClick, onConnect, isConnecting, isPending 
               </div>
             </div>
             <div className="flex flex-col items-end">
-              <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
-                <Star size={12} className="text-yellow-500 fill-yellow-500" />
-                <span className="font-bold text-slate-900">4.8</span>
+              <div className="flex flex-col items-end">
+                {/* Rating removed as it is not available from backend */}
               </div>
             </div>
           </div>
@@ -434,6 +433,7 @@ const Doctors = () => {
         doctor={selectedDoctor}
         isOpen={!!selectedDoctor}
         onClose={() => setSelectedDoctor(null)}
+        isConnected={activeDoctors.some(doc => doc.id === selectedDoctor?.id)}
       />
     </div>
   );

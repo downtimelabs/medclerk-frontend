@@ -1,27 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  FileText, 
-  MessageSquare, 
-  User, 
-  Calendar, 
-  Phone, 
+import {
+  ArrowLeft,
+  FileText,
+  MessageSquare,
+  User,
+  Calendar,
+  Phone,
   Mail,
   Send,
   Bot,
   Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  getDoctorPatients, 
-  getPatientDocuments, 
-  queryPatientDocuments 
+import {
+  getDoctorPatients,
+  getPatientDocuments,
+  queryPatientDocuments
 } from '../../api/doctor';
-import type { 
-  PatientInfo, 
+import { getRatingStats, getMyRating, type RatingStats, type Rating } from '../../api/rating';
+import StarRating from '../../components/common/StarRating';
+import RatingModal from '../../components/common/RatingModal';
+import { Button } from '../../components/ui/Button';
+import type {
+  PatientInfo,
   Document,
-  RAGResponse 
+  RAGResponse
 } from '../../interfaces/doctor';
 
 const DoctorPatientDetails = () => {
@@ -30,7 +34,7 @@ const DoctorPatientDetails = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'documents' | 'chat'>('overview');
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Documents State
   const [documents, setDocuments] = useState<Document[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
@@ -39,7 +43,13 @@ const DoctorPatientDetails = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([]);
   const [input, setInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Rating State
+  const [stats, setStats] = useState<RatingStats | null>(null);
+  const [myRating, setMyRating] = useState<Rating | null>(null);
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -53,16 +63,16 @@ const DoctorPatientDetails = () => {
         // Ideally backend should support /doctor/patients/:id
         // For this implementation, I'll assume we can fetch the patient details.
         // If not, I'll fallback to fetching list and filtering (inefficient but works for now).
-        
+
         // Let's try fetching list and filtering for now as per available API
         const data = await getDoctorPatients({ status: 'ACTIVE' }); // This might be heavy if many patients
         const found = data.patients.find(p => p.id === id);
         if (found) {
           setPatient(found);
         } else {
-            // Fallback: maybe it's pending or we need another call. 
-            // For now, handle not found.
-            console.error('Patient not found in active list');
+          // Fallback: maybe it's pending or we need another call. 
+          // For now, handle not found.
+          console.error('Patient not found in active list');
         }
       } catch (error) {
         console.error('Error fetching patient:', error);
@@ -73,6 +83,32 @@ const DoctorPatientDetails = () => {
 
     fetchPatient();
   }, [id]);
+
+  // Fetch rating stats
+  useEffect(() => {
+    if (id) {
+      const fetchRatingData = async () => {
+        try {
+          const [statsData, myRatingData] = await Promise.all([
+            getRatingStats(id),
+            getMyRating(id).catch(() => null)
+          ]);
+          setStats(statsData);
+          setMyRating(myRatingData);
+        } catch (error) {
+          console.error('Error fetching rating data:', error);
+        }
+      };
+      fetchRatingData();
+    }
+  }, [id]);
+
+  const handleRatingSuccess = () => {
+    if (id) {
+      getRatingStats(id).then(setStats);
+      getMyRating(id).then(setMyRating);
+    }
+  };
 
   useEffect(() => {
     if (activeTab === 'documents' && id) {
@@ -139,7 +175,7 @@ const DoctorPatientDetails = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button 
+        <button
           onClick={() => navigate('/doctor/patients')}
           className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
         >
@@ -153,7 +189,31 @@ const DoctorPatientDetails = () => {
             </span>
             <span>•</span>
             <span>{patient.email}</span>
+            {stats && stats.totalReviews > 0 && (
+              <>
+                <span>•</span>
+                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100">
+                  <StarRating rating={stats.averageRating} size={12} readOnly />
+                  <span className="text-xs font-bold text-slate-700">{stats.averageRating.toFixed(1)}</span>
+                </div>
+              </>
+            )}
           </div>
+        </div>
+        <div className="ml-auto">
+          {myRating ? (
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-medium text-slate-500">You rated</span>
+              <div className="flex items-center gap-1">
+                <StarRating rating={myRating.rating} size={16} readOnly />
+                <span className="text-sm font-bold text-slate-700">{myRating.rating}/5</span>
+              </div>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={() => setIsRateModalOpen(true)}>
+              Rate Patient
+            </Button>
+          )}
         </div>
       </div>
 
@@ -168,11 +228,10 @@ const DoctorPatientDetails = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-4 flex items-center gap-2 text-sm font-medium transition-colors relative ${
-                activeTab === tab.id 
-                  ? 'text-[#0277BD] dark:text-blue-400' 
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}
+              className={`pb-4 flex items-center gap-2 text-sm font-medium transition-colors relative ${activeTab === tab.id
+                ? 'text-[#0277BD] dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
             >
               <tab.icon size={18} />
               {tab.label}
@@ -188,7 +247,7 @@ const DoctorPatientDetails = () => {
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           {activeTab === 'overview' && (
-            <motion.div 
+            <motion.div
               key="overview"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -231,7 +290,7 @@ const DoctorPatientDetails = () => {
           )}
 
           {activeTab === 'documents' && (
-            <motion.div 
+            <motion.div
               key="documents"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -270,9 +329,9 @@ const DoctorPatientDetails = () => {
                             {new Date(doc.createdAt).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 text-right">
-                            <a 
-                              href={doc.fileUrl} 
-                              target="_blank" 
+                            <a
+                              href={doc.fileUrl}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-[#0277BD] hover:underline text-sm font-medium"
                             >
@@ -297,7 +356,7 @@ const DoctorPatientDetails = () => {
           )}
 
           {activeTab === 'chat' && (
-            <motion.div 
+            <motion.div
               key="chat"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -324,29 +383,27 @@ const DoctorPatientDetails = () => {
                     <p className="text-sm text-slate-400 max-w-xs mt-2">Ask about recent blood tests, diagnosis history, or summarize documents.</p>
                   </div>
                 )}
-                
+
                 {messages.map((msg, idx) => (
                   <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      msg.role === 'user' 
-                        ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300' 
-                        : 'bg-gradient-to-r from-blue-500 to-teal-400 text-white'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user'
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                      : 'bg-gradient-to-r from-blue-500 to-teal-400 text-white'
+                      }`}>
                       {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                     </div>
-                    <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                      msg.role === 'user'
-                        ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white rounded-tr-none'
-                        : 'bg-blue-50 dark:bg-blue-900/20 text-slate-800 dark:text-slate-200 rounded-tl-none border border-blue-100 dark:border-blue-900/30'
-                    }`}>
+                    <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user'
+                      ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white rounded-tr-none'
+                      : 'bg-blue-50 dark:bg-blue-900/20 text-slate-800 dark:text-slate-200 rounded-tl-none border border-blue-100 dark:border-blue-900/30'
+                      }`}>
                       {msg.content}
                     </div>
                   </div>
                 ))}
-                
+
                 {chatLoading && (
                   <div className="flex gap-3">
-                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white flex-shrink-0">
                       <Bot size={16} />
                     </div>
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl rounded-tl-none border border-blue-100 dark:border-blue-900/30">
@@ -373,7 +430,7 @@ const DoctorPatientDetails = () => {
                     className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0277BD]/20 dark:text-white"
                     disabled={chatLoading}
                   />
-                  <button 
+                  <button
                     onClick={handleSendMessage}
                     disabled={!input.trim() || chatLoading}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#0277BD] text-white rounded-lg hover:bg-[#026aa8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -389,6 +446,13 @@ const DoctorPatientDetails = () => {
           )}
         </AnimatePresence>
       </div>
+      <RatingModal
+        isOpen={isRateModalOpen}
+        onClose={() => setIsRateModalOpen(false)}
+        targetName={patient.name}
+        targetId={patient.id}
+        onSuccess={handleRatingSuccess}
+      />
     </div>
   );
 };

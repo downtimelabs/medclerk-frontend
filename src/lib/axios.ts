@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://medclerk-backend.vercel.app/api/v1';
-// const API_URL = 'http://localhost:3000/api/v1';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000/api/v1' : 'https://medclerk-backend.vercel.app/api/v1');
 
 const api = axios.create({
   baseURL: API_URL,
@@ -33,7 +32,7 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
-        
+
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
@@ -48,9 +47,9 @@ api.interceptors.response.use(
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
         // Update store with new tokens
-        useAuthStore.getState().setTokens({ 
-          accessToken, 
-          refreshToken: newRefreshToken 
+        useAuthStore.getState().setTokens({
+          accessToken,
+          refreshToken: newRefreshToken
         });
 
         // Retry original request with new token
