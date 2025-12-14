@@ -1,25 +1,29 @@
 import { useState } from 'react';
-import { 
-  Send, 
-  Paperclip, 
-  Image as ImageIcon, 
+import {
+  Send,
+  Paperclip,
+  Image as ImageIcon,
   Sparkles,
   FileText,
   Settings,
   History,
   BookOpen
 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 import { runMultiRagQuery } from '../../api/rag';
 import type { RagQueryResponse } from '../../interfaces/rag';
 
 const Chat = () => {
+  const { user } = useAuthStore();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Array<{ 
-    role: 'user' | 'assistant', 
+  const [messages, setMessages] = useState<Array<{
+    role: 'user' | 'assistant',
     content: string,
     sources?: RagQueryResponse['sources']
   }>>([]);
+
+  const userFirstName = user?.name?.split(' ')[0] || 'there';
 
   const suggestedPrompts = [
     { icon: FileText, title: "Summarize Report", desc: "Get a summary of my latest blood test" },
@@ -38,8 +42,8 @@ const Chat = () => {
 
     try {
       const response = await runMultiRagQuery({ question: userMessage });
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
         content: response.answer,
         sources: response.sources
       }]);
@@ -57,7 +61,7 @@ const Chat = () => {
       {messages.length === 0 && (
         <div className="flex-none mb-12 mt-10 text-left">
           <h1 className="text-6xl font-bold text-slate-900 mb-4 tracking-tight">
-            Hi there, <span className="text-[#0277BD]">John</span>
+            Hi there, <span className="text-[#0277BD]">{userFirstName}</span>
           </h1>
           <h2 className="text-5xl font-semibold text-slate-700 mb-6 tracking-tight leading-tight">
             What would you like to know?
@@ -72,7 +76,7 @@ const Chat = () => {
       {messages.length === 0 && (
         <div className="flex-none grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {suggestedPrompts.map((prompt, i) => (
-            <button 
+            <button
               key={i}
               className="p-4 text-left bg-white border border-slate-200 rounded-xl hover:border-[#0277BD] hover:shadow-md transition-all group"
               onClick={() => handleSend(prompt.desc)}
@@ -96,7 +100,7 @@ const Chat = () => {
             </div>
             <div className={`p-4 rounded-2xl shadow-sm max-w-[80%] ${msg.role === 'assistant' ? 'bg-white border border-slate-200 rounded-tl-none' : 'bg-[#0277BD] text-white rounded-tr-none'}`}>
               <p className={`text-sm ${msg.role === 'assistant' ? 'text-slate-700' : 'text-white'} whitespace-pre-wrap`}>{msg.content}</p>
-              
+
               {msg.sources && msg.sources.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
                   <div className="flex items-center gap-2 mb-2 text-slate-400">
@@ -150,7 +154,7 @@ const Chat = () => {
             className="w-full p-3 min-h-[60px] max-h-[120px] resize-none focus:outline-none text-slate-700 text-sm bg-transparent"
             disabled={isLoading}
           />
-          
+
           <div className="flex items-center justify-between px-2 pb-1">
             <div className="flex gap-2">
               <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 rounded-lg transition-colors">
@@ -162,10 +166,10 @@ const Chat = () => {
                 Use Image
               </button>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-400">{input.length}/1000</span>
-              <button 
+              <button
                 className={`p-2 rounded-lg transition-colors ${input.trim() && !isLoading ? 'bg-[#0277BD] text-white hover:bg-[#026aa8]' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
                 disabled={!input.trim() || isLoading}
                 onClick={() => handleSend(input)}
