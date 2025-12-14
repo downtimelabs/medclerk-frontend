@@ -193,8 +193,8 @@ const DoctorPatientDetails = () => {
               <>
                 <span>•</span>
                 <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100">
-                  <StarRating rating={stats.averageRating} size={12} readOnly />
-                  <span className="text-xs font-bold text-slate-700">{stats.averageRating.toFixed(1)}</span>
+                  <StarRating rating={stats?.averageRating || 0} size={12} readOnly />
+                  <span className="text-xs font-bold text-slate-700">{stats?.averageRating?.toFixed(1)}</span>
                 </div>
               </>
             )}
