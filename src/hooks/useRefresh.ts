@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 
+// this is a hack
+
 export function useOnFocus(callback: () => void) {
   const callbackRef = useRef(callback);
 
