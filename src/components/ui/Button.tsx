@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'white';
+  variant?: 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'white' | 'danger';
   className?: string;
 }
 
@@ -15,7 +15,8 @@ export const Button = ({ children, variant = 'primary', className = '', ...props
     accent: "bg-[#FF9800] text-white hover:bg-[#f57c00] shadow-md hover:shadow-lg transition-all",
     ghost: "hover:bg-slate-100 text-slate-700",
     outline: "border border-slate-200 bg-white hover:bg-slate-100 text-slate-900",
-    white: "bg-white text-[#0277BD] hover:bg-blue-50 shadow-sm"
+    white: "bg-white text-[#0277BD] hover:bg-blue-50 shadow-sm",
+    danger: "bg-red-600 text-white hover:bg-red-700 shadow-sm"
   };
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity, ArrowRight, FileText, ShieldCheck } from 'lucide-react';
+import { Activity, ArrowRight, FileText, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -12,6 +12,7 @@ const Login = () => {
   const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,25 +76,33 @@ const Login = () => {
               className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
             />
             
-            <div>
+            <div className="relative">
               <Input 
                 label="Password" 
-                type="password" 
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-colors pr-10"
               />
-              <div className="flex justify-between items-center mt-2">
-                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                  <input type="checkbox" className="rounded border-slate-300 text-[#0277BD] focus:ring-[#0277BD]" />
-                  Remember me
-                </label>
-                <a href="#" className="text-sm text-[#0277BD] hover:text-[#026aa8] font-medium">
-                  Forgot password?
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+
+            <div className="flex justify-between items-center mt-2">
+              <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <input type="checkbox" className="rounded border-slate-300 text-[#0277BD] focus:ring-[#0277BD]" />
+                Remember me
+              </label>
+              <a href="#" className="text-sm text-[#0277BD] hover:text-[#026aa8] font-medium">
+                Forgot password?
+              </a>
             </div>
 
             <Button type="submit" className="w-full h-12 text-base mt-2 shadow-lg shadow-blue-500/20" disabled={loading}>
