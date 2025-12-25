@@ -14,7 +14,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { fetchPatientDocuments, getFileUrl } from '../../api/upload';
+import { fetchPatientDocuments } from '../../api/upload';
 import { useOnFocus } from '../../hooks/useRefresh';
 import UploadBox from '../../components/documents/UploadBox';
 import type { PatientDocument } from '../../interfaces/upload';
@@ -24,12 +24,88 @@ const UploadModal = ({ isOpen, onClose, onUploadComplete }: { isOpen: boolean; o
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
         <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-            <Trash2 size={20} className="rotate-45" /> {/* Using Trash2 as X icon placeholder if X not imported, but X is usually imported. Let's use X if available or just text */}
+            <Trash2 size={20} className="rotate-45" />
         </button>
-        <h2 className="text-xl font-bold mb-4">Upload Document</h2>
+        <h2 className="text-xl font-bold mb-4 text-slate-900 border-b border-slate-100 pb-2">Upload Document</h2>
         <UploadBox onUploadComplete={() => { onUploadComplete(); onClose(); }} />
+      </div>
+    </div>
+  );
+};
+
+// Preview Modal for Documents
+const PreviewModal = ({ isOpen, onClose, fileUrl, fileName, mimeType, onDownload }: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  fileUrl: string | null; 
+  fileName: string;
+  mimeType: string;
+  onDownload: () => void;
+}) => {
+  if (!isOpen) return null;
+
+  const isImage = mimeType?.startsWith('image/');
+  const isPdf = mimeType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl w-full max-w-5xl h-[90vh] flex flex-col shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div className="flex items-center gap-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isImage ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
+              <FileText size={20} />
+            </div>
+            <div>
+              <h2 className="font-bold text-slate-900 truncate max-w-[250px] md:max-w-md leading-tight">{fileName}</h2>
+              <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mt-0.5">{mimeType || 'Document'}</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+          >
+             <Trash2 size={20} className="rotate-45" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto bg-slate-50/50 p-6 flex items-center justify-center">
+          {!fileUrl ? (
+             <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-10 h-10 text-[#0277BD] animate-spin" />
+                <p className="text-slate-500 font-medium">Loading preview...</p>
+             </div>
+          ) : isImage ? (
+            <img src={fileUrl} alt={fileName} className="max-w-full max-h-full object-contain rounded-2xl shadow-lg border border-white" />
+          ) : isPdf ? (
+            <iframe src={`${fileUrl}#toolbar=0`} className="w-full h-full rounded-2xl border border-slate-200 bg-white shadow-inner" title={fileName} />
+          ) : (
+            <div className="text-center p-12 bg-white rounded-3xl shadow-sm border border-slate-100 max-w-sm">
+              <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                <FileText size={40} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">No Preview Available</h3>
+              <p className="text-slate-500 mb-6">We can't preview this file type directly in the browser.</p>
+              <Button onClick={onDownload} className="w-full bg-[#0277BD] text-white">
+                Download to View
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-5 border-t border-slate-100 flex justify-end gap-3 bg-white">
+           <Button variant="outline" onClick={onClose} className="rounded-xl px-6">Close</Button>
+           {fileUrl && (
+             <Button onClick={onDownload} className="bg-[#0277BD] text-white rounded-xl px-6 hover:shadow-lg hover:shadow-blue-100 transition-all">
+                <Download size={18} className="mr-2" />
+                Download Report
+             </Button>
+           )}
+        </div>
       </div>
     </div>
   );
@@ -41,7 +117,11 @@ const Documents = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [documents, setDocuments] = useState<PatientDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewingKey, setViewingKey] = useState<string | null>(null);
+
+  // Preview states
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<PatientDocument | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const loadDocuments = async () => {
     try {
@@ -68,15 +148,16 @@ const Documents = () => {
     setActiveMenu(activeMenu === id ? null : id);
   };
 
-  const handleFileClick = async (file: any) => {
-    try {
-      setViewingKey(file.objectKey);
-      const url = await getFileUrl(file.objectKey);
-      window.open(url, '_blank');
-    } catch (error) {
-      console.error('Failed to view document:', error);
-    } finally {
-      setViewingKey(null);
+  const handleFileClick = (file: PatientDocument) => {
+    setSelectedFile(file);
+    setIsPreviewOpen(true);
+    setPreviewUrl(file.fileUrl); // Use the fileUrl already in the document
+  };
+
+  const handleDownload = (e: React.MouseEvent, file: PatientDocument) => {
+    e.stopPropagation();
+    if (file.fileUrl) {
+      window.open(file.fileUrl, '_blank');
     }
   };
 
@@ -103,6 +184,19 @@ const Documents = () => {
         isOpen={isUploadModalOpen} 
         onClose={() => setIsUploadModalOpen(false)} 
         onUploadComplete={() => loadDocuments()}
+      />
+
+      <PreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setPreviewUrl(null);
+          setSelectedFile(null);
+        }}
+        fileUrl={previewUrl}
+        fileName={selectedFile?.title || ''}
+        mimeType={selectedFile?.mimeType || ''}
+        onDownload={() => previewUrl && window.open(previewUrl, '_blank')}
       />
 
       {/* Header */}
@@ -239,27 +333,32 @@ const Documents = () => {
                           className="fixed inset-0 z-10" 
                           onClick={(e) => { e.stopPropagation(); setActiveMenu(null); }}
                         />
-                        <div className="absolute right-8 top-10 w-40 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute right-8 top-10 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1.5 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                           <button 
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium"
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleFileClick(file);
+                              setActiveMenu(null);
                             }}
-                            disabled={viewingKey === file.objectKey}
                           >
-                            {viewingKey === file.objectKey ? (
-                              <Loader2 size={16} className="animate-spin text-[#0277BD]" />
-                            ) : (
-                              <Eye size={16} />
-                            )}
+                            <Eye size={16} />
                             Preview
                           </button>
-                          <button className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium">
+                          <button 
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 w-full text-left font-medium transition-colors"
+                            onClick={(e) => {
+                                handleDownload(e, file);
+                                setActiveMenu(null);
+                            }}
+                          >
                             <Download size={16} /> Download
                           </button>
-                          <div className="h-px bg-slate-100 my-1"></div>
-                          <button className="flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full text-left font-medium">
+                          <div className="h-px bg-slate-100 my-1.5 mx-2"></div>
+                          <button 
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left font-medium transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Trash2 size={16} /> Delete
                           </button>
                         </div>

@@ -47,7 +47,7 @@ export async function fetchPatientDocument(
 }
 
 export async function getFileUrl(key: string): Promise<string> {
-  const response = await api.get<APIResponse<GetFileUrlResponse>>(`/upload/file-url-endpoint`, {
+  const response = await api.get<APIResponse<GetFileUrlResponse>>(`/upload/file-url`, {
     params: { key }
   });
   return response.data.data.presignedUrl;
