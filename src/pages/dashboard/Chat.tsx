@@ -1,6 +1,8 @@
 // deploy
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Send,
   Paperclip,
@@ -101,7 +103,15 @@ const Chat = () => {
               {msg.role === 'assistant' ? <Sparkles size={16} /> : <div className="text-xs font-bold">ME</div>}
             </div>
             <div className={`p-4 rounded-2xl shadow-sm max-w-[80%] ${msg.role === 'assistant' ? 'bg-white border border-slate-200 rounded-tl-none' : 'bg-[#0277BD] text-white rounded-tr-none'}`}>
-              <p className={`text-sm ${msg.role === 'assistant' ? 'text-slate-700' : 'text-white'} whitespace-pre-wrap`}>{msg.content}</p>
+              {msg.role === 'assistant' ? (
+                <div className="prose prose-sm max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-li:text-slate-700">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm text-white whitespace-pre-wrap">{msg.content}</p>
+              )}
 
               {msg.sources && msg.sources.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
