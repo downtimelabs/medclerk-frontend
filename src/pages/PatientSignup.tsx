@@ -15,7 +15,7 @@ const PatientSignup = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState({
     // Step 1: Compulsory
@@ -78,8 +78,8 @@ const PatientSignup = () => {
           bloodGroup: formData.bloodGroup || null,
           height: formData.height ? parseFloat(formData.height) : null,
           weight: formData.weight ? parseFloat(formData.weight) : null,
-          knownConditions: formData.chronicConditions 
-            ? formData.chronicConditions.split(',').map(c => c.trim()).filter(c => c) 
+          knownConditions: formData.chronicConditions
+            ? formData.chronicConditions.split(',').map(c => c.trim()).filter(c => c)
             : [],
         }
       };
@@ -140,9 +140,9 @@ const PatientSignup = () => {
                 </div>
                 <p className="text-xs text-slate-500">Your personal health data is encrypted at rest and in transit.</p>
               </div>
-              
+
               <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                 <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="bg-blue-100 p-1.5 rounded-lg">
                     <Activity size={14} className="text-blue-600" />
                   </div>
@@ -170,8 +170,8 @@ const PatientSignup = () => {
               {step === 1 ? "Create your account" : "Complete your profile"}
             </h1>
             <p className="text-slate-600">
-              {step === 1 
-                ? "Join thousands of patients managing their health smarter." 
+              {step === 1
+                ? "Join thousands of patients managing their health smarter."
                 : "Help us personalize your experience. You can skip this for now."}
             </p>
             {error && (
@@ -208,16 +208,42 @@ const PatientSignup = () => {
                   onChange={handleInputChange}
                   required
                 />
-                <Input
-                  label="Password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                  minLength={8}
-                />
+                <div>
+                  <Input
+                    label="Password"
+                    name="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    required
+                    minLength={8}
+                  />
+                  {formData.password && (
+                    <div className="mt-2 space-y-1 text-xs">
+                      <div className={`flex items-center gap-1.5 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${formData.password.length >= 8 ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        At least 8 characters
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One uppercase letter
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[a-z]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One lowercase letter
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/\d/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/\d/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One number
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One special character
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <Input
                   label="Confirm Password"
                   name="confirmPassword"
@@ -228,7 +254,7 @@ const PatientSignup = () => {
                   required
                   minLength={8}
                 />
-                
+
                 <Button type="submit" className="w-full h-12 text-base mt-4">
                   Continue
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -340,8 +366,8 @@ const PatientSignup = () => {
           <div className="mt-8 pt-8 border-t border-slate-100 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{' '}
-              <span 
-                onClick={() => navigate('/login')} 
+              <span
+                onClick={() => navigate('/login')}
                 className="text-[#0277BD] font-semibold hover:underline cursor-pointer"
               >
                 Log in
@@ -349,7 +375,7 @@ const PatientSignup = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="absolute bottom-8 text-xs text-slate-400">
           &copy; 2025 MedClerk Inc. • HIPAA Compliant
         </div>

@@ -13,7 +13,7 @@ const DoctorSignup = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Form State
   const [formData, setFormData] = useState({
     // Step 1: Compulsory
@@ -137,9 +137,9 @@ const DoctorSignup = () => {
                 </div>
                 <p className="text-xs text-slate-500">We verify all medical licenses to ensure a trusted network.</p>
               </div>
-              
+
               <div className="p-4 bg-teal-50 rounded-xl border border-teal-100">
-                 <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="bg-teal-100 p-1.5 rounded-lg">
                     <Activity size={14} className="text-teal-600" />
                   </div>
@@ -167,8 +167,8 @@ const DoctorSignup = () => {
               {step === 1 ? "Join as a Doctor" : "Clinic Details"}
             </h1>
             <p className="text-slate-600">
-              {step === 1 
-                ? "Expand your practice and streamline patient care." 
+              {step === 1
+                ? "Expand your practice and streamline patient care."
                 : "Tell us about your practice. You can add this later."}
             </p>
             {error && (
@@ -205,27 +205,53 @@ const DoctorSignup = () => {
                   onChange={handleInputChange}
                   required
                 />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    required
-                    minLength={8}
-                  />
-                  <Input
-                    label="Confirm Password"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    required
-                    minLength={8}
-                  />
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Password"
+                      name="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required
+                      minLength={8}
+                    />
+                    <Input
+                      label="Confirm Password"
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      required
+                      minLength={8}
+                    />
+                  </div>
+                  {formData.password && (
+                    <div className="space-y-1 text-xs">
+                      <div className={`flex items-center gap-1.5 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${formData.password.length >= 8 ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        At least 8 characters
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[A-Z]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One uppercase letter
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[a-z]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One lowercase letter
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/\d/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/\d/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One number
+                      </div>
+                      <div className={`flex items-center gap-1.5 ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-600' : 'text-slate-500'}`}>
+                        <div className={`w-1 h-1 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'bg-green-600' : 'bg-slate-400'}`} />
+                        One special character
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -254,7 +280,7 @@ const DoctorSignup = () => {
                     ]}
                   />
                 </div>
-                
+
                 <Button type="submit" className="w-full h-12 text-base mt-4 bg-[#004D40] hover:bg-[#00382e]">
                   Continue
                   <ChevronRight className="ml-2 h-4 w-4" />
@@ -338,8 +364,8 @@ const DoctorSignup = () => {
           <div className="mt-8 pt-8 border-t border-slate-100 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{' '}
-              <span 
-                onClick={() => navigate('/login')} 
+              <span
+                onClick={() => navigate('/login')}
                 className="text-[#004D40] font-semibold hover:underline cursor-pointer"
               >
                 Log in
@@ -347,7 +373,7 @@ const DoctorSignup = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="absolute bottom-8 text-xs text-slate-400">
           &copy; 2025 MedClerk Inc. • HIPAA Compliant
         </div>
