@@ -9,7 +9,6 @@ export function useAvatarUrl() {
   const fetchAvatar = useAvatarStore((state) => state.fetchAvatar);
   const upload = useAvatarStore((state) => state.upload);
   const startPolling = useAvatarStore((state) => state.startPolling);
-  const stopPolling = useAvatarStore((state) => state.stopPolling);
 
   useEffect(() => {
     startPolling();
