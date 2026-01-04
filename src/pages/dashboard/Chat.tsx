@@ -11,7 +11,9 @@ import {
   FileText,
   Settings,
   History,
-  BookOpen
+  BookOpen,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { runMultiRagQuery } from '../../api/rag';
@@ -26,6 +28,20 @@ const Chat = () => {
     content: string,
     sources?: RagQueryResponse['sources']
   }>>([]);
+
+  const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
+
+  const toggleSources = (index: number) => {
+    setExpandedSources(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   const userFirstName = user?.name?.split(' ')[0] || 'there';
 
@@ -115,20 +131,30 @@ const Chat = () => {
 
               {msg.sources && msg.sources.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
-                  <div className="flex items-center gap-2 mb-2 text-slate-400">
+                  <button
+                    onClick={() => toggleSources(idx)}
+                    className="flex items-center gap-2 mb-2 text-slate-400 hover:text-slate-600 transition-colors w-full"
+                  >
                     <BookOpen size={14} />
-                    <span className="text-xs font-medium">Sources</span>
-                  </div>
-                  <div className="space-y-2">
-                    {msg.sources.map((source, sIdx) => (
-                      <div key={sIdx} className="bg-slate-50 p-2 rounded-lg text-xs text-slate-600">
-                        <p className="font-medium text-[#0277BD] mb-1 truncate">
-                          {decodeURIComponent(source.source_name.split('/').pop()?.split('?')[0] || 'Document')}
-                        </p>
-                        <p className="line-clamp-2 text-slate-500 italic">"{source.text_snippet}"</p>
-                      </div>
-                    ))}
-                  </div>
+                    <span className="text-xs font-medium">Sources ({msg.sources.length})</span>
+                    {expandedSources.has(idx) ? (
+                      <ChevronUp size={14} />
+                    ) : (
+                      <ChevronDown size={14} />
+                    )}
+                  </button>
+                  {expandedSources.has(idx) && (
+                    <div className="space-y-2">
+                      {msg.sources.map((source, sIdx) => (
+                        <div key={sIdx} className="bg-slate-50 p-2 rounded-lg text-xs text-slate-600">
+                          <p className="font-medium text-[#0277BD] mb-1 truncate" title={source.source_name}>
+                            {source.source_name}
+                          </p>
+                          <p className="line-clamp-2 text-slate-500 italic">"{source.text_snippet}"</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
