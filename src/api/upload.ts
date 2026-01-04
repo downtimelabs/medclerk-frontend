@@ -7,6 +7,7 @@ import type {
   PatientDocumentDetails,
   DocumentsResponse,
   GetFileUrlResponse,
+  AvatarUploadResponse,
 } from '../interfaces/upload';
 
 export async function getPresignedUrl(
@@ -51,4 +52,23 @@ export async function getFileUrl(key: string): Promise<string> {
     params: { key }
   });
   return response.data.data.presignedUrl;
+}
+
+// Avatar upload via multipart form data
+export async function uploadAvatar(file: File): Promise<AvatarUploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await api.post<APIResponse<AvatarUploadResponse>>(
+    '/upload/avatar',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return response.data.data;
+}
+
+// Get patient's current avatar URL
+export async function getPatientAvatarUrl(): Promise<string> {
+  const response = await api.get<APIResponse<string>>('/patient/avatar');
+  return response.data.data;
 }
