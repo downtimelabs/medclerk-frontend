@@ -74,3 +74,12 @@ export interface DocumentsResponse {
 }
 
 export interface PatientDocumentDetails extends PatientDocument {}
+
+// Avatar responses
+export interface AvatarUploadResponse {
+  avatarUrl: string;
+}
+
+export interface AvatarUrlResponse {
+  avatarUrl: string;
+}

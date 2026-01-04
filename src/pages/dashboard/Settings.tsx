@@ -1,17 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, User, Activity, AlertCircle, Loader2, Bell, Shield, Lock, Trash2, Eye, EyeOff, MapPin, Mail, Phone } from 'lucide-react';
+import { Save, User, Activity, AlertCircle, Loader2, Bell, Shield, Lock, Trash2, Eye, EyeOff, MapPin, Mail, Phone, Camera } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { getPatientProfile, updatePatientPersonal, updatePatientMedical } from '../../api/patient';
 import { useOnFocus } from '../../hooks/useRefresh';
+import { useAvatarUrl } from '../../hooks/useAvatarUrl';
 import type { PatientProfile } from '../../interfaces/patient';
+
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'medical' | 'notifications' | 'security'>('profile');
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Avatar hook with polling
+  const { avatarUrl, uploading: avatarUploading, upload: uploadAvatarFile } = useAvatarUrl();
   
   // Profile Form State
   const [profileData, setProfileData] = useState({
@@ -19,7 +26,6 @@ const Settings = () => {
     phoneNumber: '',
     country: '',
     state: '',
-    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
   });
 
   // Medical Form State
@@ -87,7 +93,6 @@ const Settings = () => {
         phoneNumber: profile.personal.phoneNumber || '',
         country: profile.personal.country || '',
         state: profile.personal.state || '',
-        avatarUrl: profile.personal.avatarUrl || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
       });
 
       setMedicalData({
@@ -114,6 +119,30 @@ const Settings = () => {
     setMedicalData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+    
+    try {
+      await uploadAvatarFile(file);
+    } catch (error) {
+      console.error('Failed to upload avatar:', error);
+      alert('Failed to upload avatar. Please try again.');
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -123,7 +152,6 @@ const Settings = () => {
         phoneNumber: profileData.phoneNumber,
         country: profileData.country,
         state: profileData.state,
-        avatarUrl: profileData.avatarUrl
       });
       await fetchAndSetProfile();
     } catch (error) {
@@ -288,13 +316,33 @@ const Settings = () => {
               {/* Mini Profile Overview */}
               <div className="bg-gradient-to-br from-[#0277BD]/5 to-transparent rounded-2xl p-8 border border-[#0277BD]/10 flex flex-col md:flex-row items-center md:items-start gap-8">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full p-1 bg-white shadow-lg">
+                  <div className="w-24 h-24 rounded-full p-1 bg-white shadow-lg relative">
                     <img
-                      src={profileData.avatarUrl}
+                      src={avatarUrl || DEFAULT_AVATAR}
                       alt="Profile"
                       className="w-full h-full rounded-full object-cover"
                     />
+                    {avatarUploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    className="absolute bottom-0 right-0 w-8 h-8 bg-[#0277BD] rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#01579B] transition-colors disabled:opacity-50"
+                  >
+                    <Camera size={14} />
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-2">
@@ -361,16 +409,7 @@ const Settings = () => {
                       onChange={handleProfileChange}
                       maxLength={100}
                     />
-                    <div className="md:col-span-2">
-                       <Input 
-                          label="Avatar URL"
-                          name="avatarUrl"
-                          value={profileData.avatarUrl}
-                          onChange={handleProfileChange}
-                          placeholder="https://..."
-                       />
-                       <p className="text-xs text-slate-500 mt-1">Provide a valid image URL for your profile picture.</p>
-                    </div>
+
                   </div>
 
                   <div className="flex justify-end pt-4">
