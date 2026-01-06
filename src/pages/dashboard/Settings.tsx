@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Save, User, Activity, AlertCircle, Loader2, Bell, Shield, Lock, Trash2, Eye, EyeOff, MapPin, Mail, Phone } from 'lucide-react';
+import { Save, User, Activity, AlertCircle, Loader2, Bell, Shield, Lock, Trash2, Eye, EyeOff, MapPin, Mail, Phone, Camera } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { getPatientProfile, updatePatientPersonal, updatePatientMedical } from '../../api/patient';
+import { getPresignedUrl, getFileUrl } from '../../api/upload';
 import { useOnFocus } from '../../hooks/useRefresh';
 import type { PatientProfile } from '../../interfaces/patient';
 
@@ -12,6 +13,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState<'profile' | 'medical' | 'notifications' | 'security'>('profile');
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   // Profile Form State
   const [profileData, setProfileData] = useState({
@@ -107,6 +109,68 @@ const Settings = () => {
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validation (optional but good)
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      try {
+        setUploadingAvatar(true);
+        
+        // 1. Get presigned URL
+        const presignData = await getPresignedUrl(
+          file.name,
+          file.type,
+          file.size
+        );
+
+        // 2. Upload to S3
+        const uploadResponse = await fetch(presignData.presignedUrl, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            'Content-Type': file.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload file to S3');
+        }
+
+        // 3. Get viewable URL (using the key)
+        // We use the key to ask the backend for a viewable URL
+        try {
+           const viewUrl = await getFileUrl(presignData.key);
+           setProfileData(prev => ({ ...prev, avatarUrl: viewUrl }));
+        } catch (urlError) {
+           console.error('Failed to get file URL, falling back to key construction or error', urlError);
+           // Fallback: If getFileUrl fails or we suspect it's short-lived, 
+           // we still set it so the user sees something if possible.
+           // Ideally, the backend should handle "key" in avatarUrl, but we work with what we have.
+           alert('Photo uploaded but failed to retrieve preview URL.');
+        }
+
+      } catch (error) {
+        console.error('Upload failed:', error);
+        alert('Failed to upload profile photo');
+      } finally {
+        setUploadingAvatar(false);
+        // Reset input
+        e.target.value = '';
+      }
+    }
   };
 
   const handleMedicalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -215,13 +279,13 @@ const Settings = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-          <p className="text-slate-500">Manage your account and medical preferences</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Settings</h1>
+          <p className="text-slate-500 dark:text-slate-400">Manage your account and medical preferences</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="border-b border-slate-200">
+      <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-premium dark:shadow-premium-dark border border-slate-200 dark:border-slate-800 overflow-hidden backdrop-blur-sm">
+        <div className="border-b border-slate-200 dark:border-slate-800">
           <nav className="flex gap-4 px-6">
             <button
               onClick={() => setActiveTab('profile')}
@@ -267,7 +331,7 @@ const Settings = () => {
               className={`py-4 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === 'security'
                   ? 'border-[#0277BD] text-[#0277BD]'
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -286,21 +350,38 @@ const Settings = () => {
               className="space-y-8"
             >
               {/* Mini Profile Overview */}
-              <div className="bg-gradient-to-br from-[#0277BD]/5 to-transparent rounded-2xl p-8 border border-[#0277BD]/10 flex flex-col md:flex-row items-center md:items-start gap-8">
+              <div className="bg-gradient-to-br from-[#0277BD]/5 to-transparent dark:from-[#0277BD]/10 rounded-2xl p-8 border border-[#0277BD]/10 dark:border-[#0277BD]/20 flex flex-col md:flex-row items-center md:items-start gap-8">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full p-1 bg-white shadow-lg">
+                  <div className="w-24 h-24 rounded-full p-1 bg-white dark:bg-slate-800 shadow-lg relative overflow-hidden">
                     <img
                       src={profileData.avatarUrl}
                       alt="Profile"
                       className="w-full h-full rounded-full object-cover"
                     />
+                    {/* Upload Overlay */}
+                    <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                         onClick={() => document.getElementById('avatar-upload')?.click()}>
+                        {uploadingAvatar ? (
+                           <Loader2 className="w-6 h-6 text-white animate-spin" />
+                        ) : (
+                           <Camera className="w-6 h-6 text-white" />
+                        )}
+                    </div>
                   </div>
+                  <input 
+                    type="file" 
+                    id="avatar-upload" 
+                    className="hidden" 
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    disabled={uploadingAvatar}
+                  />
                 </div>
                 
                 <div className="flex-1 text-center md:text-left space-y-2">
                   <div>
-                    <h2 className="text-2xl font-bold text-slate-900">{profileData.name}</h2>
-                    <p className="text-slate-500 font-medium flex items-center justify-center md:justify-start gap-2">
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{profileData.name}</h2>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
                        <Mail size={14} />
                        {profile?.personal?.email || 'No email provided'}
                     </p>
@@ -308,17 +389,29 @@ const Settings = () => {
                   
                   <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-2">
                     {(profileData.state || profileData.country) && (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white text-slate-600 shadow-sm border border-slate-200">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700">
                         <MapPin size={12} />
                         {[profileData.state, profileData.country].filter(Boolean).join(', ')}
                       </span>
                     )}
                     {profileData.phoneNumber && (
-                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white text-slate-600 shadow-sm border border-slate-200">
+                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700">
                         <Phone size={12} />
                         {profileData.phoneNumber}
                       </span>
                     )}
+                  </div>
+                  
+                  <div className="pt-4 flex justify-center md:justify-start">
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => document.getElementById('avatar-upload')?.click()}
+                      className="shadow-sm"
+                    >
+                      <Camera size={16} className="mr-2 text-[#0277BD]" />
+                      Change Photo
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -326,8 +419,8 @@ const Settings = () => {
               {/* Edit Profile Section */}
               <div className="max-w-2xl">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-slate-900">Edit Profile</h3>
-                  <p className="text-sm text-slate-500">Update your personal details below.</p>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Edit Profile</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Update your personal details below.</p>
                 </div>
 
                 <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -362,14 +455,19 @@ const Settings = () => {
                       maxLength={100}
                     />
                     <div className="md:col-span-2">
-                       <Input 
-                          label="Avatar URL"
-                          name="avatarUrl"
-                          value={profileData.avatarUrl}
-                          onChange={handleProfileChange}
-                          placeholder="https://..."
-                       />
-                       <p className="text-xs text-slate-500 mt-1">Provide a valid image URL for your profile picture.</p>
+                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                         Profile Photo
+                       </label>
+                       <Button 
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById('avatar-upload')?.click()}
+                          className="w-full shadow-sm flex justify-start items-center dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300"
+                        >
+                          <Camera size={16} className="mr-2 text-[#0277BD]" />
+                          Change Profile Photo
+                        </Button>
+                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Upload a JPG or PNG image to update your avatar.</p>
                     </div>
                   </div>
 
@@ -393,7 +491,7 @@ const Settings = () => {
             >
               {/* Personal Stats */}
               <section>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Physical Attributes</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Physical Attributes</h3>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   <Input
                     label="Date of Birth"
@@ -438,42 +536,42 @@ const Settings = () => {
               </section>
 
               {/* Conditions */}
-              <section className="pt-4 border-t border-slate-100">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Medical History</h3>
+              <section className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Medical History</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Allergies
                     </label>
                     <textarea
                       name="allergies"
                       value={medicalData.allergies}
                       onChange={handleMedicalChange}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] focus:border-transparent min-h-[100px]"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD]/50 focus:border-[#0277BD] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 min-h-[120px] transition-all"
                       placeholder="List any allergies..."
                       maxLength={1000}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                       Chronic Conditions
                     </label>
                     <textarea
                       name="chronicConditions"
                       value={medicalData.chronicConditions}
                       onChange={handleMedicalChange}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] focus:border-transparent min-h-[100px]"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD]/50 focus:border-[#0277BD] dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 min-h-[120px] transition-all"
                       placeholder="List chronic conditions (comma separated)..."
                     />
-                    <p className="text-xs text-slate-500 mt-1">Separate multiple conditions with commas</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">Separate multiple conditions with commas</p>
                   </div>
                 </div>
               </section>
 
               {/* Emergency Contact */}
-              <section className="pt-4 border-t border-slate-100">
+              <section className="pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-lg font-semibold text-slate-900">Emergency Contact</h3>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Emergency Contact</h3>
                   <div className="group relative">
                     <AlertCircle size={16} className="text-slate-400 cursor-help" />
                     <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 w-48 p-2 bg-slate-800 text-white text-xs rounded hidden group-hover:block z-10">
@@ -523,7 +621,7 @@ const Settings = () => {
             >
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-medium text-slate-900 mb-4">Notification Preferences</h3>
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">Notification Preferences</h3>
                   <div className="space-y-4">
                     {[
                       { key: 'email', label: 'Email Notifications', desc: 'Receive daily summaries and important updates via email.' },
@@ -532,12 +630,12 @@ const Settings = () => {
                       { key: 'marketing', label: 'Marketing Emails', desc: 'Receive offers and promotional content.' },
                       { key: 'updates', label: 'Product Updates', desc: 'Stay informed about new features and improvements.' },
                     ].map((item) => (
-                      <div key={item.key} className="flex items-start justify-between p-4 border border-slate-200 rounded-lg">
+                      <div key={item.key} className="flex items-start justify-between p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50 transition-colors">
                         <div className="flex-1">
-                          <label htmlFor={item.key} className="text-sm font-medium text-slate-900 block mb-1">
+                          <label htmlFor={item.key} className="text-sm font-medium text-slate-900 dark:text-slate-100 block mb-1">
                             {item.label}
                           </label>
-                          <p className="text-sm text-slate-500">{item.desc}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{item.desc}</p>
                         </div>
                         <div className="ml-4 flex items-center h-5">
                           <input
@@ -545,7 +643,7 @@ const Settings = () => {
                             type="checkbox"
                             checked={notifications[item.key as keyof typeof notifications]}
                             onChange={() => handleNotificationChange(item.key as keyof typeof notifications)}
-                            className="w-4 h-4 text-[#0277BD] border-slate-300 rounded focus:ring-[#0277BD]"
+                            className="w-4 h-4 text-[#0277BD] border-slate-300 dark:border-slate-700 rounded focus:ring-[#0277BD] dark:bg-slate-800"
                           />
                         </div>
                       </div>
@@ -573,10 +671,10 @@ const Settings = () => {
               <section className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Lock className="w-5 h-5 text-[#0277BD]" />
-                  <h3 className="text-lg font-medium text-slate-900">Change Password</h3>
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-white">Change Password</h3>
                 </div>
                 
-                <form onSubmit={handleUpdatePassword} className="space-y-4 p-6 border border-slate-200 rounded-xl bg-slate-50/50">
+                <form onSubmit={handleUpdatePassword} className="space-y-4 p-6 border border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/30">
                   <div className="relative">
                     <Input
                       label="Current Password"
@@ -637,17 +735,17 @@ const Settings = () => {
               </section>
 
               {/* Privacy & Security */}
-              <section className="space-y-6 pt-6 border-t border-slate-200">
+              <section className="space-y-6 pt-6 border-t border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2 mb-4">
                   <Shield className="w-5 h-5 text-[#0277BD]" />
-                  <h3 className="text-lg font-medium text-slate-900">Privacy & Security</h3>
+                  <h3 className="text-lg font-medium text-slate-900 dark:text-white">Privacy & Security</h3>
                 </div>
                 
                 <div className="space-y-4">
-                   <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
+                   <div className="flex items-center justify-between p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50">
                     <div>
-                      <h4 className="text-sm font-medium text-slate-900">Two-Factor Authentication</h4>
-                      <p className="text-sm text-slate-500">Add an extra layer of security to your account.</p>
+                      <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100">Two-Factor Authentication</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Add an extra layer of security to your account.</p>
                     </div>
                     <div className="flex items-center h-5">
                       <input
@@ -660,9 +758,9 @@ const Settings = () => {
                     </div>
                   </div>
 
-                  <div className="p-4 border border-slate-200 rounded-lg">
-                    <h4 className="text-sm font-medium text-slate-900 mb-2">Profile Visibility</h4>
-                    <p className="text-sm text-slate-500 mb-4">Control who can see your profile information.</p>
+                  <div className="p-4 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50">
+                    <h4 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">Profile Visibility</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Control who can see your profile information.</p>
                     <Select
                       name="profileVisibility"
                       value={securityData.profileVisibility}
@@ -678,15 +776,15 @@ const Settings = () => {
               </section>
 
               {/* Danger Zone */}
-              <section className="space-y-6 pt-6 border-t border-slate-200">
+              <section className="space-y-6 pt-6 border-t border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2 mb-4">
                   <Trash2 className="w-5 h-5 text-red-600" />
                   <h3 className="text-lg font-medium text-red-600">Danger Zone</h3>
                 </div>
                 
-                <div className="p-6 border border-red-200 rounded-xl bg-red-50">
-                  <h4 className="text-md font-bold text-red-900 mb-2">Delete Account</h4>
-                  <p className="text-sm text-red-700 mb-6">
+                <div className="p-6 border border-red-200 dark:border-red-900/30 rounded-2xl bg-red-50 dark:bg-red-950/20">
+                  <h4 className="text-md font-bold text-red-900 dark:text-red-400 mb-2">Delete Account</h4>
+                  <p className="text-sm text-red-700 dark:text-red-300 mb-6">
                     Once you delete your account, there is no going back. Please be certain.
                     All your data including medical records and personal information will be permanently deleted.
                   </p>

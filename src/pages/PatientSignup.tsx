@@ -101,54 +101,54 @@ const PatientSignup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col lg:flex-row transition-colors duration-300">
       {/* Left Side: Dynamic Visualization (Patient Focus) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#F0F9FA] relative justify-center items-center overflow-hidden p-12 order-2 lg:order-1">
-        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-teal-100/50 via-transparent to-transparent" />
+      <div className="hidden lg:flex lg:w-1/2 bg-[#F0F9FA] dark:bg-slate-900 relative justify-center items-center overflow-hidden p-12 order-2 lg:order-1 transition-colors duration-300">
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100/50 dark:from-blue-900/20 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-teal-100/50 dark:from-teal-900/20 via-transparent to-transparent" />
 
         <div className="relative w-full max-w-lg" style={{ perspective: '1000px' }}>
           <motion.div
             initial={{ opacity: 0, y: 20, rotateX: 10 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
             transition={{ duration: 0.8 }}
-            className="bg-white rounded-2xl shadow-2xl border border-slate-200/60 p-6 relative z-20"
+            className="bg-white dark:bg-slate-950 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-800 p-6 relative z-20"
           >
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0277BD]">
+                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#0277BD] dark:text-blue-400">
                   <User size={20} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-900">New Patient Profile</div>
-                  <div className="text-xs text-slate-500">Setup in progress...</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">New Patient Profile</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Setup in progress...</div>
                 </div>
               </div>
               <div className="flex gap-1">
-                <div className={`w-2 h-2 rounded-full ${step >= 1 ? 'bg-[#0277BD]' : 'bg-slate-200'}`} />
-                <div className={`w-2 h-2 rounded-full ${step >= 2 ? 'bg-[#0277BD]' : 'bg-slate-200'}`} />
+                <div className={`w-2.5 h-2.5 rounded-full transition-all ${step >= 1 ? 'bg-[#0277BD] dark:bg-blue-500 shadow-lg shadow-blue-500/20' : 'bg-slate-200 dark:bg-slate-800'}`} />
+                <div className={`w-2.5 h-2.5 rounded-full transition-all ${step >= 2 ? 'bg-[#0277BD] dark:bg-blue-500 shadow-lg shadow-blue-500/20' : 'bg-slate-200 dark:bg-slate-800'}`} />
               </div>
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-green-100 p-1.5 rounded-lg">
-                    <ShieldCheck size={14} className="text-green-600" />
+                  <div className="bg-green-100 dark:bg-green-950/20 p-1.5 rounded-lg">
+                    <ShieldCheck size={14} className="text-green-600 dark:text-green-400" />
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">Secure Encryption</span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Secure Encryption</span>
                 </div>
-                <p className="text-xs text-slate-500">Your personal health data is encrypted at rest and in transit.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 font-medium leading-relaxed">Your health data is protected with military-grade encryption.</p>
               </div>
               
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
                  <div className="flex items-center gap-3 mb-2">
-                  <div className="bg-blue-100 p-1.5 rounded-lg">
-                    <Activity size={14} className="text-blue-600" />
+                  <div className="bg-blue-100 dark:bg-blue-950/20 p-1.5 rounded-lg">
+                    <Activity size={14} className="text-blue-600 dark:text-blue-400" />
                   </div>
-                  <span className="text-sm font-semibold text-slate-700">AI Health Insights</span>
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-300">AI Health Insights</span>
                 </div>
-                <p className="text-xs text-slate-500">Complete your profile to get personalized health recommendations.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-500 font-medium leading-relaxed">Get personalized recommendations based on your unique records.</p>
               </div>
             </div>
           </motion.div>
@@ -166,16 +166,16 @@ const PatientSignup = () => {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
               {step === 1 ? "Create your account" : "Complete your profile"}
             </h1>
-            <p className="text-slate-600">
+            <p className="text-slate-600 dark:text-slate-400 font-medium">
               {step === 1 
                 ? "Join thousands of patients managing their health smarter." 
                 : "Help us personalize your experience. You can skip this for now."}
             </p>
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+              <div className="mt-4 p-4 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-900/30 font-bold">
                 {error}
               </div>
             )}
@@ -337,12 +337,12 @@ const PatientSignup = () => {
             )}
           </AnimatePresence>
 
-          <div className="mt-8 pt-8 border-t border-slate-100 text-center">
-            <p className="text-sm text-slate-600">
+          <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
+            <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">
               Already have an account?{' '}
               <span 
                 onClick={() => navigate('/login')} 
-                className="text-[#0277BD] font-semibold hover:underline cursor-pointer"
+                className="text-[#0277BD] dark:text-blue-400 font-bold hover:underline cursor-pointer"
               >
                 Log in
               </span>
