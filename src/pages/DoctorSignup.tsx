@@ -87,7 +87,11 @@ const DoctorSignup = () => {
       console.error('Signup failed:', err);
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
-      setLoading  const skipStep2 = async () => {
+      setLoading(false);
+    }
+  };
+
+  const skipStep2 = async () => {
     setLoading(true);
     setError(null);
     try {
