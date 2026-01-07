@@ -1,6 +1,8 @@
 // deploy
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Send,
   Paperclip,
@@ -9,7 +11,9 @@ import {
   FileText,
   Settings,
   History,
-  BookOpen
+  BookOpen,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { runMultiRagQuery } from '../../api/rag';
@@ -24,6 +28,20 @@ const Chat = () => {
     content: string,
     sources?: RagQueryResponse['sources']
   }>>([]);
+
+  const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
+
+  const toggleSources = (index: number) => {
+    setExpandedSources(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   const userFirstName = user?.name?.split(' ')[0] || 'there';
 
@@ -100,25 +118,43 @@ const Chat = () => {
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-lg ${msg.role === 'assistant' ? 'bg-gradient-to-br from-blue-500 to-teal-400' : 'bg-slate-800 dark:bg-slate-700'}`}>
               {msg.role === 'assistant' ? <Sparkles size={18} /> : <div className="text-[10px] font-extrabold uppercase">You</div>}
             </div>
-            <div className={`p-4 rounded-2xl shadow-sm max-w-[80%] ${msg.role === 'assistant' ? 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-tl-none' : 'bg-[#0277BD] dark:bg-blue-600 text-white rounded-tr-none'}`}>
-              <p className={`text-sm ${msg.role === 'assistant' ? 'text-slate-700 dark:text-slate-200' : 'text-white'} whitespace-pre-wrap font-medium leading-relaxed`}>{msg.content}</p>
+            <div className={`p-4 rounded-2xl shadow-sm max-w-[80%] ${msg.role === 'assistant' ? 'bg-white border border-slate-200 rounded-tl-none' : 'bg-[#0277BD] text-white rounded-tr-none'}`}>
+              {msg.role === 'assistant' ? (
+                <div className="prose prose-sm max-w-none prose-headings:text-slate-900 prose-p:text-slate-700 prose-strong:text-slate-900 prose-ul:text-slate-700 prose-ol:text-slate-700 prose-li:text-slate-700">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm text-white whitespace-pre-wrap">{msg.content}</p>
+              )}
 
               {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-2 mb-2 text-slate-400 dark:text-slate-500">
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <button
+                    onClick={() => toggleSources(idx)}
+                    className="flex items-center gap-2 mb-2 text-slate-400 hover:text-slate-600 transition-colors w-full"
+                  >
                     <BookOpen size={14} />
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest">Sources</span>
-                  </div>
-                  <div className="space-y-2">
-                    {msg.sources.map((source, sIdx) => (
-                      <div key={sIdx} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl text-xs text-slate-600 dark:text-slate-400 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
-                        <p className="font-bold text-[#0277BD] dark:text-blue-400 mb-1 truncate">
-                          {decodeURIComponent(source.source_name.split('/').pop()?.split('?')[0] || 'Document')}
-                        </p>
-                        <p className="line-clamp-2 text-slate-500 dark:text-slate-500 italic font-medium">"{source.text_snippet}"</p>
-                      </div>
-                    ))}
-                  </div>
+                    <span className="text-xs font-medium">Sources ({msg.sources.length})</span>
+                    {expandedSources.has(idx) ? (
+                      <ChevronUp size={14} />
+                    ) : (
+                      <ChevronDown size={14} />
+                    )}
+                  </button>
+                  {expandedSources.has(idx) && (
+                    <div className="space-y-2">
+                      {msg.sources.map((source, sIdx) => (
+                        <div key={sIdx} className="bg-slate-50 p-2 rounded-lg text-xs text-slate-600">
+                          <p className="font-medium text-[#0277BD] mb-1 truncate" title={source.source_name}>
+                            {source.source_name}
+                          </p>
+                          <p className="line-clamp-2 text-slate-500 italic">"{source.text_snippet}"</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

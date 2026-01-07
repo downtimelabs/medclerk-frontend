@@ -23,7 +23,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import { getPatientProfile } from '../api/patient';
+import { useAvatarUrl } from '../hooks/useAvatarUrl';
 import type { PatientProfile } from '../interfaces/patient';
+
+const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80';
 
 const DashboardLayout = () => {
   const navigate = useNavigate();
@@ -33,6 +36,7 @@ const DashboardLayout = () => {
   const { isDarkMode, toggleDarkMode } = useThemeStore();
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const logout = useAuthStore((state) => state.logout);
+  const { avatarUrl } = useAvatarUrl();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -214,9 +218,9 @@ const DashboardLayout = () => {
                 className={`flex items-center gap-3 pl-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 p-1.5 rounded-xl transition-colors ${isProfileOpen ? 'bg-slate-50 dark:bg-slate-700' : ''}`}
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
               >
-                {profile?.personal?.avatarUrl ? (
+                {avatarUrl ? (
                   <img 
-                    src={profile.personal.avatarUrl} 
+                    src={avatarUrl} 
                     alt="Profile" 
                     className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-600"
                   />
@@ -252,7 +256,7 @@ const DashboardLayout = () => {
                         <div className="flex flex-col items-center text-center">
                           <div className="w-20 h-20 rounded-full p-1 bg-white dark:bg-slate-700 shadow-md mb-3">
                             <img
-                              src={profile?.personal?.avatarUrl || 'https://via.placeholder.com/150'}
+                              src={avatarUrl || DEFAULT_AVATAR}
                               alt="Profile"
                               className="w-full h-full rounded-full object-cover"
                             />
