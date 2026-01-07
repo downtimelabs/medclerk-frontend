@@ -73,12 +73,11 @@ const PatientSignup = () => {
         confirmPassword: formData.confirmPassword,
         role: 'PATIENT',
         patientProfile: {
-          age: age,
-          gender: formData.gender as "MALE" | "FEMALE" | "OTHER" | null,
+          dob: formData.dob ? new Date(formData.dob) : undefined,
           bloodGroup: formData.bloodGroup || null,
-          height: formData.height ? parseFloat(formData.height) : null,
-          weight: formData.weight ? parseFloat(formData.weight) : null,
-          knownConditions: formData.chronicConditions
+          heightCm: formData.height ? parseFloat(formData.height) : null,
+          weightKg: formData.weight ? parseFloat(formData.weight) : null,
+          chronicConditions: formData.chronicConditions
             ? formData.chronicConditions.split(',').map(c => c.trim()).filter(c => c)
             : [],
         }
@@ -94,10 +93,33 @@ const PatientSignup = () => {
     }
   };
 
-  const skipStep2 = () => {
-    console.log('Skipped Step 2. Signup Data:', formData);
-    // TODO: API Call with partial data
-    navigate('/patient/dashboard');
+  const skipStep2 = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload: RegisterPatientRequest = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'PATIENT',
+        patientProfile: {
+          dob: undefined,
+          bloodGroup: null,
+          heightCm: null,
+          weightKg: null,
+          chronicConditions: [],
+        }
+      };
+
+      await registerPatientApi(payload);
+      navigate('/login');
+    } catch (err: any) {
+      console.error('Signup failed:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -5,11 +5,10 @@ export interface RegisterPatientRequest {
   confirmPassword: string;
   role: "PATIENT";
   patientProfile: {
-    age: number | null;
-    gender: "MALE" | "FEMALE" | "OTHER" | null;
-    bloodGroup: string | null;
-    height: number | null;
-    weight: number | null;
-    knownConditions: string[];
+    dob?: Date;
+    bloodGroup?: string | null;
+    heightCm?: number | null;
+    weightKg?: number | null;
+    chronicConditions: string[];
   };
 }
