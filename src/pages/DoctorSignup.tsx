@@ -91,10 +91,30 @@ const DoctorSignup = () => {
     }
   };
 
-  const skipStep2 = () => {
-    console.log('Skipped Step 2. Doctor Signup Data:', formData);
-    // TODO: API Call with partial data
-    navigate('/');
+  const skipStep2 = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload: RegisterDoctorRequest = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        role: 'DOCTOR',
+        doctorProfile: {
+          licenseNumber: formData.licenseNumber,
+          specialization: formData.specialization,
+        }
+      };
+
+      await registerDoctorApi(payload);
+      navigate('/login');
+    } catch (err: any) {
+      console.error('Signup failed:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
