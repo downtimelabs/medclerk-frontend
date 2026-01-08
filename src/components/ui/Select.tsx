@@ -18,7 +18,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
             {label}
           </label>
         )}
@@ -26,10 +26,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             className={`
-              flex h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-2 pr-10 text-sm placeholder:text-slate-400 
-              dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 dark:placeholder:text-slate-600
-              focus:outline-none focus:ring-2 focus:ring-[#0277BD]/50 focus:border-[#0277BD] 
-              disabled:cursor-not-allowed disabled:opacity-50
+              flex h-10 w-full appearance-none rounded-md border border-slate-300 bg-white px-3 py-2 pr-8 text-sm placeholder:text-slate-400 
+              focus:outline-none focus:ring-2 focus:ring-[#0277BD] focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50
               transition-all duration-200
               ${error ? 'border-red-500 focus:ring-red-500' : ''}
               ${className}
@@ -38,12 +36,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           >
             <option value="" disabled selected>Select an option</option>
             {options.map((option) => (
-              <option key={option.value} value={option.value} className="bg-white dark:bg-slate-900">
+              <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 dark:text-slate-500">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-500">
             <ChevronDown className="h-4 w-4" />
           </div>
         </div>
@@ -56,4 +54,3 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 );
 
 Select.displayName = 'Select';
-

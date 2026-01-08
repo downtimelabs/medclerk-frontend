@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
-import { useThemeStore } from '../store/themeStore';
 import { getPatientProfile } from '../api/patient';
 import { useAvatarUrl } from '../hooks/useAvatarUrl';
 import type { PatientProfile } from '../interfaces/patient';
@@ -33,7 +32,7 @@ const DashboardLayout = () => {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { isDarkMode, toggleDarkMode } = useThemeStore();
+  const [darkMode, setDarkMode] = useState(false);
   const [profile, setProfile] = useState<PatientProfile | null>(null);
   const logout = useAuthStore((state) => state.logout);
   const { avatarUrl } = useAvatarUrl();
@@ -49,6 +48,15 @@ const DashboardLayout = () => {
     };
     fetchProfile();
   }, []);
+
+  // Handle Dark Mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const menuGroups = [
     {
@@ -81,7 +89,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-screen flex bg-[#F5F6FA] dark:bg-slate-900 transition-colors duration-200">
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -98,7 +106,7 @@ const DashboardLayout = () => {
       {/* Sidebar */}
       <motion.aside
         className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           transition-all duration-300 ease-in-out
         `}
@@ -164,10 +172,10 @@ const DashboardLayout = () => {
           <div className="flex items-center justify-between mb-6">
             <span className="text-sm font-medium text-slate-600 dark:text-slate-300">Dark mode</span>
             <button 
-              onClick={() => toggleDarkMode()}
-              className={`w-11 h-6 rounded-full transition-colors relative ${isDarkMode ? 'bg-[#0277BD]' : 'bg-slate-200'}`}
+              onClick={() => setDarkMode(!darkMode)}
+              className={`w-11 h-6 rounded-full transition-colors relative ${darkMode ? 'bg-[#0277BD]' : 'bg-slate-200'}`}
             >
-              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${isDarkMode ? 'translate-x-5' : 'translate-x-0'}`} />
+              <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${darkMode ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
           <button 
@@ -183,7 +191,7 @@ const DashboardLayout = () => {
       {/* Main Content Wrapper */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Bar */}
-        <header className="h-20 bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 lg:px-8 flex-shrink-0 transition-all duration-300 backdrop-blur-md z-20">
+        <header className="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 lg:px-8 flex-shrink-0 transition-colors duration-200">
           <div className="flex items-center gap-4 flex-1">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -329,7 +337,7 @@ const DashboardLayout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth bg-[#F8FAFC] dark:bg-slate-950">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 scroll-smooth dark:bg-slate-900">
           <div className="max-w-[1600px] mx-auto">
             <Outlet />
           </div>

@@ -177,24 +177,24 @@ const DoctorPatientDetails = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/doctor/patients')}
-          className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-95 border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
         >
           <ArrowLeft size={24} className="text-slate-600 dark:text-slate-400" />
         </button>
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">{patient.name}</h1>
-          <div className="flex items-center gap-2 mt-1 text-sm text-slate-500 dark:text-slate-400 font-medium">
-            <span className="px-2.5 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{patient.name}</h1>
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <span className="px-2 py-0.5 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full text-xs font-medium">
               Active Patient
             </span>
-            <span className="opacity-30">•</span>
+            <span>•</span>
             <span>{patient.email}</span>
             {stats && stats.totalReviews > 0 && (
               <>
-                <span className="opacity-30">•</span>
-                <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 px-2.5 py-1 rounded-xl border border-yellow-100 dark:border-yellow-900/30">
-                  <StarRating rating={stats?.averageRating || 0} size={14} readOnly />
-                  <span className="text-xs font-bold text-slate-700 dark:text-yellow-500">{stats?.averageRating?.toFixed(1)}</span>
+                <span>•</span>
+                <div className="flex items-center gap-1 bg-yellow-50 px-2 py-0.5 rounded-md border border-yellow-100">
+                  <StarRating rating={stats?.averageRating || 0} size={12} readOnly />
+                  <span className="text-xs font-bold text-slate-700">{stats?.averageRating?.toFixed(1)}</span>
                 </div>
               </>
             )}
@@ -203,18 +203,14 @@ const DoctorPatientDetails = () => {
         <div className="ml-auto">
           {myRating ? (
             <div className="flex flex-col items-end">
-              <span className="text-[10px] uppercase tracking-widest font-extrabold text-slate-400 dark:text-slate-500 mb-1">Your Rating</span>
-              <div className="flex items-center gap-2 bg-white dark:bg-slate-900/50 px-3 py-1.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                <StarRating rating={myRating.rating} size={18} readOnly />
-                <span className="text-sm font-bold text-slate-950 dark:text-white">{myRating.rating}/5</span>
+              <span className="text-xs font-medium text-slate-500">You rated</span>
+              <div className="flex items-center gap-1">
+                <StarRating rating={myRating.rating} size={16} readOnly />
+                <span className="text-sm font-bold text-slate-700">{myRating.rating}/5</span>
               </div>
             </div>
           ) : (
-            <Button 
-              variant="outline" 
-              onClick={() => setIsRateModalOpen(true)}
-              className="rounded-xl font-bold border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95"
-            >
+            <Button variant="outline" onClick={() => setIsRateModalOpen(true)}>
               Rate Patient
             </Button>
           )}
@@ -222,25 +218,25 @@ const DoctorPatientDetails = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-slate-200 dark:border-slate-800">
-        <div className="flex gap-10">
+      <div className="border-b border-slate-200 dark:border-slate-700">
+        <div className="flex gap-8">
           {[
             { id: 'overview', label: 'Overview', icon: User },
             { id: 'documents', label: 'Documents', icon: FileText },
-            { id: 'chat', label: 'AI Insights', icon: Bot },
+            { id: 'chat', label: 'AI Chat', icon: MessageSquare },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`pb-4 flex items-center gap-2 text-sm font-bold transition-colors relative tracking-wide ${activeTab === tab.id
+              className={`pb-4 flex items-center gap-2 text-sm font-medium transition-colors relative ${activeTab === tab.id
                 ? 'text-[#0277BD] dark:text-blue-400'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                 }`}
             >
-              <tab.icon size={18} className={activeTab === tab.id ? 'animate-pulse' : ''} />
+              <tab.icon size={18} />
               {tab.label}
               {activeTab === tab.id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0277BD] dark:bg-blue-500 rounded-t-full shadow-[0_-2px_6px_rgba(2,119,189,0.3)] dark:shadow-[0_-2px_6px_rgba(59,130,246,0.3)]" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0277BD] rounded-t-full" />
               )}
             </button>
           ))}
@@ -259,32 +255,32 @@ const DoctorPatientDetails = () => {
               className="grid md:grid-cols-3 gap-6"
             >
               <div className="md:col-span-2 space-y-6">
-                <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-premium dark:shadow-premium-dark backdrop-blur-sm">
-                  <h3 className="text-lg font-bold text-slate-950 dark:text-white mb-6">Patient Overview</h3>
-                  <div className="grid sm:grid-cols-2 gap-x-8 gap-y-6">
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold">Full Name</label>
-                      <p className="font-bold text-slate-900 dark:text-slate-100">{patient.name}</p>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Personal Information</h3>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Full Name</label>
+                      <p className="mt-1 font-medium text-slate-900 dark:text-white">{patient.name}</p>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold">Email Address</label>
-                      <div className="flex items-center gap-2">
-                        <Mail size={14} className="text-blue-500" />
-                        <p className="font-bold text-slate-900 dark:text-slate-100">{patient.email}</p>
+                    <div>
+                      <label className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Email</label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Mail size={14} className="text-slate-400" />
+                        <p className="font-medium text-slate-900 dark:text-white">{patient.email}</p>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold">Primary Contact</label>
-                      <div className="flex items-center gap-2">
-                        <Phone size={14} className="text-teal-500" />
-                        <p className="font-bold text-slate-900 dark:text-slate-100">{patient.phoneNumber || 'Not provided'}</p>
+                    <div>
+                      <label className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Phone</label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Phone size={14} className="text-slate-400" />
+                        <p className="font-medium text-slate-900 dark:text-white">{patient.phoneNumber || 'N/A'}</p>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold">Birth Date</label>
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-orange-500" />
-                        <p className="font-bold text-slate-900 dark:text-slate-100">Not specified</p>
+                    <div>
+                      <label className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Date of Birth</label>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Calendar size={14} className="text-slate-400" />
+                        <p className="font-medium text-slate-900 dark:text-white">N/A</p>
                       </div>
                     </div>
                   </div>
@@ -300,22 +296,22 @@ const DoctorPatientDetails = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-            <div className="bg-white dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-premium dark:shadow-premium-dark backdrop-blur-sm overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
                 {docsLoading ? (
                   <div className="p-12 flex justify-center">
                     <Loader2 className="animate-spin text-[#0277BD]" size={24} />
                   </div>
                 ) : documents.length > 0 ? (
                   <table className="w-full">
-                    <thead className="bg-slate-50/50 dark:bg-slate-950/30">
+                    <thead className="bg-slate-50 dark:bg-slate-700/50">
                       <tr>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Document Name</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Type</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Date</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Actions</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Document Name</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
+                        <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                       {documents.map((doc) => (
                         <tr key={doc.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                           <td className="px-6 py-4">
@@ -365,63 +361,40 @@ const DoctorPatientDetails = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="h-[600px] flex flex-col bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-premium dark:shadow-premium-dark backdrop-blur-md overflow-hidden relative"
+              className="h-[600px] flex flex-col bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden"
             >
-              {/* Decorative background pulse for AI */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 dark:bg-blue-500/10 blur-[100px] pointer-events-none rounded-full" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/5 dark:bg-teal-500/10 blur-[100px] pointer-events-none rounded-full" />
-
               {/* Chat Header */}
-              <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900/30 flex items-center justify-between z-10 backdrop-blur-sm">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#0277BD] to-[#00ACC1] flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-                    <Bot size={20} className="animate-pulse" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-slate-950 dark:text-white text-base">MedClerk Specialist AI</h3>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest">Active Insight Mode</p>
-                    </div>
-                  </div>
+              <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/30 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white shadow-sm">
+                  <Bot size={16} />
                 </div>
-                <div className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full border border-blue-100 dark:border-blue-900/30">
-                  <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">RAG Enabled</span>
+                <div>
+                  <h3 className="font-bold text-slate-800 dark:text-white text-sm">MedClerk AI</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Ask questions about {patient.name}'s medical history</p>
                 </div>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 relative z-10 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 && (
-                  <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                    <div className="w-20 h-20 rounded-3xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-6 text-slate-300 dark:text-slate-700 border border-slate-100 dark:border-slate-800">
-                      <MessageSquare size={40} />
-                    </div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Patient Intelligence Hub</h4>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto font-medium">
-                      Analyze medical history, summarize lab reports, or track vital trends across documents.
-                    </p>
-                    <div className="mt-8 grid grid-cols-1 gap-3 w-full max-w-sm">
-                      {['Summarize recent reports', 'Highlight critical findings', 'Track BP trends'].map(hint => (
-                        <button key={hint} onClick={() => setInput(hint)} className="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-700 rounded-xl transition-all text-left">
-                          "{hint}"
-                        </button>
-                      ))}
-                    </div>
+                  <div className="flex flex-col items-center justify-center h-full text-center p-8 opacity-60">
+                    <Bot size={48} className="text-slate-300 mb-4" />
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">No messages yet</p>
+                    <p className="text-sm text-slate-400 max-w-xs mt-2">Ask about recent blood tests, diagnosis history, or summarize documents.</p>
                   </div>
                 )}
 
                 {messages.map((msg, idx) => (
-                  <div key={idx} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ${msg.role === 'user'
-                      ? 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-100 dark:border-slate-700'
-                      : 'bg-gradient-to-tr from-[#0277BD] to-[#00ACC1] text-white'
+                  <div key={idx} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${msg.role === 'user'
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                      : 'bg-gradient-to-r from-blue-500 to-teal-400 text-white'
                       }`}>
-                      {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
+                      {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                     </div>
-                    <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${msg.role === 'user'
-                      ? 'bg-[#0277BD] text-white rounded-tr-none'
-                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-100 dark:border-slate-700'
+                    <div className={`max-w-[80%] p-3 rounded-2xl text-sm ${msg.role === 'user'
+                      ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white rounded-tr-none'
+                      : 'bg-blue-50 dark:bg-blue-900/20 text-slate-800 dark:text-slate-200 rounded-tl-none border border-blue-100 dark:border-blue-900/30'
                       }`}>
                       {msg.content}
                     </div>
@@ -429,15 +402,15 @@ const DoctorPatientDetails = () => {
                 ))}
 
                 {chatLoading && (
-                  <div className="flex gap-4">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#0277BD] to-[#00ACC1] flex items-center justify-center text-white flex-shrink-0 shadow-sm">
-                      <Bot size={18} className="animate-pulse" />
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white flex-shrink-0">
+                      <Bot size={16} />
                     </div>
-                    <div className="bg-white dark:bg-slate-800 px-5 py-4 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700 shadow-sm">
-                      <div className="flex gap-1.5">
-                        <span className="w-2 h-2 bg-[#0277BD] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                        <span className="w-2 h-2 bg-[#0277BD] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                        <span className="w-2 h-2 bg-[#0277BD] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl rounded-tl-none border border-blue-100 dark:border-blue-900/30">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                        <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                       </div>
                     </div>
                   </div>
@@ -445,33 +418,29 @@ const DoctorPatientDetails = () => {
                 <div ref={chatEndRef} />
               </div>
 
-              {/* Input Area */}
-              <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-10">
-                <div className="relative group">
+              {/* Input */}
+              <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800">
+                <div className="relative">
                   <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                    placeholder="Ask AI anything about this patient's records..."
-                    className="w-full pl-5 pr-14 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#0277BD]/30 dark:text-white dark:placeholder:text-slate-600 transition-all font-medium"
+                    placeholder="Ask a question..."
+                    className="w-full pl-4 pr-12 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0277BD]/20 dark:text-white"
                     disabled={chatLoading}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!input.trim() || chatLoading}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2.5 bg-[#0277BD] text-white rounded-xl hover:bg-[#01579B] disabled:opacity-30 disabled:grayscale transition-all shadow-lg shadow-blue-500/20 active:scale-90"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#0277BD] text-white rounded-lg hover:bg-[#026aa8] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    <Send size={18} />
+                    <Send size={16} />
                   </button>
                 </div>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                   <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
-                   <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em]">
-                     AI Insight Engine
-                   </p>
-                   <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800" />
-                </div>
+                <p className="text-center text-[10px] text-slate-400 mt-2">
+                  AI responses are generated based on patient documents. Verify with original files.
+                </p>
               </div>
             </motion.div>
           )}
