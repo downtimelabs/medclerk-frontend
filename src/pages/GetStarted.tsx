@@ -7,12 +7,12 @@ const GetStarted = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col lg:flex-row">
       {/* Left Side: Dynamic Visualization */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#F0F9FA] relative justify-center items-center overflow-hidden p-12 order-2 lg:order-1">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#F0F9FA] dark:bg-slate-900 absolute lg:relative justify-center items-center overflow-hidden p-12 order-2 lg:order-1 transition-colors duration-300">
         {/* Background Decor */}
-        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-teal-100/50 via-transparent to-transparent" />
+        <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-100/50 dark:from-blue-900/20 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-teal-100/50 dark:from-teal-900/20 via-transparent to-transparent" />
 
         <div className="relative w-full max-w-lg" style={{ perspective: '1000px' }}>
           {/* Doctor View Card (Back) */}
@@ -20,15 +20,15 @@ const GetStarted = () => {
             initial={{ opacity: 0, x: 40, y: -20, rotateY: -10 }}
             animate={{ opacity: 1, x: 40, y: -20, rotateY: -10 }}
             transition={{ duration: 0.8 }}
-            className="absolute top-0 right-0 w-3/4 bg-white rounded-2xl shadow-xl border border-slate-200/60 p-5 z-10 opacity-60 scale-95"
+            className="absolute top-0 right-0 w-3/4 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200/60 dark:border-slate-800 p-5 z-10 opacity-60 scale-95"
           >
-            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 pb-3">
-              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-[#004D40]">
+            <div className="flex items-center gap-3 mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="w-8 h-8 rounded-full bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center text-[#004D40] dark:text-teal-400">
                 <Stethoscope size={16} />
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900">Dr. Sarah Smith</div>
-                <div className="text-[10px] text-slate-500">Cardiology</div>
+                <div className="text-xs font-bold text-slate-900 dark:text-white">Dr. Sarah Smith</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">Cardiology</div>
               </div>
             </div>
             <div className="space-y-2">
@@ -48,16 +48,16 @@ const GetStarted = () => {
             initial={{ opacity: 0, x: -20, y: 20, rotateY: 5 }}
             animate={{ opacity: 1, x: -20, y: 20, rotateY: 5 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl border border-slate-200/60 p-6 relative z-20 transform transition-transform duration-500 hover:rotate-y-0"
+            className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-800 p-6 relative z-20 transform transition-transform duration-500 hover:rotate-y-0"
           >
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-[#0277BD]">
+                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-[#0277BD] dark:text-blue-400">
                   <Activity size={20} />
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-slate-900">My Health</div>
-                  <div className="text-xs text-slate-500">Daily Vitals</div>
+                  <div className="text-sm font-bold text-slate-900 dark:text-white">My Health</div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">Daily Vitals</div>
                 </div>
               </div>
               <div className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-full">
@@ -91,14 +91,14 @@ const GetStarted = () => {
           <motion.div 
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -left-4 bottom-10 bg-white p-3 rounded-xl shadow-lg border border-slate-100 z-30 flex items-center gap-3"
+            className="absolute -left-4 bottom-10 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 z-30 flex items-center gap-3"
           >
-            <div className="bg-orange-100 p-1.5 rounded-lg">
-              <ShieldCheck size={16} className="text-orange-600" />
+            <div className="bg-orange-100 dark:bg-orange-950/40 p-1.5 rounded-lg">
+              <ShieldCheck size={16} className="text-orange-600 dark:text-orange-400" />
             </div>
             <div>
-              <div className="text-xs font-bold text-slate-800">Secure & Private</div>
-              <div className="text-[10px] text-slate-500">HIPAA Compliant</div>
+              <div className="text-xs font-bold text-slate-800 dark:text-white">Secure & Private</div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400">HIPAA Compliant</div>
             </div>
           </motion.div>
         </div>
@@ -118,26 +118,26 @@ const GetStarted = () => {
             <span className="font-bold text-xl text-slate-800 tracking-tight">MedClerk</span>
           </div>
 
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">Get Started</h2>
-            <p className="text-slate-600">Select your role to continue to your dashboard.</p>
+          <div className="mb-10 text-center lg:text-left">
+            <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-3">Get Started</h2>
+            <p className="text-slate-600 dark:text-slate-400 font-medium">Select your role to continue to your dashboard.</p>
           </div>
 
           <div className="space-y-6">
             {/* Patient Card */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => navigate('/signup/patient')}>
-              <Card className="p-6 cursor-pointer border-2 border-transparent hover:border-[#FF9800] transition-all group relative overflow-hidden shadow-sm hover:shadow-md bg-slate-50 hover:bg-white">
+              <Card className="p-6 cursor-pointer border-2 border-transparent hover:border-[#FF9800] transition-all group relative overflow-hidden shadow-sm hover:shadow-xl bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-[#0277BD] transition-colors">
-                    <User className="h-6 w-6 text-[#0277BD] group-hover:text-white transition-colors" />
+                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-[#0277BD] transition-colors border border-slate-100 dark:border-slate-800">
+                    <User className="h-6 w-6 text-[#0277BD] dark:text-blue-400 group-hover:text-white transition-colors" />
                   </div>
                   <div className="flex-grow">
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">I am a Patient</h3>
-                    <p className="text-sm text-slate-500 mb-4">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-[#0277BD] transition-colors">I am a Patient</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 font-medium">
                       Access your records, track vitals, and get AI insights.
                     </p>
-                    <div className="flex items-center text-sm font-medium text-[#0277BD] group-hover:text-[#FF9800] transition-colors">
-                      Continue <ArrowRight className="ml-1 h-4 w-4" />
+                    <div className="flex items-center text-sm font-bold text-[#0277BD] group-hover:text-[#FF9800] transition-colors uppercase tracking-widest">
+                      Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </div>
                   </div>
                 </div>
@@ -146,18 +146,18 @@ const GetStarted = () => {
 
             {/* Doctor Card */}
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => navigate('/signup/doctor')}>
-              <Card className="p-6 cursor-pointer border-2 border-transparent hover:border-[#004D40] transition-all group relative overflow-hidden shadow-sm hover:shadow-md bg-slate-50 hover:bg-white">
+              <Card className="p-6 cursor-pointer border-2 border-transparent hover:border-[#004D40] transition-all group relative overflow-hidden shadow-sm hover:shadow-xl bg-slate-50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-900">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-[#004D40] transition-colors">
-                    <Stethoscope className="h-6 w-6 text-[#004D40] group-hover:text-white transition-colors" />
+                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm group-hover:bg-[#004D40] transition-colors border border-slate-100 dark:border-slate-800">
+                    <Stethoscope className="h-6 w-6 text-[#004D40] dark:text-teal-500 group-hover:text-white transition-colors" />
                   </div>
                   <div className="flex-grow">
-                    <h3 className="text-lg font-bold text-slate-900 mb-1">I am a Doctor</h3>
-                    <p className="text-sm text-slate-500 mb-4">
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1 group-hover:text-[#004D40] transition-colors">I am a Doctor</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 font-medium">
                       Manage patients, view summaries, and streamline care.
                     </p>
-                    <div className="flex items-center text-sm font-medium text-[#004D40] group-hover:text-[#FF9800] transition-colors">
-                      Continue <ArrowRight className="ml-1 h-4 w-4" />
+                    <div className="flex items-center text-sm font-bold text-[#004D40] group-hover:text-[#FF9800] transition-colors uppercase tracking-widest">
+                      Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </div>
                   </div>
                 </div>

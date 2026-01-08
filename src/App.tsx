@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import GetStarted from './pages/GetStarted';
@@ -18,8 +19,19 @@ import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import DoctorPatients from './pages/doctor/DoctorPatients';
 import DoctorPatientDetails from './pages/doctor/DoctorPatientDetails';
 import DoctorSettings from './pages/doctor/DoctorSettings';
+import { useThemeStore } from './store/themeStore';
 
 function App() {
+  const isDarkMode = useThemeStore((state) => state.isDarkMode);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
     <Router>
       <Routes>
