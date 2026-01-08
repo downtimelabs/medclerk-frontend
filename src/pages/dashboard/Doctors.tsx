@@ -18,15 +18,15 @@ const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () 
   const specialization = request.doctor?.specialization || request.doctorProfile?.specialization || 'Specialist';
 
   return (
-    <div className="flex items-center justify-between p-4 bg-blue-50/50 border border-blue-100 rounded-xl">
+    <div className="flex items-center justify-between p-4 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg">
+        <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-lg">
           {doctorName.charAt(0)}
         </div>
         <div>
-          <h4 className="font-bold text-slate-800 text-sm">{doctorName}</h4>
-          <div className="text-xs text-slate-600">{specialization}</div>
-          <div className="text-[10px] text-[#0277BD] font-medium mt-0.5">
+          <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">{doctorName}</h4>
+          <div className="text-xs text-slate-600 dark:text-slate-400">{specialization}</div>
+          <div className="text-[10px] text-[#0277BD] dark:text-blue-400 font-medium mt-0.5">
             {new Date(request.createdAt).toLocaleDateString()}
           </div>
         </div>
@@ -34,7 +34,7 @@ const PendingRequestItem = ({ request, onCancel }: { request: any, onCancel: () 
       <div className="flex gap-2">
         <Button
           variant="outline"
-          className="h-8 text-xs px-3 border-red-200 hover:bg-red-50 text-red-500 hover:border-red-300"
+          className="h-8 text-xs px-3 border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 hover:border-red-300 dark:hover:border-red-800"
           onClick={onCancel}
         >
           Cancel
@@ -52,35 +52,35 @@ const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick:
   const clinicName = doctor.clinicName || doctor.doctor?.clinicName || doctor.doctorProfile?.clinicName || 'Clinic';
 
   return (
-    <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD]">
+    <Card onClick={onClick} className="p-4 hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-transparent hover:border-l-[#0277BD] bg-white dark:bg-slate-900/50 dark:border-slate-800">
       <div className="flex items-center gap-4">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-2xl border-2 border-slate-100 group-hover:border-[#0277BD] transition-colors">
+          <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-2xl border-2 border-slate-100 dark:border-slate-700 group-hover:border-[#0277BD] transition-colors">
             {doctorName.charAt(0)}
           </div>
-          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+          <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-slate-900 truncate">{doctorName}</h3>
-          <p className="text-sm text-[#0277BD] font-medium truncate">{specialization}</p>
-          <p className="text-xs text-slate-500 truncate">{clinicName}</p>
+          <h3 className="font-bold text-slate-900 dark:text-white truncate">{doctorName}</h3>
+          <p className="text-sm text-[#0277BD] dark:text-blue-400 font-medium truncate">{specialization}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{clinicName}</p>
         </div>
-        <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD]">
+        <Button variant="ghost" className="text-slate-400 hover:text-[#0277BD] dark:hover:text-blue-400">
           <ChevronRight size={20} />
         </Button>
       </div>
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-1">
           <Clock size={12} />
           Connected
         </div>
         <div className="flex items-center gap-2">
-          <span className="px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium text-[10px] uppercase tracking-wide">
+          <span className="px-2 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-full font-medium text-[10px] uppercase tracking-wide">
             Active
           </span>
           <button
             onClick={onRevoke}
-            className="text-red-400 hover:text-red-600 hover:underline"
+            className="text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:underline"
           >
             Revoke
           </button>
@@ -91,45 +91,40 @@ const LinkedDoctorCard = ({ doctor, onClick, onRevoke }: { doctor: any, onClick:
 };
 
 const DoctorResultCard = ({ doctor, onClick, onConnect, isConnecting, isPending }: { doctor: any, onClick: () => void, onConnect: (e: any) => void, isConnecting: boolean, isPending: boolean }) => (
-  <Card onClick={onClick} className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer">
+  <Card onClick={onClick} className="overflow-hidden hover:shadow-lg transition-all duration-300 group cursor-pointer bg-white dark:bg-slate-900/50 dark:border-slate-800">
     <div className="p-5">
       <div className="flex gap-4">
-        <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-3xl shadow-sm">
+        <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 font-bold text-3xl shadow-sm border border-slate-200/50 dark:border-slate-700/50">
           {doctor.name.charAt(0)}
         </div>
         <div className="flex-1">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-bold text-slate-900 text-lg group-hover:text-[#0277BD] transition-colors">{doctor.name}</h3>
-              <div className="flex items-center gap-1 text-[#0277BD] text-sm font-medium mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white text-lg group-hover:text-[#0277BD] transition-colors">{doctor.name}</h3>
+              <div className="flex items-center gap-1 text-[#0277BD] dark:text-blue-400 text-sm font-medium mb-1">
                 <Stethoscope size={14} />
                 {doctor.profile?.specialization || 'Specialist'}
               </div>
             </div>
-            <div className="flex flex-col items-end">
-              <div className="flex flex-col items-end">
-                {/* Rating removed as it is not available from backend */}
-              </div>
-            </div>
           </div>
 
-          <div className="flex items-center gap-1 text-slate-500 text-xs mt-1">
+          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-xs mt-1">
             <MapPin size={12} />
             {doctor.profile?.clinicAddress?.street || doctor.profile?.clinicAddress?.city || 'Location N/A'}
           </div>
 
           <div className="mt-3 flex flex-wrap gap-2">
-            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-medium rounded-full">
+            <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-medium rounded-full">
               {doctor.profile?.yearsOfExperience || 0} Years Exp
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-3 mt-5 pt-4 border-t border-slate-100">
+      <div className="flex gap-3 mt-5 pt-5 border-t border-slate-100 dark:border-slate-800">
         <Button
           variant="outline"
-          className="flex-1 h-10 text-sm hover:border-[#0277BD] hover:text-[#0277BD]"
+          className="flex-1 h-11 text-sm hover:border-[#0277BD] hover:text-[#0277BD] dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-blue-700"
           onClick={(e) => {
             e.stopPropagation();
             onClick();
@@ -140,7 +135,7 @@ const DoctorResultCard = ({ doctor, onClick, onConnect, isConnecting, isPending 
         {isPending ? (
           <Button
             disabled
-            className="flex-1 h-10 text-sm bg-slate-100 text-slate-500 border-none cursor-not-allowed"
+            className="flex-1 h-11 text-sm bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-500 border-none cursor-not-allowed"
           >
             <Clock size={16} className="mr-2" />
             Pending
@@ -149,7 +144,7 @@ const DoctorResultCard = ({ doctor, onClick, onConnect, isConnecting, isPending 
           <Button
             onClick={onConnect}
             disabled={isConnecting}
-            className="flex-1 h-10 text-sm bg-[#0277BD] hover:bg-[#015f96] text-white border-none shadow-md shadow-blue-200 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex-1 h-11 text-sm bg-[#0277BD] hover:bg-[#015f96] text-white border-none shadow-premium dark:shadow-premium-dark disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isConnecting ? (
               <Loader2 className="animate-spin mr-2" size={16} />
@@ -263,19 +258,19 @@ const Doctors = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Doctors</h1>
-          <p className="text-slate-500">Manage your care team and find new specialists</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Doctors</h1>
+          <p className="text-slate-500 dark:text-slate-400">Manage your care team and find new specialists</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="border-b border-slate-200">
+      <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-premium dark:shadow-premium-dark border border-slate-200 dark:border-slate-800 overflow-hidden backdrop-blur-sm">
+        <div className="border-b border-slate-200 dark:border-slate-800">
           <nav className="flex gap-4 px-6">
             <button
               onClick={() => setActiveTab('my-doctors')}
               className={`py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'my-doctors'
                 ? 'border-[#0277BD] text-[#0277BD]'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
             >
               <div className="flex items-center gap-2">
@@ -287,7 +282,7 @@ const Doctors = () => {
               onClick={() => setActiveTab('find-doctors')}
               className={`py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'find-doctors'
                 ? 'border-[#0277BD] text-[#0277BD]'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
             >
               <div className="flex items-center gap-2">
@@ -311,7 +306,7 @@ const Doctors = () => {
                 {/* Pending Requests */}
                 {pendingRequests.length > 0 && (
                   <section>
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 px-1">Pending Requests</h3>
+                    <h3 className="text-sm font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider mb-4 px-1">Pending Requests</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       {pendingRequests.map(req => (
                         <PendingRequestItem
@@ -327,8 +322,8 @@ const Doctors = () => {
                 {/* Linked Doctors */}
                 <section>
                   <div className="flex items-center justify-between mb-4 px-1">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Connected Doctors</h3>
-                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{activeDoctors.length} Total</span>
+                    <h3 className="text-sm font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">Connected Doctors</h3>
+                    <span className="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-1 rounded-full">{activeDoctors.length} Total</span>
                   </div>
 
                   {loading && activeDoctors.length === 0 ? (
@@ -349,9 +344,9 @@ const Doctors = () => {
                       {/* Add New Placeholder */}
                       <div
                         onClick={() => setActiveTab('find-doctors')}
-                        className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center text-slate-400 hover:border-[#0277BD] hover:text-[#0277BD] hover:bg-blue-50 transition-all cursor-pointer min-h-[160px]"
+                        className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:border-[#0277BD] dark:hover:border-blue-600 hover:text-[#0277BD] dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all cursor-pointer min-h-[160px]"
                       >
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-white">
+                        <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
                           <UserPlus size={24} />
                         </div>
                         <span className="font-medium">Connect New Doctor</span>
@@ -369,27 +364,27 @@ const Doctors = () => {
                 className="space-y-6"
               >
                 {/* Search & Filter Bar */}
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row gap-4">
+                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                     <input
                       type="text"
                       placeholder="Search by name, clinic, or condition..."
-                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
                   <div className="flex gap-2">
                     <div className="relative w-full md:w-48">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                       <input
                         type="text"
                         placeholder="Location"
-                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0277BD] dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-600 transition-all"
                       />
                     </div>
-                    <Button variant="outline" className="px-3 hover:text-[#0277BD] hover:border-[#0277BD]">
+                    <Button variant="outline" className="px-3 hover:text-[#0277BD] hover:border-[#0277BD] dark:border-slate-800 dark:text-slate-400 dark:hover:text-blue-400">
                       <Filter size={18} />
                     </Button>
                   </div>
@@ -400,7 +395,7 @@ const Doctors = () => {
                   {popularSpecializations.map((spec, i) => (
                     <button
                       key={i}
-                      className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs font-medium text-slate-600 hover:border-[#0277BD] hover:text-[#0277BD] transition-colors"
+                      className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-medium text-slate-600 dark:text-slate-400 hover:border-[#0277BD] dark:hover:border-blue-600 hover:text-[#0277BD] dark:hover:text-blue-400 transition-colors"
                     >
                       {spec}
                     </button>
